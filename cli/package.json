@@ -1,0 +1,12 @@
+{
+  "name": "@heart-transplant/cli",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "heart-transplant": "./src/index.mjs"
+  },
+  "scripts": {
+    "build": "node src/index.mjs --help"
+  }
+}

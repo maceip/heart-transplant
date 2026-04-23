@@ -1,0 +1,14 @@
+{
+  "name": "@heart-transplant/backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/scan-server.mjs",
+    "start": "node src/scan-server.mjs",
+    "build": "node --check src/scan-server.mjs && node --check src/repo-architect-core.mjs && node --check src/logic/ingest-runner.mjs"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}
