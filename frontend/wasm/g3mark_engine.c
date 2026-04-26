@@ -1,10 +1,18 @@
 #include <ctype.h>
+#if defined(__has_include)
+#if __has_include(<emscripten/emscripten.h>)
 #include <emscripten/emscripten.h>
+#endif
+#endif
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifndef EMSCRIPTEN_KEEPALIVE
+#define EMSCRIPTEN_KEEPALIVE __attribute__((used))
+#endif
 
 typedef struct {
   char *data;
