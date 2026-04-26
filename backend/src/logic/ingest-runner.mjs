@@ -259,9 +259,11 @@ export async function ingestRepository(input, onPhaseDetail) {
 }
 
 export async function runLogicLensSymbolica(repoContext, onPhaseDetail) {
-  const scopedFacts = repoContext.__facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate));
-  onPhaseDetail?.(`Running local rule engine over ${scopedFacts.length} scoped facts`);
-  const derivedFacts = runRules(scopedFacts, RULES);
+  const scopedFacts = selectRuleInputFacts(repoContext.__facts);
+  onPhaseDetail?.(`Running local rule engine over ${scopedFacts.length} evidence-scoped facts`);
+  const ruleFacts = runRules(scopedFacts, RULES);
+  const seedFactKeys = new Set(scopedFacts.map(factKey));
+  const derivedFacts = ruleFacts.filter((fact) => !seedFactKeys.has(factKey(fact)));
   const reports = buildTaintReports(repoContext, derivedFacts);
 
   await writeArtifactJson(repoContext.__artifactDir, 'rules.json', RULES);
@@ -368,11 +370,71 @@ function uniqueFacts(values) {
   return [...new Set(values)].sort();
 }
 
+function factKey(fact) {
+  return `${fact.predicate}::${fact.args.map((arg) => JSON.stringify(arg)).join('|')}`;
+}
+
+function selectRuleInputFacts(facts) {
+  const inputFacts = capEvidenceFacts(facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate)));
+  const sourceFiles = new Set(
+    inputFacts
+      .filter((fact) => fact.predicate === 'source_match')
+      .map((fact) => fact.args[1]),
+  );
+
+  if (!sourceFiles.size) {
+    return inputFacts.filter((fact) => fact.predicate !== 'import_edge');
+  }
+
+  const importFacts = inputFacts.filter((fact) => fact.predicate === 'import_edge');
+  const reverseImports = new Map();
+  for (const fact of importFacts) {
+    const [from, to] = fact.args;
+    reverseImports.set(to, [...(reverseImports.get(to) ?? []), { from, fact }]);
+  }
+
+  const retainedImportKeys = new Set();
+  const queue = [...sourceFiles].map((file) => ({ file, depth: 0 }));
+  const seen = new Set(sourceFiles);
+  const maxDepth = 3;
+  const maxRetainedImports = 750;
+
+  while (queue.length && retainedImportKeys.size < maxRetainedImports) {
+    const { file, depth } = queue.shift();
+    if (depth >= maxDepth) continue;
+
+    for (const edge of reverseImports.get(file) ?? []) {
+      retainedImportKeys.add(factKey(edge.fact));
+      if (seen.has(edge.from)) continue;
+      seen.add(edge.from);
+      queue.push({ file: edge.from, depth: depth + 1 });
+      if (retainedImportKeys.size >= maxRetainedImports) break;
+    }
+  }
+
+  return inputFacts.filter((fact) => fact.predicate !== 'import_edge' || retainedImportKeys.has(factKey(fact)));
+}
+
+function capEvidenceFacts(facts) {
+  const evidenceLimits = {
+    source_match: 750,
+    sink_match: 750,
+  };
+  const counts = {};
+
+  return facts.filter((fact) => {
+    const limit = evidenceLimits[fact.predicate];
+    if (!limit) return true;
+    counts[fact.predicate] = (counts[fact.predicate] ?? 0) + 1;
+    return counts[fact.predicate] <= limit;
+  });
+}
+
 function connectEvidencePaths(sourceMatches, sinkMatches, dependsOnFacts) {
-  const graph = new Map();
+  const importersByDependency = new Map();
   for (const fact of dependsOnFacts) {
     const [from, to] = fact.args;
-    graph.set(from, [...(graph.get(from) ?? []), to]);
+    importersByDependency.set(to, [...(importersByDependency.get(to) ?? []), from]);
   }
 
   const sinkSet = new Set(sinkMatches.map((match) => match.filePath));
@@ -391,7 +453,7 @@ function connectEvidencePaths(sourceMatches, sinkMatches, dependsOnFacts) {
         break;
       }
 
-      for (const next of graph.get(node) ?? []) {
+      for (const next of importersByDependency.get(node) ?? []) {
         if (seen.has(next)) continue;
         seen.add(next);
         queue.push([...path, next]);
@@ -613,6 +675,9 @@ export function parseGitHubRepoInput(input) {
 
   const normalized = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
   const url = new URL(normalized);
+  if (url.hostname !== 'github.com') {
+    throw new Error('Only public GitHub repositories are supported');
+  }
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts.length < 2) {
     throw new Error('Enter a GitHub repo URL like https://github.com/owner/repo');

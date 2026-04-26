@@ -22,7 +22,7 @@ class WasmEngineService {
 
   private loadModule() {
     if (!this.modulePromise) {
-      this.modulePromise = initG3markEngine() as Promise<G3markModule>;
+      this.modulePromise = initG3markEngine() as unknown as Promise<G3markModule>;
     }
     return this.modulePromise;
   }
