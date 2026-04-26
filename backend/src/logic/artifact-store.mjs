@@ -30,6 +30,10 @@ export async function writeArtifactJson(dir, name, value) {
   await writeFile(path.join(dir, name), JSON.stringify(value, null, 2), 'utf8');
 }
 
+export async function writeArtifactText(dir, name, value) {
+  await writeFile(path.join(dir, name), value, 'utf8');
+}
+
 function buildArtifactId(fullName, branch, archiveBuffer) {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const repoSlug = fullName.replace(/[^\w.-]+/g, '_');

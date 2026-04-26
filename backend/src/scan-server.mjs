@@ -2,7 +2,8 @@ import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { buildSuggestionSet, ingestRepository, runLogicLensSymbolica } from './logic/ingest-runner.mjs';
 import { writeArtifactJson } from './logic/artifact-store.mjs';
-import { buildMigrationPlan, buildValidationReport, renderMigrationReport } from './logic/migration-planner.mjs';
+import { buildMigrationPlan, renderMigrationReport } from './logic/migration-planner.mjs';
+import { buildValidationReport } from './logic/scan-validator.mjs';
 
 const port = 3001;
 const jobs = new Map();

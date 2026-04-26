@@ -1,4 +1,4 @@
-const SCHEMA_VERSION = 'phase-13.migration-plan.v1';
+const SCHEMA_VERSION = 'phase-13.migration-plan.v2';
 
 export function buildMigrationPlan(scan) {
   const lanes = (scan.suggestions ?? []).map((lane, index) => buildLanePlan(lane, index));
@@ -25,26 +25,11 @@ export function buildMigrationPlan(scan) {
       taintReportCount: scan.taintReports?.length ?? 0,
     },
     lanes,
-    validationGates: buildValidationGates(scan, lanes),
   };
 }
 
-export function buildValidationReport(scan, plan = buildMigrationPlan(scan)) {
-  const gates = plan.validationGates.map((gate) => ({
-    ...gate,
-    status: gate.required && gate.state === 'failed' ? 'failed' : gate.state,
-  }));
-
-  const failedRequired = gates.filter((gate) => gate.required && gate.status === 'failed');
-  return {
-    schemaVersion: `${SCHEMA_VERSION}.validation`,
-    generatedAt: new Date().toISOString(),
-    status: failedRequired.length ? 'failed' : 'passed',
-    gates,
-  };
-}
-
-export function renderMigrationReport(plan, validationReport = buildValidationReport({}, plan)) {
+export function renderMigrationReport(plan, validationReport = null) {
+  const gates = validationReport?.gates ?? [];
   const lines = [
     `# Migration plan for ${plan.sourceRepo ?? 'unknown repo'}`,
     '',
@@ -60,7 +45,9 @@ export function renderMigrationReport(plan, validationReport = buildValidationRe
     '',
     '## Validation gates',
     '',
-    ...validationReport.gates.map((gate) => `- [${gate.status === 'passed' ? 'x' : ' '}] ${gate.name}: ${gate.detail}`),
+    ...(gates.length
+      ? gates.map((gate) => `- ${formatGateStatus(gate.status)} ${gate.name}: ${gate.detail}`)
+      : ['No validation report was supplied.']),
     '',
     '## Lanes',
     '',
@@ -154,46 +141,6 @@ function buildLaneSteps(lane, taint, risk) {
   return steps;
 }
 
-function buildValidationGates(scan, lanes) {
-  return [
-    {
-      id: 'source-artifact',
-      name: 'Source artifact persisted',
-      required: true,
-      state: scan.artifacts?.source?.id ? 'passed' : 'failed',
-      detail: scan.artifacts?.source?.id ?? 'missing source artifact id',
-    },
-    {
-      id: 'fact-extraction',
-      name: 'Fact extraction completed',
-      required: true,
-      state: (scan.artifacts?.source?.factCount ?? 0) > 0 ? 'passed' : 'failed',
-      detail: `${scan.artifacts?.source?.factCount ?? 0} facts extracted`,
-    },
-    {
-      id: 'rule-scope',
-      name: 'Rule input stayed bounded',
-      required: true,
-      state: (scan.logicRun?.scopedFactCount ?? 0) <= 2000 ? 'passed' : 'failed',
-      detail: `${scan.logicRun?.scopedFactCount ?? 0} scoped facts`,
-    },
-    {
-      id: 'migration-plan',
-      name: 'Migration plan generated',
-      required: false,
-      state: lanes.length ? 'passed' : 'skipped',
-      detail: lanes.length ? `${lanes.length} lanes planned` : 'no vendor lanes detected',
-    },
-    {
-      id: 'manual-review',
-      name: 'Manual review needed for risky lanes',
-      required: false,
-      state: lanes.some((lane) => lane.risk.level === 'high') ? 'warning' : 'passed',
-      detail: `${lanes.filter((lane) => lane.risk.level === 'high').length} high-risk lanes`,
-    },
-  ];
-}
-
 function scoreLaneRisk(taint) {
   if (!taint) {
     return { level: 'low', reason: 'No taint evidence was detected for this lane.' };
@@ -212,4 +159,11 @@ function scoreLaneRisk(taint) {
 
 function formatPackageList(packages = []) {
   return packages.length ? packages.join(', ') : 'the detected vendor package';
+}
+
+function formatGateStatus(status) {
+  if (status === 'passed') return '[pass]';
+  if (status === 'warning') return '[warn]';
+  if (status === 'skipped') return '[skip]';
+  return '[fail]';
 }

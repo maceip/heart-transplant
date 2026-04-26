@@ -3,7 +3,8 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildSuggestionSet, ingestRepository, runLogicLensSymbolica } from '../../backend/src/logic/ingest-runner.mjs';
-import { buildMigrationPlan, buildValidationReport, renderMigrationReport } from '../../backend/src/logic/migration-planner.mjs';
+import { buildMigrationPlan, renderMigrationReport } from '../../backend/src/logic/migration-planner.mjs';
+import { buildValidationReport } from '../../backend/src/logic/scan-validator.mjs';
 
 const args = process.argv.slice(2);
 

@@ -61,6 +61,19 @@ export interface RepoArtifact {
 export interface LogicRunSummary {
   ruleCount: number;
   derivedFactCount: number;
+  scopedFactCount?: number;
+  budget?: {
+    sourceMatchesSeen?: number;
+    sourceMatchLimit?: number;
+    truncatedSourceMatches?: boolean;
+    sinkMatchesSeen?: number;
+    sinkMatchLimit?: number;
+    truncatedSinkMatches?: boolean;
+    importEdgesRetained?: number;
+    importEdgeLimit?: number;
+    importDepth?: number;
+    truncatedImportEdges?: boolean;
+  };
 }
 
 export interface IngestPolicySummary {
@@ -113,10 +126,11 @@ export interface MigrationPlanLane {
 export interface ValidationGate {
   id: string;
   name: string;
-  required: boolean;
-  state: 'passed' | 'failed' | 'skipped' | 'warning';
-  status?: 'passed' | 'failed' | 'skipped' | 'warning';
+  severity: 'error' | 'warning' | 'info';
+  status: 'passed' | 'failed' | 'warning' | 'info' | 'skipped';
+  passed: boolean;
   detail: string;
+  metrics?: Record<string, unknown>;
 }
 
 export interface MigrationPlan {
@@ -133,13 +147,22 @@ export interface MigrationPlan {
     taintReportCount: number;
   };
   lanes: MigrationPlanLane[];
-  validationGates: ValidationGate[];
 }
 
 export interface ValidationReport {
   schemaVersion: string;
   generatedAt: string;
-  status: 'passed' | 'failed';
+  status: 'passed' | 'warning' | 'failed';
+  summary: {
+    total: number;
+    passed: number;
+    failed: number;
+    warning: number;
+    info: number;
+    skipped: number;
+    errorCount: number;
+    warningCount: number;
+  };
   gates: ValidationGate[];
 }
 

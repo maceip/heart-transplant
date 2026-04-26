@@ -182,6 +182,13 @@ const RULE_INPUT_PREDICATES = new Set([
   'zone',
 ]);
 
+const RULE_INPUT_BUDGETS = {
+  importEdgeDepth: 3,
+  maxRetainedImports: 750,
+  maxSourceMatches: 750,
+  maxSinkMatches: 750,
+};
+
 export async function ingestRepository(input, onPhaseDetail) {
   const parsed = parseGitHubRepoInput(input);
   onPhaseDetail?.(`Resolving repo metadata for ${parsed.owner}/${parsed.repo}`);
@@ -259,7 +266,8 @@ export async function ingestRepository(input, onPhaseDetail) {
 }
 
 export async function runLogicLensSymbolica(repoContext, onPhaseDetail) {
-  const scopedFacts = selectRuleInputFacts(repoContext.__facts);
+  const ruleInput = selectRuleInputFacts(repoContext.__facts);
+  const scopedFacts = ruleInput.facts;
   onPhaseDetail?.(`Running local rule engine over ${scopedFacts.length} evidence-scoped facts`);
   const ruleFacts = runRules(scopedFacts, RULES);
   const seedFactKeys = new Set(scopedFacts.map(factKey));
@@ -275,6 +283,8 @@ export async function runLogicLensSymbolica(repoContext, onPhaseDetail) {
   repoContext.logicRun = {
     ruleCount: RULES.length,
     derivedFactCount: derivedFacts.length,
+    scopedFactCount: scopedFacts.length,
+    budget: ruleInput.budget,
   };
 
   return {
@@ -282,6 +292,7 @@ export async function runLogicLensSymbolica(repoContext, onPhaseDetail) {
     scopedFactCount: scopedFacts.length,
     derivedFactCount: derivedFacts.length,
     ruleCount: RULES.length,
+    budget: ruleInput.budget,
   };
 }
 
@@ -375,7 +386,8 @@ function factKey(fact) {
 }
 
 function selectRuleInputFacts(facts) {
-  const inputFacts = capEvidenceFacts(facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate)));
+  const capped = capEvidenceFacts(facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate)));
+  const inputFacts = capped.facts;
   const sourceFiles = new Set(
     inputFacts
       .filter((fact) => fact.predicate === 'source_match')
@@ -383,7 +395,16 @@ function selectRuleInputFacts(facts) {
   );
 
   if (!sourceFiles.size) {
-    return inputFacts.filter((fact) => fact.predicate !== 'import_edge');
+    return {
+      facts: inputFacts.filter((fact) => fact.predicate !== 'import_edge' && fact.predicate !== 'zone'),
+      budget: {
+        ...capped.budget,
+        importEdgesRetained: 0,
+        importEdgeLimit: RULE_INPUT_BUDGETS.maxRetainedImports,
+        importDepth: RULE_INPUT_BUDGETS.importEdgeDepth,
+        truncatedImportEdges: false,
+      },
+    };
   }
 
   const importFacts = inputFacts.filter((fact) => fact.predicate === 'import_edge');
@@ -394,40 +415,72 @@ function selectRuleInputFacts(facts) {
   }
 
   const retainedImportKeys = new Set();
+  const retainedFiles = new Set(sourceFiles);
   const queue = [...sourceFiles].map((file) => ({ file, depth: 0 }));
   const seen = new Set(sourceFiles);
-  const maxDepth = 3;
-  const maxRetainedImports = 750;
 
-  while (queue.length && retainedImportKeys.size < maxRetainedImports) {
+  while (queue.length && retainedImportKeys.size < RULE_INPUT_BUDGETS.maxRetainedImports) {
     const { file, depth } = queue.shift();
-    if (depth >= maxDepth) continue;
+    if (depth >= RULE_INPUT_BUDGETS.importEdgeDepth) continue;
 
     for (const edge of reverseImports.get(file) ?? []) {
       retainedImportKeys.add(factKey(edge.fact));
+      retainedFiles.add(edge.fact.args[0]);
+      retainedFiles.add(edge.fact.args[1]);
       if (seen.has(edge.from)) continue;
       seen.add(edge.from);
       queue.push({ file: edge.from, depth: depth + 1 });
-      if (retainedImportKeys.size >= maxRetainedImports) break;
+      if (retainedImportKeys.size >= RULE_INPUT_BUDGETS.maxRetainedImports) break;
     }
   }
 
-  return inputFacts.filter((fact) => fact.predicate !== 'import_edge' || retainedImportKeys.has(factKey(fact)));
+  return {
+    facts: inputFacts.filter((fact) => {
+      if (fact.predicate === 'import_edge') return retainedImportKeys.has(factKey(fact));
+      if (fact.predicate === 'zone') return retainedFiles.has(fact.args[0]);
+      return true;
+    }),
+    budget: {
+      ...capped.budget,
+      importEdgesRetained: retainedImportKeys.size,
+      importEdgeLimit: RULE_INPUT_BUDGETS.maxRetainedImports,
+      importDepth: RULE_INPUT_BUDGETS.importEdgeDepth,
+      truncatedImportEdges: retainedImportKeys.size >= RULE_INPUT_BUDGETS.maxRetainedImports,
+    },
+  };
 }
 
 function capEvidenceFacts(facts) {
   const evidenceLimits = {
-    source_match: 750,
-    sink_match: 750,
+    source_match: RULE_INPUT_BUDGETS.maxSourceMatches,
+    sink_match: RULE_INPUT_BUDGETS.maxSinkMatches,
   };
   const counts = {};
+  const retained = [];
 
-  return facts.filter((fact) => {
+  for (const fact of facts) {
     const limit = evidenceLimits[fact.predicate];
-    if (!limit) return true;
+    if (!limit) {
+      retained.push(fact);
+      continue;
+    }
     counts[fact.predicate] = (counts[fact.predicate] ?? 0) + 1;
-    return counts[fact.predicate] <= limit;
-  });
+    if (counts[fact.predicate] <= limit) {
+      retained.push(fact);
+    }
+  }
+
+  return {
+    facts: retained,
+    budget: {
+      sourceMatchesSeen: counts.source_match ?? 0,
+      sourceMatchLimit: RULE_INPUT_BUDGETS.maxSourceMatches,
+      truncatedSourceMatches: (counts.source_match ?? 0) > RULE_INPUT_BUDGETS.maxSourceMatches,
+      sinkMatchesSeen: counts.sink_match ?? 0,
+      sinkMatchLimit: RULE_INPUT_BUDGETS.maxSinkMatches,
+      truncatedSinkMatches: (counts.sink_match ?? 0) > RULE_INPUT_BUDGETS.maxSinkMatches,
+    },
+  };
 }
 
 function connectEvidencePaths(sourceMatches, sinkMatches, dependsOnFacts) {
