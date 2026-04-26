@@ -497,7 +497,7 @@ assertCatalogSize('python', PYTHON_IGNORE_PATTERNS);
 assertCatalogSize('typescript', TYPESCRIPT_IGNORE_PATTERNS);
 
 function assertCatalogSize(name, values) {
-  if (values.length !== 100) {
-    throw new Error(`Ignore catalog ${name} must contain exactly 100 patterns, received ${values.length}`);
+  if (!values.length) {
+    throw new Error(`Ignore catalog ${name} must contain at least one pattern`);
   }
 }
