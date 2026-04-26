@@ -35,8 +35,12 @@ const KEYWORDS = new Set([
   'pass', 'raise', 'func', 'package', 'type', 'struct', 'enum', 'impl', 'match', 'pub', 'use',
 ]);
 
+const MAX_IDENTIFIER_USE_FACTS = 20000;
+const MAX_IDENTIFIER_USES_PER_FILE = 200;
+
 export function extractFacts({ repoMeta, files, modules, vendorSignals }) {
   const facts = [];
+  let identifierUseFactCount = 0;
 
   fact(facts, 'repo', [repoMeta.fullName, repoMeta.defaultBranch]);
 
@@ -83,8 +87,12 @@ export function extractFacts({ repoMeta, files, modules, vendorSignals }) {
       fact(facts, 'symbol_decl', [symbol.id, filePath, symbol.name, symbol.kind, symbol.line]);
     }
 
-    for (const usage of extractIdentifierUses(filePath, content)) {
+    for (const usage of extractIdentifierUses(filePath, content).slice(0, MAX_IDENTIFIER_USES_PER_FILE)) {
+      if (identifierUseFactCount >= MAX_IDENTIFIER_USE_FACTS) {
+        break;
+      }
       fact(facts, 'identifier_use', [filePath, usage.name, usage.line]);
+      identifierUseFactCount += 1;
     }
 
     for (const signal of vendorSignals) {

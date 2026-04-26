@@ -375,7 +375,7 @@ function factKey(fact) {
 }
 
 function selectRuleInputFacts(facts) {
-  const inputFacts = facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate));
+  const inputFacts = capEvidenceFacts(facts.filter((fact) => RULE_INPUT_PREDICATES.has(fact.predicate)));
   const sourceFiles = new Set(
     inputFacts
       .filter((fact) => fact.predicate === 'source_match')
@@ -396,8 +396,8 @@ function selectRuleInputFacts(facts) {
   const retainedImportKeys = new Set();
   const queue = [...sourceFiles].map((file) => ({ file, depth: 0 }));
   const seen = new Set(sourceFiles);
-  const maxDepth = 6;
-  const maxRetainedImports = 5000;
+  const maxDepth = 3;
+  const maxRetainedImports = 750;
 
   while (queue.length && retainedImportKeys.size < maxRetainedImports) {
     const { file, depth } = queue.shift();
@@ -413,6 +413,21 @@ function selectRuleInputFacts(facts) {
   }
 
   return inputFacts.filter((fact) => fact.predicate !== 'import_edge' || retainedImportKeys.has(factKey(fact)));
+}
+
+function capEvidenceFacts(facts) {
+  const evidenceLimits = {
+    source_match: 750,
+    sink_match: 750,
+  };
+  const counts = {};
+
+  return facts.filter((fact) => {
+    const limit = evidenceLimits[fact.predicate];
+    if (!limit) return true;
+    counts[fact.predicate] = (counts[fact.predicate] ?? 0) + 1;
+    return counts[fact.predicate] <= limit;
+  });
 }
 
 function connectEvidencePaths(sourceMatches, sinkMatches, dependsOnFacts) {

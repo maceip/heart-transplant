@@ -98,6 +98,51 @@ export interface SuggestionLane {
   taint?: TaintReport | null;
 }
 
+export interface MigrationPlanLane {
+  id: string;
+  category: VendorCategory;
+  sourceVendor: Pick<VendorSignal, 'id' | 'label' | 'category' | 'packages' | 'confidence'>;
+  targetVendor: Pick<VendorSignal, 'id' | 'label' | 'category' | 'packages' | 'confidence'>;
+  risk: {
+    level: 'low' | 'medium' | 'high';
+    reason: string;
+  };
+  steps: string[];
+}
+
+export interface ValidationGate {
+  id: string;
+  name: string;
+  required: boolean;
+  state: 'passed' | 'failed' | 'skipped' | 'warning';
+  status?: 'passed' | 'failed' | 'skipped' | 'warning';
+  detail: string;
+}
+
+export interface MigrationPlan {
+  schemaVersion: string;
+  generatedAt: string;
+  sourceRepo: string | null;
+  referenceRepo: string | null;
+  summary: {
+    laneCount: number;
+    highRiskLaneCount: number;
+    mediumRiskLaneCount: number;
+    lowRiskLaneCount: number;
+    sourceVendorCount: number;
+    taintReportCount: number;
+  };
+  lanes: MigrationPlanLane[];
+  validationGates: ValidationGate[];
+}
+
+export interface ValidationReport {
+  schemaVersion: string;
+  generatedAt: string;
+  status: 'passed' | 'failed';
+  gates: ValidationGate[];
+}
+
 export interface ScanPhase {
   key: string;
   label: string;
@@ -116,6 +161,8 @@ export interface ScanJobResponse {
   secondaryRepo: RepoIntel | null;
   suggestions: SuggestionLane[];
   taintReports: TaintReport[];
+  migrationPlan?: MigrationPlan | null;
+  validationReport?: ValidationReport | null;
   artifacts?: {
     source?: RepoArtifact;
     reference?: RepoArtifact;

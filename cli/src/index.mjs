@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { buildSuggestionSet, ingestRepository, runLogicLensSymbolica } from '../../backend/src/logic/ingest-runner.mjs';
+import { buildMigrationPlan, buildValidationReport, renderMigrationReport } from '../../backend/src/logic/migration-planner.mjs';
 
 const args = process.argv.slice(2);
 
@@ -27,6 +30,11 @@ async function main() {
     return;
   }
 
+  if (command === 'plan') {
+    await runPlan(commandArgs);
+    return;
+  }
+
   throw new Error(`Unknown command: ${command}`);
 }
 
@@ -42,6 +50,32 @@ async function runIngest(args) {
 
 async function runScan(args) {
   const options = parseOptions(args);
+  const scan = await executeScan(options);
+  scan.migrationPlan = buildMigrationPlan(scan);
+  scan.validationReport = buildValidationReport(scan, scan.migrationPlan);
+  await writeScanOutputs(scan, options);
+  writeJson(scan);
+}
+
+async function runPlan(args) {
+  const options = parseOptions(args);
+  const scan = await executeScan(options);
+  const plan = buildMigrationPlan(scan);
+  const validationReport = buildValidationReport(scan, plan);
+  await writePlanOutputs(plan, validationReport, options);
+
+  if (options.format === 'markdown') {
+    process.stdout.write(renderMigrationReport(plan, validationReport));
+    return;
+  }
+
+  writeJson({
+    migrationPlan: plan,
+    validationReport,
+  });
+}
+
+async function executeScan(options) {
   const sourceRepo = readRequiredRepo(options);
   const referenceRepo = options.reference ?? options.ref;
   const log = createLogger(options);
@@ -57,7 +91,7 @@ async function runScan(args) {
   }
 
   const suggestions = buildSuggestionSet(sourceIngest.repo, referenceIngest?.repo ?? null);
-  writeJson({
+  return {
     sourceRepo: sanitizeRepo(sourceIngest.repo),
     referenceRepo: referenceIngest ? sanitizeRepo(referenceIngest.repo) : null,
     suggestions,
@@ -71,7 +105,7 @@ async function runScan(args) {
       derivedFactCount: logicRun.derivedFactCount,
       ruleCount: logicRun.ruleCount,
     },
-  });
+  };
 }
 
 function parseOptions(args) {
@@ -85,7 +119,7 @@ function parseOptions(args) {
     }
 
     const [rawKey, inlineValue] = value.slice(2).split('=', 2);
-    const key = rawKey.trim();
+    const key = normalizeOptionKey(rawKey.trim());
     if (!key) continue;
 
     if (inlineValue !== undefined) {
@@ -114,6 +148,10 @@ function readRequiredRepo(options) {
   return repo;
 }
 
+function normalizeOptionKey(key) {
+  return key.replace(/-([a-z])/g, (_match, letter) => letter.toUpperCase());
+}
+
 function createLogger(options) {
   if (options.quiet) {
     return () => {};
@@ -122,6 +160,27 @@ function createLogger(options) {
   return (message) => {
     console.error(`[heart-transplant] ${message}`);
   };
+}
+
+async function writeScanOutputs(scan, options) {
+  const outputDir = options.outputDir ?? options.out;
+  if (!outputDir) return;
+
+  await mkdir(outputDir, { recursive: true });
+  await writeJsonFile(path.join(outputDir, 'scan.json'), scan);
+  await writeJsonFile(path.join(outputDir, 'migration-plan.json'), scan.migrationPlan);
+  await writeJsonFile(path.join(outputDir, 'validation-report.json'), scan.validationReport);
+  await writeFile(path.join(outputDir, 'migration-report.md'), renderMigrationReport(scan.migrationPlan, scan.validationReport), 'utf8');
+}
+
+async function writePlanOutputs(plan, validationReport, options) {
+  const outputDir = options.outputDir ?? options.out;
+  if (!outputDir) return;
+
+  await mkdir(outputDir, { recursive: true });
+  await writeJsonFile(path.join(outputDir, 'migration-plan.json'), plan);
+  await writeJsonFile(path.join(outputDir, 'validation-report.json'), validationReport);
+  await writeFile(path.join(outputDir, 'migration-report.md'), renderMigrationReport(plan, validationReport), 'utf8');
 }
 
 function sanitizeRepo(repo) {
@@ -133,15 +192,22 @@ function writeJson(payload) {
   console.log(JSON.stringify(payload, null, 2));
 }
 
+async function writeJsonFile(filePath, payload) {
+  await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf8');
+}
+
 function printHelp() {
   console.log('heart-transplant CLI');
   console.log('');
   console.log('Commands:');
   console.log('  ingest <repo>                 Ingest a public GitHub repo and print artifact metadata');
   console.log('  scan <repo> [--reference r]   Run ingest, rules, taint reporting, and swap suggestions');
+  console.log('  plan <repo> [--reference r]   Generate migration plan and validation gates');
   console.log('');
   console.log('Options:');
   console.log('  --reference, --ref <repo>     Optional reference repo for scan target mapping');
+  console.log('  --output-dir, --out <dir>     Persist scan/plan report files');
+  console.log('  --format markdown             Print plan command as Markdown');
   console.log('  --quiet                       Suppress progress logs on stderr');
   console.log('  --help                        Show this help');
 }

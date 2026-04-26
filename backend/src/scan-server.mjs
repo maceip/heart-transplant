@@ -1,6 +1,8 @@
 import http from 'node:http';
 import { randomUUID } from 'node:crypto';
 import { buildSuggestionSet, ingestRepository, runLogicLensSymbolica } from './logic/ingest-runner.mjs';
+import { writeArtifactJson } from './logic/artifact-store.mjs';
+import { buildMigrationPlan, buildValidationReport, renderMigrationReport } from './logic/migration-planner.mjs';
 
 const port = 3001;
 const jobs = new Map();
@@ -89,6 +91,8 @@ function createJob(sourceRepo, referenceRepo) {
     secondaryRepo: null,
     suggestions: [],
     taintReports: [],
+    migrationPlan: null,
+    validationReport: null,
     artifacts: {},
     error: undefined,
   };
@@ -144,7 +148,17 @@ async function runJob(job) {
   setPhase(job, 'map', 'running', 'Building category lanes and alternate mappings');
   await pause(120);
   job.suggestions = buildSuggestionSet(job.primaryRepo, job.secondaryRepo);
-  setPhase(job, 'map', 'completed', `Mapped ${job.suggestions.length} vendor lanes`);
+  const scanSnapshot = buildScanSnapshot(job, logicRun);
+  job.migrationPlan = buildMigrationPlan(scanSnapshot);
+  job.validationReport = buildValidationReport(scanSnapshot, job.migrationPlan);
+  await writeArtifactJson(job.primaryRepo.__artifactDir, 'migration-plan.json', job.migrationPlan);
+  await writeArtifactJson(job.primaryRepo.__artifactDir, 'validation-report.json', job.validationReport);
+  await writeArtifactJson(
+    job.primaryRepo.__artifactDir,
+    'migration-report.md',
+    renderMigrationReport(job.migrationPlan, job.validationReport),
+  );
+  setPhase(job, 'map', 'completed', `Mapped ${job.suggestions.length} vendor lanes and wrote migration plan`);
 
   job.status = 'completed';
 }
@@ -178,8 +192,25 @@ function serializeJob(job) {
     secondaryRepo: sanitizeRepo(job.secondaryRepo),
     suggestions: job.suggestions,
     taintReports: job.taintReports,
+    migrationPlan: job.migrationPlan,
+    validationReport: job.validationReport,
     artifacts: job.artifacts,
     error: job.error,
+  };
+}
+
+function buildScanSnapshot(job, logicRun) {
+  return {
+    sourceRepo: sanitizeRepo(job.primaryRepo),
+    referenceRepo: sanitizeRepo(job.secondaryRepo),
+    suggestions: job.suggestions,
+    taintReports: job.taintReports,
+    artifacts: job.artifacts,
+    logicRun: {
+      scopedFactCount: logicRun.scopedFactCount,
+      derivedFactCount: logicRun.derivedFactCount,
+      ruleCount: logicRun.ruleCount,
+    },
   };
 }
 
