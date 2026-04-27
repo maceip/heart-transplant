@@ -1,0 +1,41 @@
+[project]
+name = "heart-transplant-backend"
+version = "0.1.0"
+description = "Canonical backend for structural ingest and graph construction."
+requires-python = ">=3.13"
+dependencies = [
+  "pydantic>=2.11,<3",
+  "typer>=0.16,<1",
+  "tree-sitter>=0.25,<0.26",
+  "tree-sitter-language-pack>=0.7,<1",
+  "protobuf>=6.33,<7",
+  "surrealdb>=1.0.8,<2",
+  "httpx>=0.28,<1",
+  "openai>=1.50,<3",
+  "mcp>=1.8,<2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.25,<1",
+  "grpcio-tools>=1.76,<2",
+]
+
+[project.scripts]
+heart-transplant = "heart_transplant.cli:app"
+heart-transplant-mcp = "heart_transplant.mcp_server:main"
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--basetemp=.pytest_tmp"

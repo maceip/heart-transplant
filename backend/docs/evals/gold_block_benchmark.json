@@ -1,0 +1,44 @@
+[
+  {
+    "id": "elysia-supabase-tempate:prisma/seed.ts:data_persistence",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "prisma/seed.ts",
+    "expected_block": "Data Persistence",
+    "source": "hand-reviewed"
+  },
+  {
+    "id": "elysia-supabase-tempate:src/lib/prisma.ts:data_persistence",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "src/lib/prisma.ts",
+    "expected_block": "Data Persistence",
+    "source": "hand-reviewed"
+  },
+  {
+    "id": "elysia-supabase-tempate:src/utils/auth.ts:access_control",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "src/utils/auth.ts",
+    "expected_block": "Access Control",
+    "source": "hand-reviewed"
+  },
+  {
+    "id": "elysia-supabase-tempate:src/routes/auth.routes.ts:access_control",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "src/routes/auth.routes.ts",
+    "expected_block": "Access Control",
+    "source": "hand-reviewed"
+  },
+  {
+    "id": "elysia-supabase-tempate:src/lib/logger.ts:system_telemetry",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "src/lib/logger.ts",
+    "expected_block": "System Telemetry",
+    "source": "hand-reviewed"
+  },
+  {
+    "id": "elysia-supabase-tempate:src/emails/WelcomeEmail.tsx:core_rendering",
+    "repo_name": "elysia-supabase-tempate",
+    "file_path": "src/emails/WelcomeEmail.tsx",
+    "expected_block": "Core Rendering",
+    "source": "hand-reviewed"
+  }
+]

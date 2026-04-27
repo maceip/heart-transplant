@@ -1,0 +1,622 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import typer
+
+from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
+from heart_transplant.graph_smoke import run_graph_smoke
+from heart_transplant.ingest.corpus_ingest import ingest_vendors
+from heart_transplant.ingest.treesitter_ingest import ingest_repository
+from heart_transplant.ontology import iter_blocks
+from heart_transplant.phase_metrics import collect_phase_metrics
+from heart_transplant.classify.pipeline import persist_semantic_to_surreal, run_classification_on_artifact
+from heart_transplant.db.surreal_loader import load_artifact
+from heart_transplant.db.verify import verify_artifact_in_db
+from heart_transplant.evals.build_gold import write_gold_from_ground_truth
+from heart_transplant.maximize.report import build_maximize_report, write_maximize_report
+from heart_transplant.maximize.gates import run_maximize_gates
+from heart_transplant.scip_consume import consume_scip_artifact
+from heart_transplant.scip.symbol_index import build_symbol_index_from_artifacts, save_symbol_index
+from heart_transplant.scip_typescript import run_scip_typescript_index
+from heart_transplant.temporal.diff import architecture_diff
+from heart_transplant.temporal.drift import detect_architectural_drift
+from heart_transplant.temporal.gates import run_temporal_gates
+from heart_transplant.temporal.metrics import temporal_metrics, write_temporal_metrics
+from heart_transplant.temporal.persist import persist_temporal_metrics
+from heart_transplant.temporal.scan import temporal_scan, write_temporal_scan
+from heart_transplant.temporal.snapshot import architecture_snapshot
+from heart_transplant.causal.simulation import run_change_simulation
+from heart_transplant.regret.scan import run_regret_scan
+from heart_transplant.execution.orchestrator import run_transplant
+from heart_transplant.multimodal.ingest import run_multimodal_ingest
+from heart_transplant.surface.status import program_surface_status
+from heart_transplant.validation_gates import latest_artifact_dir, run_validation_gates
+
+app = typer.Typer(no_args_is_help=True, help="Canonical backend CLI for heart-transplant.")
+
+
+@app.command("list-blocks")
+def list_blocks() -> None:
+    for block in iter_blocks():
+        typer.echo(block)
+
+
+@app.command("ingest-local")
+def ingest_local(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    repo_name: str | None = typer.Option(None, "--repo-name", help="Override the repo name stored in the artifact."),
+    with_scip: bool = typer.Option(False, "--with-scip", help="Also generate a real SCIP index with scip-typescript."),
+    install_deps: bool = typer.Option(False, "--install-deps", help="Install Node dependencies before running SCIP when needed."),
+) -> None:
+    """Parse a local repo into CodeNode records using Tree-sitter."""
+
+    resolved_path = repo_path.resolve()
+    inferred_name = repo_name or resolved_path.name
+    artifact = ingest_repository(repo_path=resolved_path, repo_name=inferred_name)
+    target_dir = persist_structural_artifact(artifact)
+    scip_metadata = None
+
+    if with_scip:
+        scip_metadata = run_scip_typescript_index(
+            resolved_path,
+            inferred_name,
+            target_dir,
+            install_deps=install_deps,
+        )
+        write_json(target_dir / "scip-index.json", scip_metadata.model_dump(mode="json"))
+        scip_consumed = consume_scip_artifact(
+            target_dir,
+            global_symbol_index_path=None,
+        )
+        write_json(target_dir / "scip-consumed.json", scip_consumed)
+    else:
+        scip_consumed = None
+
+    typer.echo(
+        json.dumps(
+            {
+                "repo_name": artifact.repo_name,
+                "repo_path": artifact.repo_path,
+                "artifact_dir": str(target_dir),
+                "node_count": artifact.node_count,
+                "edge_count": artifact.edge_count,
+                "parser_backends": artifact.parser_backends,
+                "scip": scip_metadata.model_dump(mode="json") if scip_metadata else None,
+                "scip_consumed": scip_consumed,
+            },
+            indent=2,
+        )
+    )
+
+
+@app.command("test-graph")
+def test_graph(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    strict: bool = typer.Option(
+        False,
+        "--strict",
+        help="Exit with code 1 if SCIP is present on disk but no nodes resolved (symbol_source=scip).",
+    ),
+) -> None:
+    """Run a structural smoke test against a stored graph artifact."""
+
+    report = run_graph_smoke(artifact_dir)
+    typer.echo(json.dumps(report, indent=2))
+    if strict and str(report.get("scip_integration_status", "")).startswith("fail:"):
+        raise typer.Exit(code=1)
+
+
+@app.command("consume-scip")
+def consume_scip(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    strict: bool = typer.Option(
+        False,
+        "--strict",
+        help="Exit with code 1 when index.scip exists but zero code nodes get SCIP identity.",
+    ),
+    symbol_index: Path | None = typer.Option(
+        None,
+        "--symbol-index",
+        help="Optional merged corpus symbol index JSON for cross-repo reference resolution.",
+    ),
+) -> None:
+    """Parse and consume a real SCIP index into the stored structural artifact."""
+
+    report = consume_scip_artifact(artifact_dir, global_symbol_index_path=symbol_index.resolve() if symbol_index else None)
+    typer.echo(json.dumps(report, indent=2))
+    if strict and (artifact_dir / "index.scip").exists() and not int(
+        report.get("resolution", {}).get("nodes_with_scip_identity", 0)  # type: ignore[union-attr]
+        or 0
+    ):
+        raise typer.Exit(code=1)
+
+
+@app.command("ingest-vendor-corpus")
+def ingest_vendor_corpus(
+    root: Path = typer.Argument(
+        "vendor/github-repos",
+        help="Directory containing one subdirectory per repository (e.g. vendor/github-repos).",
+    ),
+    report_path: Path | None = typer.Option(
+        None,
+        "--write-report",
+        help="Write JSON summary to this path (default: .heart-transplant/artifacts/corpus-ingest.json).",
+    ),
+) -> None:
+    """Run canonical Tree-sitter ingest on every subfolder; reports failures, never silent-skip errors."""
+
+    resolved = root.resolve()
+    if not resolved.is_dir():
+        raise typer.BadParameter(f"Not a directory: {resolved}")
+    out = report_path.resolve() if report_path else (artifact_root() / "corpus-ingest.json")
+    summary = ingest_vendors(resolved, output_report=out)
+    typer.echo(json.dumps(summary, indent=2))
+    if summary["failed"]:
+        raise typer.Exit(code=1)
+
+
+@app.command("build-corpus-symbols")
+def build_corpus_symbols(
+    out: Path = typer.Option(
+        None,
+        "--out",
+        help="Output path (default: .heart-transplant/artifacts/corpus-symbol-index.json).",
+    ),
+    roots: list[Path] = typer.Argument(
+        default_factory=list,
+        help="Each directory should contain a structural-artifact.json (e.g. multiple artifact folders).",
+    ),
+) -> None:
+    """Merge ``code_nodes`` from several artifact dirs for multi-repo SCIP cross-reference."""
+
+    if roots:
+        paths = [p.resolve() for p in roots]
+    else:
+        paths = [p for p in artifact_root().iterdir() if p.is_dir() and (p / "structural-artifact.json").is_file()]
+    if not paths:
+        raise typer.Exit(code=1)
+    idx = build_symbol_index_from_artifacts(paths)
+    dest = (out or (artifact_root() / "corpus-symbol-index.json")).resolve()
+    save_symbol_index(dest, idx)
+    typer.echo(json.dumps({"wrote": str(dest), "symbol_count": idx.get("symbol_count", 0)}, indent=2))
+
+
+@app.command("load-surreal")
+def load_surreal(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Load structural (and ``semantic-artifact.json`` if present) into SurrealDB."""
+
+    r = load_artifact(artifact_dir)
+    typer.echo(json.dumps(r, indent=2))
+
+
+@app.command("verify-surreal")
+def verify_surreal(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Check Surreal record counts match the on-disk structural artifact for the same repo."""
+
+    r = verify_artifact_in_db(artifact_dir)
+    typer.echo(json.dumps(r, indent=2))
+    if not r.get("pass"):
+        raise typer.Exit(code=1)
+
+
+@app.command("classify")
+def classify_artifact(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    use_openai: bool = typer.Option(
+        True,
+        help="If false, use keyword heuristic only. If true and OPENAI_API_KEY is set, use the OpenAI API.",
+    ),
+) -> None:
+    """Run neighborhood-aware block classification; writes ``semantic-artifact.json``."""
+
+    sem = run_classification_on_artifact(artifact_dir, use_openai=use_openai)
+    typer.echo(sem.model_dump_json(indent=2))
+
+
+@app.command("persist-semantic-surreal")
+def persist_semantic_surreal(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Load ``semantic-artifact.json`` block rows into Surreal (requires ``classify`` first)."""
+
+    n = persist_semantic_to_surreal(artifact_dir)
+    typer.echo(json.dumps({"rows_loaded": n}, indent=2))
+
+
+@app.command("validate-gates")
+def validate_gates(
+    repo_path: Path | None = typer.Option(None, "--repo-path", exists=True, file_okay=False, dir_okay=True, help="Repo path to validate against. Defaults to the repo_path recorded in the artifact."),
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Artifact directory to validate. Defaults to the latest artifact."),
+) -> None:
+    """Run simple truthfulness gates against real code and artifacts."""
+
+    chosen_artifact_dir = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    structural = json.loads((chosen_artifact_dir / "structural-artifact.json").read_text(encoding="utf-8"))
+    chosen_repo_path = repo_path.resolve() if repo_path else Path(str(structural["repo_path"])).resolve()
+    report = run_validation_gates(chosen_repo_path, chosen_artifact_dir)
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("mcp-serve")
+def mcp_serve() -> None:
+    """Start the stdio MCP server (graph tools); same as ``python -m heart_transplant.mcp_server``."""
+
+    from heart_transplant.mcp_server import main as mcp_main
+
+    mcp_main()
+
+
+@app.command("phase-metrics")
+def phase_metrics(
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Artifact directory to inspect. Defaults to the latest artifact."),
+    repo_path: Path | None = typer.Option(None, "--repo-path", exists=True, file_okay=False, dir_okay=True, help="Override repo path. Defaults to the repo_path recorded in the artifact."),
+    gold_set: Path | None = typer.Option(None, "--gold-set", exists=True, dir_okay=False, help="Optional gold benchmark JSON for the evaluation phase."),
+    classify_if_missing: bool = typer.Option(False, "--classify-if-missing", help="If semantic-artifact.json is missing, run the current classifier before reporting metrics."),
+    use_openai: bool = typer.Option(False, "--use-openai", help="When classifying, use OpenAI if OPENAI_API_KEY is present."),
+) -> None:
+    """Emit raw per-phase metrics without embedding private pass/fail thresholds in the repo."""
+
+    chosen_artifact_dir = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    report = collect_phase_metrics(
+        chosen_artifact_dir,
+        repo_path=repo_path.resolve() if repo_path else None,
+        gold_set_path=gold_set.resolve() if gold_set else None,
+        classify_if_missing=classify_if_missing,
+        use_openai=use_openai,
+    )
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("build-gold")
+def build_gold(
+    ground_truth: Path = typer.Argument(..., exists=True, dir_okay=False, help="vendored-ground-truth.json path."),
+    out: Path = typer.Option("docs/evals/gold_block_benchmark.json", "--out", help="Output benchmark JSON."),
+    repo_name: str | None = typer.Option(None, "--repo-name", help="Optional repoName filter from the ground-truth file."),
+    max_items: int = typer.Option(40, "--max-items", help="Maximum gold items to emit."),
+    include_medium: bool = typer.Option(
+        True,
+        "--include-medium/--no-include-medium",
+        help="Include medium-confidence ground-truth rows (recommended for Phase 8.5 breadth).",
+    ),
+    exclude_repo: list[str] = typer.Option(
+        [],
+        "--exclude-repo",
+        help="Repeatable. repoName values to omit (e.g. holdout repo for the main benchmark file).",
+    ),
+    only_repo: str | None = typer.Option(
+        None,
+        "--only-repo",
+        help="If set, only emit items for this repoName (e.g. holdout-only benchmark).",
+    ),
+) -> None:
+    """Create artifact-stable file-level block benchmark items from vendored ground truth."""
+
+    excl = frozenset(exclude_repo) if exclude_repo else None
+    only = frozenset({only_repo}) if only_repo else None
+    items = write_gold_from_ground_truth(
+        ground_truth.resolve(),
+        out.resolve(),
+        repo_name=repo_name,
+        max_items=max_items,
+        include_medium=include_medium,
+        exclude_repo_names=excl,
+        only_repo_names=only,
+    )
+    typer.echo(json.dumps({"wrote": str(out.resolve()), "item_count": len(items)}, indent=2))
+
+
+@app.command("maximize-audit")
+def maximize_audit(
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Artifact directory to audit. Defaults to latest artifact."),
+    gold_set: Path | None = typer.Option(None, "--gold-set", exists=True, dir_okay=False, help="Optional gold benchmark JSON."),
+    out: Path | None = typer.Option(None, "--out", help="Output JSON path. Defaults to .heart-transplant/reports/<timestamp>__phase-8-5-audit.json."),
+    no_validation: bool = typer.Option(False, "--no-validation", help="Skip fresh validation gates for a faster report."),
+) -> None:
+    """Write a Phase 8.5 current-capability audit report."""
+
+    chosen_artifact_dir = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    report = build_maximize_report(
+        chosen_artifact_dir,
+        gold_set_path=gold_set.resolve() if gold_set else None,
+        include_validation=not no_validation,
+    )
+    dest = write_maximize_report(report, out.resolve() if out else None)
+    typer.echo(json.dumps({"wrote": str(dest), "summary": report["summary"], "known_limitations": report["known_limitations"]}, indent=2))
+
+
+@app.command("maximize-report")
+def maximize_report_cmd(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    gold_set: Path | None = typer.Option(
+        None,
+        "--gold-set",
+        exists=True,
+        dir_okay=False,
+        help="Optional gold benchmark JSON.",
+    ),
+    skip_validation: bool = typer.Option(False, "--skip-validation", help="Skip fresh validation gates."),
+) -> None:
+    """Print the full Phase 8.5 capability report as JSON (for tooling and maximize-gates demos)."""
+
+    report = build_maximize_report(
+        artifact_dir.resolve(),
+        gold_set_path=gold_set.resolve() if gold_set else None,
+        include_validation=not skip_validation,
+    )
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("maximize-gates")
+def maximize_gates_cmd(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    gold_set: Path = typer.Option(
+        ...,
+        "--gold-set",
+        exists=True,
+        dir_okay=False,
+        help="Gold benchmark JSON (Phase 8.5 breadth thresholds).",
+    ),
+    holdout_artifact_dir: Path | None = typer.Option(
+        None,
+        "--holdout-artifact-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+    ),
+    skip_demos: bool = typer.Option(False, "--skip-demos", help="Skip five-CLI JSON replay checks."),
+) -> None:
+    """Run Phase 8.5 maximize gates; exits 1 if any gate fails."""
+
+    report = run_maximize_gates(
+        artifact_dir.resolve(),
+        gold_set.resolve(),
+        holdout_artifact_dir=holdout_artifact_dir.resolve() if holdout_artifact_dir else None,
+        run_demos=not skip_demos,
+    )
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["overall_status"] != "pass":
+        raise typer.Exit(code=1)
+
+
+@app.command("temporal-scan")
+def temporal_scan_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    max_commits: int = typer.Option(50, "--max-commits", help="Maximum commits to inspect."),
+    since: str | None = typer.Option(None, "--since", help="Optional git --since value, e.g. 2026-01-01."),
+    out: Path | None = typer.Option(None, "--out", help="Output JSON path. Defaults to .heart-transplant/reports/<timestamp>__phase-9-temporal-scan.json."),
+) -> None:
+    """Phase 9 deterministic git-history scan with block-churn metrics."""
+
+    report = temporal_scan(repo_path.resolve(), max_commits=max_commits, since=since)
+    dest = write_temporal_scan(report, out.resolve() if out else None)
+    typer.echo(json.dumps({"wrote": str(dest), "commit_count": report.commit_count, "block_churn": report.block_churn}, indent=2))
+
+
+@app.command("temporal-snapshot")
+def temporal_snapshot_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    ref: str = typer.Option("HEAD", "--ref", help="Git ref/commit to snapshot."),
+) -> None:
+    """Phase 9: immutable file/block architecture snapshot for one commit."""
+
+    snapshot = architecture_snapshot(repo_path.resolve(), ref)
+    typer.echo(snapshot.model_dump_json(indent=2))
+
+
+@app.command("temporal-diff")
+def temporal_diff_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    before: str = typer.Argument(..., help="Before git ref/commit."),
+    after: str = typer.Argument(..., help="After git ref/commit."),
+) -> None:
+    """Phase 9: deterministic architecture diff between two commits."""
+
+    diff = architecture_diff(repo_path.resolve(), before, after)
+    typer.echo(diff.model_dump_json(indent=2))
+
+
+@app.command("temporal-metrics")
+def temporal_metrics_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    max_commits: int = typer.Option(25, "--max-commits", help="Maximum commits to include."),
+    since: str | None = typer.Option(None, "--since", help="Optional git --since value."),
+    out: Path | None = typer.Option(None, "--out", help="Output JSON path. Defaults to .heart-transplant/reports/<timestamp>__phase-9-temporal-metrics.json."),
+) -> None:
+    """Phase 9: deterministic time-series architecture metrics."""
+
+    report = temporal_metrics(repo_path.resolve(), max_commits=max_commits, since=since)
+    dest = write_temporal_metrics(report, out.resolve() if out else None)
+    typer.echo(json.dumps({"wrote": str(dest), "commit_count": report.commit_count, "block_churn_rate": report.block_churn_rate}, indent=2))
+
+
+@app.command("persist-temporal-surreal")
+def persist_temporal_surreal_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    max_commits: int = typer.Option(25, "--max-commits", help="Maximum commits to include."),
+    since: str | None = typer.Option(None, "--since", help="Optional git date expression passed to git log."),
+) -> None:
+    """Phase 9: persist temporal snapshots, diffs, and summary rows into SurrealDB."""
+
+    report = temporal_metrics(repo_path.resolve(), max_commits=max_commits, since=since)
+    result = persist_temporal_metrics(report)
+    typer.echo(json.dumps(result, indent=2))
+
+
+@app.command("temporal-drift")
+def temporal_drift_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    before: str = typer.Argument(..., help="Before git ref/commit."),
+    after: str = typer.Argument(..., help="After git ref/commit."),
+    expected_path: list[str] | None = typer.Option(None, "--expected-path", help="Optional expected drift path for scoring; may be repeated."),
+) -> None:
+    """Phase 9: detect file-level block-membership drift between two commits."""
+
+    report = detect_architectural_drift(
+        repo_path.resolve(),
+        before,
+        after,
+        expected_paths=set(expected_path or []) if expected_path else None,
+    )
+    typer.echo(report.model_dump_json(indent=2))
+
+
+@app.command("temporal-gates")
+def temporal_gates_command(
+    repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    max_commits: int = typer.Option(25, "--max-commits", help="Maximum commits to include in reproducibility/known-change gates."),
+    expected_changes: Path | None = typer.Option(None, "--expected-changes", exists=True, dir_okay=False, help="JSON list of {after_sha,path,status} expected changes."),
+    drift_before: str | None = typer.Option(None, "--drift-before", help="Before ref for drift gate."),
+    drift_after: str | None = typer.Option(None, "--drift-after", help="After ref for drift gate."),
+    expected_drift_path: list[str] | None = typer.Option(None, "--expected-drift-path", help="Expected drift path; may be repeated."),
+) -> None:
+    """Phase 9 gates: exact known changes, drift scoring, and reproducibility."""
+
+    expected = json.loads(expected_changes.read_text(encoding="utf-8")) if expected_changes else None
+    report = run_temporal_gates(
+        repo_path.resolve(),
+        max_commits=max_commits,
+        expected_changes=expected,
+        drift_before=drift_before,
+        drift_after=drift_after,
+        expected_drift_paths=set(expected_drift_path or []) if expected_drift_path else None,
+    )
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["overall_status"] != "pass":
+        raise typer.Exit(code=1)
+
+
+@app.command("simulate-change")
+def simulate_change_command(
+    change: str = typer.Argument(..., help="Natural-language change hypothesis."),
+    artifact_dir: Path | None = typer.Option(
+        None,
+        "--artifact-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        help="Structural artifact directory. Defaults to latest under .heart-transplant/artifacts.",
+    ),
+    temporal_report: Path | None = typer.Option(
+        None,
+        "--temporal-report",
+        exists=True,
+        dir_okay=False,
+        help="Optional Phase 9 temporal-scan JSON for file hotspot boosting.",
+    ),
+    confidence_threshold: float = typer.Option(0.7, "--confidence-threshold", help="Report threshold note in limitations."),
+    seed: int = typer.Option(42, "--seed", help="RNG seed for Monte Carlo runs."),
+    mc_runs: int = typer.Option(64, "--mc-runs", help="Number of Monte Carlo rollouts."),
+) -> None:
+    """Phase 10: Monte Carlo structural impact simulation (auditable trace, no LLM)."""
+
+    chosen = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    result = run_change_simulation(
+        change,
+        chosen,
+        temporal_report_path=temporal_report.resolve() if temporal_report else None,
+        rng_seed=seed,
+        mc_runs=mc_runs,
+        confidence_threshold=confidence_threshold,
+    )
+    typer.echo(json.dumps(result.model_dump(mode="json"), indent=2, ensure_ascii=True))
+
+
+@app.command("regret-scan")
+def regret_scan_command(
+    artifact_dir: Path | None = typer.Option(
+        None,
+        "--artifact-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        help="Defaults to latest artifact directory.",
+    ),
+    min_confidence: float = typer.Option(0.35, "--min-confidence", help="Minimum regret score to emit."),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        help="Also write full JSON report to this path (for execute-transplant --plan).",
+    ),
+) -> None:
+    """Phase 11: heuristic regret surface + surgery plans."""
+
+    chosen = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    report = run_regret_scan(chosen, min_confidence=min_confidence)
+    if output:
+        write_json(output.resolve(), report.model_dump(mode="json"))
+    typer.echo(report.model_dump_json(indent=2))
+
+
+@app.command("execute-transplant")
+def execute_transplant_command(
+    regret_id: str = typer.Argument(..., help="Identifier from a regret / surgery plan."),
+    artifact_dir: Path | None = typer.Option(
+        None,
+        "--artifact-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        help="Artifact directory (for repo path). Defaults to latest.",
+    ),
+    plan: Path | None = typer.Option(
+        None,
+        "--plan",
+        exists=True,
+        dir_okay=False,
+        help="JSON from `regret-scan --output`.",
+    ),
+    execute: bool = typer.Option(
+        False,
+        "--execute",
+        help="If set, runs compileall validation after logging intent (no automatic patches).",
+    ),
+) -> None:
+    """Phase 12: transplant planner + ledger (does not rewrite source files)."""
+
+    chosen = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    result = run_transplant(
+        regret_id,
+        chosen,
+        plan_path=plan.resolve() if plan else None,
+        dry_run=not execute,
+    )
+    typer.echo(result.model_dump_json(indent=2))
+
+
+@app.command("multimodal-ingest")
+def multimodal_ingest_command(
+    directory: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    include_tests: bool = typer.Option(True, "--include-tests/--no-include-tests"),
+    include_infra: bool = typer.Option(True, "--include-infra/--no-include-infra"),
+    out: Path | None = typer.Option(
+        None,
+        "--out",
+        help="Output JSON path (default: .heart-transplant/reports/<timestamp>__multimodal-ingest.json).",
+    ),
+) -> None:
+    """Phase 13: correlate tests, openapi.json, and infra files to source tree."""
+
+    report = run_multimodal_ingest(
+        directory.resolve(),
+        include_tests=include_tests,
+        include_infra=include_infra,
+        write_artifact=out.resolve() if out else None,
+    )
+    typer.echo(report.model_dump_json(indent=2))
+
+
+@app.command("program-surface")
+def program_surface_command() -> None:
+    """Phase 14: JSON index of phase module readiness (imports + symbols)."""
+
+    typer.echo(json.dumps(program_surface_status(), indent=2))
+
+
+if __name__ == "__main__":
+    app()

@@ -1,0 +1,3688 @@
+[
+  {
+    "repoName": "Elysia-routing-controllers",
+    "repoDir": "vendor/github-repos/Elysia-routing-controllers",
+    "fileCount": 25,
+    "manifests": [
+      "package.json"
+    ],
+    "declaredModules": [
+      {
+        "name": "@elysiajs/bearer",
+        "version": "^0.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/cors",
+        "version": "^0.7.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/jwt",
+        "version": "^0.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/swagger",
+        "version": "^0.7.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@libsql/client",
+        "version": "^0.3.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/better-sqlite3",
+        "version": "^7.6.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "better-sqlite3",
+        "version": "^8.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bun-types",
+        "version": "latest",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "chalk",
+        "version": "^5.3.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "dotenv",
+        "version": "^16.3.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-kit",
+        "version": "^0.19.13",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-orm",
+        "version": "^0.28.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia",
+        "version": "latest",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "sqlite3",
+        "version": "^5.1.6",
+        "ecosystem": "npm"
+      }
+    ],
+    "usedModules": [
+      "@elysiajs/bearer",
+      "@elysiajs/cors",
+      "@elysiajs/swagger",
+      "@libsql/client",
+      "Elysia",
+      "chalk",
+      "dotenv",
+      "drizzle-kit",
+      "drizzle-orm"
+    ],
+    "undeclaredUsedModules": [],
+    "swappableDeclared": [],
+    "swappableUsed": [],
+    "blockRollup": [
+      {
+        "blockId": "data_persistence",
+        "confidence": "high",
+        "evidenceCount": 12
+      },
+      {
+        "blockId": "search_architecture",
+        "confidence": "high",
+        "evidenceCount": 11
+      },
+      {
+        "blockId": "background_processing",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "system_telemetry",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "connectivity_layer",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "access_control",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "asset_delivery",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "edge_support",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "error_boundaries",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "experimentation",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "global_interface",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "security_ops",
+        "confidence": "low",
+        "evidenceCount": 1
+      }
+    ],
+    "topFileBlocks": [
+      {
+        "filePath": "drizzle.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/database/database.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/database/index.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/database/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/database/schema.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/middlewares/Auth.ts",
+        "blockId": "access_control",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/middlewares/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/notes/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/notes/notes.controller.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/notes/notes.controller.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/modules/notes/notes.dto.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/notes/notes.service.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/modules/notes/notes.service.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/index.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.controller.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.controller.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.controller.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.repository.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.service.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.service.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.service.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/modules/tasks/tasks.service.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/utils/ErrorMessages.ts",
+        "blockId": "error_boundaries",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/utils/ErrorMessages.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/utils/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/utils/index.ts",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/utils/logger.ts",
+        "blockId": "system_telemetry",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/utils/logger.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/utils/routeMethods.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "asset_delivery",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "global_interface",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "edge_support",
+        "confidence": "low"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "experimentation",
+        "confidence": "low"
+      },
+      {
+        "filePath": "tsconfig.json",
+        "blockId": "security_ops",
+        "confidence": "low"
+      }
+    ]
+  },
+  {
+    "repoName": "bun-api",
+    "repoDir": "vendor/github-repos/bun-api",
+    "fileCount": 89,
+    "manifests": [
+      "apps/backend/package.json",
+      "apps/frontend/package.json",
+      "package.json"
+    ],
+    "declaredModules": [
+      {
+        "name": "@elysiajs/bearer",
+        "version": "^1.4.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/cors",
+        "version": "^1.4.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/eden",
+        "version": "^1.4.4",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/jwt",
+        "version": "^1.4.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/openapi",
+        "version": "^1.4.11",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@eslint/js",
+        "version": "^9.39.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@hookform/resolvers",
+        "version": "^5.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@mrleebo/prisma-ast",
+        "version": "^0.13.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@prisma/client",
+        "version": "^6.19.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-accordion",
+        "version": "^1.2.12",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-alert-dialog",
+        "version": "^1.1.15",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-aspect-ratio",
+        "version": "^1.1.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-avatar",
+        "version": "^1.1.11",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-checkbox",
+        "version": "^1.3.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-collapsible",
+        "version": "^1.1.12",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-context-menu",
+        "version": "^2.2.16",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-dialog",
+        "version": "^1.1.15",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-dropdown-menu",
+        "version": "^2.1.16",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-hover-card",
+        "version": "^1.1.15",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-label",
+        "version": "^2.1.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-menubar",
+        "version": "^1.1.16",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-navigation-menu",
+        "version": "^1.2.14",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-popover",
+        "version": "^1.1.15",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-progress",
+        "version": "^1.1.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-radio-group",
+        "version": "^1.3.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-scroll-area",
+        "version": "^1.2.10",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-select",
+        "version": "^2.2.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-separator",
+        "version": "^1.1.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-slider",
+        "version": "^1.3.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-slot",
+        "version": "^1.2.4",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-switch",
+        "version": "^1.2.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-tabs",
+        "version": "^1.1.13",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-toggle",
+        "version": "^1.1.10",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-toggle-group",
+        "version": "^1.1.11",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@radix-ui/react-tooltip",
+        "version": "^1.2.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@tailwindcss/vite",
+        "version": "^4.1.17",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@tanstack/react-query",
+        "version": "^5.90.7",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/node",
+        "version": "^24.10.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/nodemailer",
+        "version": "^7.0.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/react",
+        "version": "^19.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/react-dom",
+        "version": "^19.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@vitejs/plugin-react-swc",
+        "version": "^4.2.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "backend",
+        "version": "workspace:*",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "better-auth",
+        "version": "^1.4.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "class-variance-authority",
+        "version": "^0.7.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "clsx",
+        "version": "^2.1.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "cmdk",
+        "version": "^1.1.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "date-fns",
+        "version": "^4.1.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia",
+        "version": "^1.4.15",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "embla-carousel-react",
+        "version": "^8.6.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint",
+        "version": "^9.39.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-plugin-react-hooks",
+        "version": "^7.0.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-plugin-react-refresh",
+        "version": "^0.4.24",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "globals",
+        "version": "^16.5.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "input-otp",
+        "version": "^1.4.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "ioredis",
+        "version": "^5.8.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "lucide-react",
+        "version": "^0.553.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "next-themes",
+        "version": "^0.4.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "nodemailer",
+        "version": "^7.0.10",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prettier",
+        "version": "^3.2.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prisma",
+        "version": "^6.19.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prismabox",
+        "version": "^1.1.25",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react",
+        "version": "^19.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react-day-picker",
+        "version": "^9.11.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react-dom",
+        "version": "^19.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react-hook-form",
+        "version": "^7.66.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react-resizable-panels",
+        "version": "^3.0.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "recharts",
+        "version": "3.4.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "sonner",
+        "version": "^2.0.7",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tailwind-merge",
+        "version": "^3.4.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tailwindcss",
+        "version": "^4.1.17",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tw-animate-css",
+        "version": "^1.4.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript",
+        "version": "~5.9.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript-eslint",
+        "version": "^8.46.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "vaul",
+        "version": "^1.1.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "vite",
+        "version": "^7.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "zod",
+        "version": "^4.1.12",
+        "ecosystem": "npm"
+      }
+    ],
+    "usedModules": [
+      "@elysiajs/cors",
+      "@elysiajs/eden",
+      "@elysiajs/openapi",
+      "@eslint/js",
+      "@hookform/resolvers",
+      "@mrleebo/prisma-ast",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-alert-dialog",
+      "@radix-ui/react-aspect-ratio",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-checkbox",
+      "@radix-ui/react-collapsible",
+      "@radix-ui/react-context-menu",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-hover-card",
+      "@radix-ui/react-label",
+      "@radix-ui/react-menubar",
+      "@radix-ui/react-navigation-menu",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-radio-group",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-select",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slider",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toggle",
+      "@radix-ui/react-toggle-group",
+      "@radix-ui/react-tooltip",
+      "@tailwindcss/vite",
+      "@tanstack/react-query",
+      "@vitejs/plugin-react-swc",
+      "backend",
+      "better-auth",
+      "class-variance-authority",
+      "clsx",
+      "cmdk",
+      "elysia",
+      "eslint-plugin-react-hooks",
+      "eslint-plugin-react-refresh",
+      "globals",
+      "input-otp",
+      "ioredis",
+      "lucide-react",
+      "next-themes",
+      "nodemailer",
+      "react",
+      "react-day-picker",
+      "react-dom",
+      "react-hook-form",
+      "react-resizable-panels",
+      "recharts",
+      "sonner",
+      "tailwind-merge",
+      "typescript-eslint",
+      "vaul",
+      "vite",
+      "zod"
+    ],
+    "undeclaredUsedModules": [],
+    "swappableDeclared": [
+      {
+        "name": "@mrleebo/prisma-ast",
+        "version": "^0.13.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@prisma/client",
+        "version": "^6.19.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-accordion",
+        "version": "^1.2.12",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-alert-dialog",
+        "version": "^1.1.15",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-aspect-ratio",
+        "version": "^1.1.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-avatar",
+        "version": "^1.1.11",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-checkbox",
+        "version": "^1.3.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-collapsible",
+        "version": "^1.1.12",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-context-menu",
+        "version": "^2.2.16",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-dialog",
+        "version": "^1.1.15",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-dropdown-menu",
+        "version": "^2.1.16",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-hover-card",
+        "version": "^1.1.15",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-label",
+        "version": "^2.1.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-menubar",
+        "version": "^1.1.16",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-navigation-menu",
+        "version": "^1.2.14",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-popover",
+        "version": "^1.1.15",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-progress",
+        "version": "^1.1.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-radio-group",
+        "version": "^1.3.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-scroll-area",
+        "version": "^1.2.10",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-select",
+        "version": "^2.2.6",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-separator",
+        "version": "^1.1.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-slider",
+        "version": "^1.3.6",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-slot",
+        "version": "^1.2.4",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-switch",
+        "version": "^1.2.6",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-tabs",
+        "version": "^1.1.13",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-toggle",
+        "version": "^1.1.10",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-toggle-group",
+        "version": "^1.1.11",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-tooltip",
+        "version": "^1.2.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@tailwindcss/vite",
+        "version": "^4.1.17",
+        "ecosystem": "npm",
+        "blocks": [
+          "asset_delivery",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@tanstack/react-query",
+        "version": "^5.90.7",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@types/react",
+        "version": "^19.2.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@types/react-dom",
+        "version": "^19.2.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@vitejs/plugin-react-swc",
+        "version": "^4.2.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "asset_delivery"
+        ]
+      },
+      {
+        "name": "better-auth",
+        "version": "^1.4.5",
+        "ecosystem": "npm",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "class-variance-authority",
+        "version": "^0.7.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "embla-carousel-react",
+        "version": "^8.6.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "eslint-plugin-react-hooks",
+        "version": "^7.0.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "eslint-plugin-react-refresh",
+        "version": "^0.4.24",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "ioredis",
+        "version": "^5.8.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "lucide-react",
+        "version": "^0.553.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "next-themes",
+        "version": "^0.4.6",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "prisma",
+        "version": "^6.19.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "prismabox",
+        "version": "^1.1.25",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "react",
+        "version": "^19.2.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-day-picker",
+        "version": "^9.11.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-dom",
+        "version": "^19.2.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-hook-form",
+        "version": "^7.66.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering",
+          "interaction_design"
+        ]
+      },
+      {
+        "name": "react-resizable-panels",
+        "version": "^3.0.6",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "tailwindcss",
+        "version": "^4.1.17",
+        "ecosystem": "npm",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "vite",
+        "version": "^7.2.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "asset_delivery"
+        ]
+      },
+      {
+        "name": "zod",
+        "version": "^4.1.12",
+        "ecosystem": "npm",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "swappableUsed": [
+      {
+        "name": "@mrleebo/prisma-ast",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-accordion",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-alert-dialog",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-aspect-ratio",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-avatar",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-checkbox",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-collapsible",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-context-menu",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-dialog",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-dropdown-menu",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-hover-card",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-label",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-menubar",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-navigation-menu",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-popover",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-progress",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-radio-group",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-scroll-area",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-select",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-separator",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-slider",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-slot",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-switch",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-tabs",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-toggle",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-toggle-group",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@radix-ui/react-tooltip",
+        "blocks": [
+          "core_rendering",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@tailwindcss/vite",
+        "blocks": [
+          "asset_delivery",
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "@tanstack/react-query",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@vitejs/plugin-react-swc",
+        "blocks": [
+          "core_rendering",
+          "asset_delivery"
+        ]
+      },
+      {
+        "name": "better-auth",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "class-variance-authority",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "eslint-plugin-react-hooks",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "eslint-plugin-react-refresh",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "ioredis",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "lucide-react",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "next-themes",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-day-picker",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-dom",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-hook-form",
+        "blocks": [
+          "core_rendering",
+          "interaction_design"
+        ]
+      },
+      {
+        "name": "react-resizable-panels",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "vite",
+        "blocks": [
+          "asset_delivery"
+        ]
+      },
+      {
+        "name": "zod",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "blockRollup": [
+      {
+        "blockId": "core_rendering",
+        "confidence": "high",
+        "evidenceCount": 109
+      },
+      {
+        "blockId": "visual_systems",
+        "confidence": "high",
+        "evidenceCount": 85
+      },
+      {
+        "blockId": "global_interface",
+        "confidence": "high",
+        "evidenceCount": 31
+      },
+      {
+        "blockId": "experimentation",
+        "confidence": "high",
+        "evidenceCount": 22
+      },
+      {
+        "blockId": "identity_ui",
+        "confidence": "high",
+        "evidenceCount": 20
+      },
+      {
+        "blockId": "data_persistence",
+        "confidence": "high",
+        "evidenceCount": 19
+      },
+      {
+        "blockId": "interaction_design",
+        "confidence": "high",
+        "evidenceCount": 10
+      },
+      {
+        "blockId": "state_management",
+        "confidence": "high",
+        "evidenceCount": 10
+      },
+      {
+        "blockId": "asset_delivery",
+        "confidence": "high",
+        "evidenceCount": 9
+      },
+      {
+        "blockId": "user_observability",
+        "confidence": "high",
+        "evidenceCount": 9
+      },
+      {
+        "blockId": "search_architecture",
+        "confidence": "high",
+        "evidenceCount": 7
+      },
+      {
+        "blockId": "connectivity_layer",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "edge_support",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "error_boundaries",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "persistence_strategy",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "security_ops",
+        "confidence": "low",
+        "evidenceCount": 1
+      }
+    ],
+    "topFileBlocks": [
+      {
+        "filePath": "apps/backend/eslint.config.js",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/eslint.config.js",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/package.json",
+        "blockId": "identity_ui",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/package.json",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/scripts/generate-crud.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/scripts/generate-crud.ts",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/scripts/generate-crud.ts",
+        "blockId": "edge_support",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/scripts/generate-crud.ts",
+        "blockId": "error_boundaries",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/scripts/generate-crud.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/lib/prisma.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/src/lib/redis.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/index.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/model.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/model.ts",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/service.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/service.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/post/service.ts",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/model.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/model.ts",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/service.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/service.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/modules/user/service.ts",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/plugin/better-auth.ts",
+        "blockId": "identity_ui",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/src/plugin/better-auth.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/backend/src/plugin/better-auth.ts",
+        "blockId": "state_management",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/plugin/openapi.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/types/env.d.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/backend/src/types/models.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/src/utils/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/backend/tsconfig.json",
+        "blockId": "asset_delivery",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/frontend/eslint.config.js",
+        "blockId": "core_rendering",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/frontend/eslint.config.js",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "apps/frontend/package.json",
+        "blockId": "core_rendering",
+        "confidence": "high"
+      },
+      {
+        "filePath": "apps/frontend/package.json",
+        "blockId": "identity_ui",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/frontend/package.json",
+        "blockId": "interaction_design",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "apps/frontend/package.json",
+        "blockId": "asset_delivery",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "repoName": "clean-elysia",
+    "repoDir": "vendor/github-repos/clean-elysia",
+    "fileCount": 127,
+    "manifests": [
+      "package.json"
+    ],
+    "declaredModules": [
+      {
+        "name": "@bogeychan/elysia-logger",
+        "version": "^0.1.10",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@clickhouse/client",
+        "version": "^1.16.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/bearer",
+        "version": "^1.4.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/cors",
+        "version": "^1.4.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/jwt",
+        "version": "^1.4.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/openapi",
+        "version": "^1.4.14",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/bcrypt",
+        "version": "^6.0.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/bun",
+        "version": "^1.3.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/crypto-js",
+        "version": "^4.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/node",
+        "version": "^25.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/nodemailer",
+        "version": "^7.0.9",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/pg",
+        "version": "^8.16.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@typescript-eslint/eslint-plugin",
+        "version": "^8.54.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@typescript-eslint/parser",
+        "version": "^8.54.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bcryptjs",
+        "version": "^3.0.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bullmq",
+        "version": "^5.67.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bun-types",
+        "version": "latest",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "crypto-js",
+        "version": "^4.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "dayjs",
+        "version": "^1.11.19",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "dotenv",
+        "version": "^17.2.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-kit",
+        "version": "^0.31.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-orm",
+        "version": "^0.45.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-seed",
+        "version": "^0.3.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia",
+        "version": "^1.4.22",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia-helmet",
+        "version": "^3.0.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia-rate-limit",
+        "version": "^4.5.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "envalid",
+        "version": "^8.1.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint",
+        "version": "^9.39.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-config-prettier",
+        "version": "^10.1.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-plugin-import",
+        "version": "^2.32.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-plugin-prettier",
+        "version": "^5.5.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-plugin-simple-import-sort",
+        "version": "^12.1.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "husky",
+        "version": "^9.1.7",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "ioredis",
+        "version": "^5.9.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "lint-staged",
+        "version": "^16.2.7",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "nodemailer",
+        "version": "^7.0.13",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "pg",
+        "version": "^8.18.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "pino",
+        "version": "^10.3.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "pino-pretty",
+        "version": "^13.1.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tsx",
+        "version": "^4.21.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript",
+        "version": "^5.9.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript-eslint",
+        "version": "^8.54.0",
+        "ecosystem": "npm"
+      }
+    ],
+    "usedModules": [
+      "@bogeychan/elysia-logger",
+      "@clickhouse/client",
+      "@elysiajs/bearer",
+      "@elysiajs/cors",
+      "@elysiajs/jwt",
+      "@elysiajs/openapi",
+      "@eslint/js",
+      "bcryptjs",
+      "bullmq",
+      "crypto-js",
+      "dayjs",
+      "dotenv",
+      "drizzle-kit",
+      "drizzle-orm",
+      "elysia",
+      "elysia-helmet",
+      "elysia-rate-limit",
+      "envalid",
+      "eslint-plugin-import",
+      "eslint-plugin-prettier",
+      "eslint-plugin-simple-import-sort",
+      "globals",
+      "ioredis",
+      "nodemailer",
+      "pg",
+      "pino",
+      "typescript-eslint"
+    ],
+    "undeclaredUsedModules": [
+      "@eslint/js",
+      "globals"
+    ],
+    "swappableDeclared": [
+      {
+        "name": "@types/pg",
+        "version": "^8.16.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "bullmq",
+        "version": "^5.67.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "background_processing"
+        ]
+      },
+      {
+        "name": "elysia-rate-limit",
+        "version": "^4.5.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "traffic_control"
+        ]
+      },
+      {
+        "name": "ioredis",
+        "version": "^5.9.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "pg",
+        "version": "^8.18.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "pino",
+        "version": "^10.3.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "system_telemetry"
+        ]
+      },
+      {
+        "name": "pino-pretty",
+        "version": "^13.1.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "system_telemetry"
+        ]
+      }
+    ],
+    "swappableUsed": [
+      {
+        "name": "bullmq",
+        "blocks": [
+          "background_processing"
+        ]
+      },
+      {
+        "name": "elysia-rate-limit",
+        "blocks": [
+          "traffic_control"
+        ]
+      },
+      {
+        "name": "ioredis",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "pg",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "pino",
+        "blocks": [
+          "system_telemetry"
+        ]
+      }
+    ],
+    "blockRollup": [
+      {
+        "blockId": "data_persistence",
+        "confidence": "high",
+        "evidenceCount": 58
+      },
+      {
+        "blockId": "search_architecture",
+        "confidence": "high",
+        "evidenceCount": 48
+      },
+      {
+        "blockId": "access_control",
+        "confidence": "high",
+        "evidenceCount": 20
+      },
+      {
+        "blockId": "global_interface",
+        "confidence": "high",
+        "evidenceCount": 13
+      },
+      {
+        "blockId": "system_telemetry",
+        "confidence": "high",
+        "evidenceCount": 11
+      },
+      {
+        "blockId": "security_ops",
+        "confidence": "high",
+        "evidenceCount": 9
+      },
+      {
+        "blockId": "background_processing",
+        "confidence": "high",
+        "evidenceCount": 8
+      },
+      {
+        "blockId": "connectivity_layer",
+        "confidence": "high",
+        "evidenceCount": 8
+      },
+      {
+        "blockId": "error_boundaries",
+        "confidence": "high",
+        "evidenceCount": 8
+      },
+      {
+        "blockId": "identity_ui",
+        "confidence": "high",
+        "evidenceCount": 7
+      },
+      {
+        "blockId": "experimentation",
+        "confidence": "high",
+        "evidenceCount": 5
+      },
+      {
+        "blockId": "persistence_strategy",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "traffic_control",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "network_edge",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "state_management",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "asset_delivery",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "edge_support",
+        "confidence": "low",
+        "evidenceCount": 1
+      }
+    ],
+    "topFileBlocks": [
+      {
+        "filePath": "drizzle.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "drizzle.config.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "eslint.config.mjs",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "identity_ui",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "traffic_control",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/base.ts",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/bootstrap.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/bull/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/index.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/queue/index.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/queue/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/queue/send-mail-queue.ts",
+        "blockId": "background_processing",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/bull/worker/index.ts",
+        "blockId": "background_processing",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/worker/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/bull/worker/index.ts",
+        "blockId": "network_edge",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/bull/worker/send-mail-worker.ts",
+        "blockId": "background_processing",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/bull/worker/send-mail-worker.ts",
+        "blockId": "network_edge",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/cache/cache.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/cache/cache.ts",
+        "blockId": "persistence_strategy",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/cache/const.ts",
+        "blockId": "persistence_strategy",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/cache/index.ts",
+        "blockId": "persistence_strategy",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/cache/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/config/app.config.ts",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/libs/config/app.config.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/libs/config/cors.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/libs/config/database.config.ts",
+        "blockId": "experimentation",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/config/database.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/config/env.config.ts",
+        "blockId": "global_interface",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/config/env.config.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/libs/config/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/config/jwt.config.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/libs/database/clickhouse/client/client-manager.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/database/clickhouse/index.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/database/clickhouse/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/libs/database/clickhouse/scripts/migrate.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/libs/database/clickhouse/services/user-activity.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      }
+    ]
+  },
+  {
+    "repoName": "elysia-kickstart",
+    "repoDir": "vendor/github-repos/elysia-kickstart",
+    "fileCount": 27,
+    "manifests": [
+      "package.json"
+    ],
+    "declaredModules": [
+      {
+        "name": "@auth/core",
+        "version": "^0.14.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@auth/drizzle-adapter",
+        "version": "^0.3.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/html",
+        "version": "^0.6.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/static",
+        "version": "^0.6.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/swagger",
+        "version": "^0.6.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@ianvs/prettier-plugin-sort-imports",
+        "version": "^4.1.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@libsql/client",
+        "version": "^0.3.4",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@tailwindcss/typography",
+        "version": "^0.5.10",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@total-typescript/ts-reset",
+        "version": "^0.5.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@typescript-eslint/eslint-plugin",
+        "version": "^6.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@typescript-eslint/parser",
+        "version": "^6.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "better-sqlite3",
+        "version": "^8.6.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bun-types",
+        "version": "latest",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "concurrently",
+        "version": "^8.2.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-kit",
+        "version": "^0.19.13",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-orm",
+        "version": "^0.28.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "drizzle-typebox",
+        "version": "^0.1.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia",
+        "version": "^0.6.23",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint",
+        "version": "^8.49.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "eslint-config-prettier",
+        "version": "^9.0.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prettier",
+        "version": "^3.0.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prettier-plugin-tailwindcss",
+        "version": "^0.5.4",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tailwindcss",
+        "version": "^3.3.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "tailwindcss-animate",
+        "version": "^1.0.7",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "ts-toolbelt",
+        "version": "^9.6.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typed-html",
+        "version": "^3.0.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript",
+        "version": "^5.2.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "zod",
+        "version": "^3.22.2",
+        "ecosystem": "npm"
+      }
+    ],
+    "usedModules": [
+      "@auth/core",
+      "@auth/drizzle-adapter",
+      "@elysiajs/html",
+      "@elysiajs/static",
+      "@elysiajs/swagger",
+      "@libsql/client",
+      "@tailwindcss/typography",
+      "@total-typescript/ts-reset",
+      "drizzle-kit",
+      "drizzle-orm",
+      "drizzle-typebox",
+      "elysia",
+      "tailwindcss",
+      "tailwindcss-animate",
+      "ts-toolbelt",
+      "typed-html",
+      "zod"
+    ],
+    "undeclaredUsedModules": [],
+    "swappableDeclared": [
+      {
+        "name": "@auth/core",
+        "version": "^0.14.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "@auth/drizzle-adapter",
+        "version": "^0.3.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "@tailwindcss/typography",
+        "version": "^0.5.10",
+        "ecosystem": "npm",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "prettier-plugin-tailwindcss",
+        "version": "^0.5.4",
+        "ecosystem": "npm",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "tailwindcss",
+        "version": "^3.3.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "tailwindcss-animate",
+        "version": "^1.0.7",
+        "ecosystem": "npm",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "zod",
+        "version": "^3.22.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "swappableUsed": [
+      {
+        "name": "@auth/core",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "@auth/drizzle-adapter",
+        "blocks": [
+          "identity_ui"
+        ]
+      },
+      {
+        "name": "@tailwindcss/typography",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "tailwindcss",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "tailwindcss-animate",
+        "blocks": [
+          "visual_systems"
+        ]
+      },
+      {
+        "name": "zod",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "blockRollup": [
+      {
+        "blockId": "data_persistence",
+        "confidence": "high",
+        "evidenceCount": 11
+      },
+      {
+        "blockId": "identity_ui",
+        "confidence": "high",
+        "evidenceCount": 11
+      },
+      {
+        "blockId": "visual_systems",
+        "confidence": "high",
+        "evidenceCount": 9
+      },
+      {
+        "blockId": "search_architecture",
+        "confidence": "high",
+        "evidenceCount": 6
+      },
+      {
+        "blockId": "access_control",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "connectivity_layer",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "core_rendering",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "interaction_design",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "state_management",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "analytical_intelligence",
+        "confidence": "medium",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "background_processing",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "global_interface",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "network_edge",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "persistence_strategy",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "security_ops",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "system_telemetry",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "asset_delivery",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "edge_support",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "resiliency",
+        "confidence": "low",
+        "evidenceCount": 1
+      }
+    ],
+    "topFileBlocks": [
+      {
+        "filePath": "api/index.tsx",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "api/index.tsx",
+        "blockId": "network_edge",
+        "confidence": "low"
+      },
+      {
+        "filePath": "drizzle.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "identity_ui",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "interaction_design",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "visual_systems",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "network_edge",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "state_management",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "persistence_strategy",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "resiliency",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/htmx@1.9.5.min.js",
+        "blockId": "analytical_intelligence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/use-theme.js",
+        "blockId": "persistence_strategy",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/use-theme.js",
+        "blockId": "visual_systems",
+        "confidence": "low"
+      },
+      {
+        "filePath": "public/use-theme.js",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "scripts/transform-paths.ts",
+        "blockId": "search_architecture",
+        "confidence": "low"
+      },
+      {
+        "filePath": "scripts/transform-paths.ts",
+        "blockId": "analytical_intelligence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app/api/auth/index.ts",
+        "blockId": "identity_ui",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/app/api/auth/index.ts",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/auth/index.ts",
+        "blockId": "access_control",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/auth/index.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/index.test.ts",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/index.test.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/index.ts",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/api/index.ts",
+        "blockId": "connectivity_layer",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/index.tsx",
+        "blockId": "identity_ui",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/app/index.tsx",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/todos/components.tsx",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/todos/index.tsx",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/app/todos/index.tsx",
+        "blockId": "identity_ui",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/app/todos/index.tsx",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/components/auth.tsx",
+        "blockId": "identity_ui",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/components/auth.tsx",
+        "blockId": "visual_systems",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/components/auth.tsx",
+        "blockId": "interaction_design",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/components/Layout.tsx",
+        "blockId": "visual_systems",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/components/Layout.tsx",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/db/schemas/auth.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      }
+    ]
+  },
+  {
+    "repoName": "elysia-supabase-tempate",
+    "repoDir": "vendor/github-repos/elysia-supabase-tempate",
+    "fileCount": 32,
+    "manifests": [
+      "package.json"
+    ],
+    "declaredModules": [
+      {
+        "name": "@biomejs/biome",
+        "version": "^2.3.11",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/cors",
+        "version": "^1.4.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/cron",
+        "version": "^1.4.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@elysiajs/openapi",
+        "version": "^1.4.13",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@prisma/adapter-pg",
+        "version": "^7.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@prisma/client",
+        "version": "7.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@react-email/components",
+        "version": "^1.0.4",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@react-email/preview-server",
+        "version": "5.2.5",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@react-email/render",
+        "version": "^2.0.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@supabase/supabase-js",
+        "version": "^2.50.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/hibp",
+        "version": "^7.3.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/node",
+        "version": "^25.0.9",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/pg",
+        "version": "^8.16.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/react",
+        "version": "^19.2.8",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "@types/react-dom",
+        "version": "^19.2.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "bun-types",
+        "version": "^1.3.6",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "dotenv",
+        "version": "^17.2.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia",
+        "version": "^1.4.22",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia-logger",
+        "version": "^0.5.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "elysia-rate-limit",
+        "version": "^4.4.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "esbuild",
+        "version": "^0.27.2",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "hibp",
+        "version": "^15.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "pg",
+        "version": "^8.17.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "prisma",
+        "version": "7.2.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react",
+        "version": "^19.2.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "react-dom",
+        "version": "^19.2.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "resend",
+        "version": "^6.7.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "typescript",
+        "version": "^5.9.3",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "zod",
+        "version": "^4.3.5",
+        "ecosystem": "npm"
+      }
+    ],
+    "usedModules": [
+      "@elysiajs/cors",
+      "@elysiajs/cron",
+      "@elysiajs/openapi",
+      "@prisma/adapter-pg",
+      "@prisma/client",
+      "@prisma/config",
+      "@react-email/render",
+      "@supabase/supabase-js",
+      "dotenv",
+      "elysia",
+      "elysia-logger",
+      "elysia-rate-limit",
+      "hibp",
+      "pg",
+      "react",
+      "resend",
+      "zod"
+    ],
+    "undeclaredUsedModules": [
+      "@prisma/config"
+    ],
+    "swappableDeclared": [
+      {
+        "name": "@prisma/adapter-pg",
+        "version": "^7.2.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@prisma/client",
+        "version": "7.2.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@react-email/components",
+        "version": "^1.0.4",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@react-email/preview-server",
+        "version": "5.2.5",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@react-email/render",
+        "version": "^2.0.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@supabase/supabase-js",
+        "version": "^2.50.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@types/pg",
+        "version": "^8.16.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@types/react",
+        "version": "^19.2.8",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@types/react-dom",
+        "version": "^19.2.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "elysia-rate-limit",
+        "version": "^4.4.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "traffic_control"
+        ]
+      },
+      {
+        "name": "esbuild",
+        "version": "^0.27.2",
+        "ecosystem": "npm",
+        "blocks": [
+          "asset_delivery"
+        ]
+      },
+      {
+        "name": "pg",
+        "version": "^8.17.1",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "prisma",
+        "version": "7.2.0",
+        "ecosystem": "npm",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "react",
+        "version": "^19.2.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "react-dom",
+        "version": "^19.2.3",
+        "ecosystem": "npm",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "zod",
+        "version": "^4.3.5",
+        "ecosystem": "npm",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "swappableUsed": [
+      {
+        "name": "@prisma/adapter-pg",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@prisma/client",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@prisma/config",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "@react-email/render",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "@supabase/supabase-js",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "elysia-rate-limit",
+        "blocks": [
+          "traffic_control"
+        ]
+      },
+      {
+        "name": "pg",
+        "blocks": [
+          "data_persistence"
+        ]
+      },
+      {
+        "name": "react",
+        "blocks": [
+          "core_rendering"
+        ]
+      },
+      {
+        "name": "zod",
+        "blocks": [
+          "interaction_design"
+        ]
+      }
+    ],
+    "blockRollup": [
+      {
+        "blockId": "data_persistence",
+        "confidence": "high",
+        "evidenceCount": 23
+      },
+      {
+        "blockId": "core_rendering",
+        "confidence": "high",
+        "evidenceCount": 12
+      },
+      {
+        "blockId": "background_processing",
+        "confidence": "high",
+        "evidenceCount": 7
+      },
+      {
+        "blockId": "interaction_design",
+        "confidence": "high",
+        "evidenceCount": 7
+      },
+      {
+        "blockId": "system_telemetry",
+        "confidence": "high",
+        "evidenceCount": 7
+      },
+      {
+        "blockId": "identity_ui",
+        "confidence": "high",
+        "evidenceCount": 6
+      },
+      {
+        "blockId": "connectivity_layer",
+        "confidence": "high",
+        "evidenceCount": 5
+      },
+      {
+        "blockId": "access_control",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "security_ops",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "state_management",
+        "confidence": "high",
+        "evidenceCount": 4
+      },
+      {
+        "blockId": "analytical_intelligence",
+        "confidence": "medium",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "asset_delivery",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "global_interface",
+        "confidence": "medium",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "traffic_control",
+        "confidence": "high",
+        "evidenceCount": 3
+      },
+      {
+        "blockId": "search_architecture",
+        "confidence": "medium",
+        "evidenceCount": 2
+      },
+      {
+        "blockId": "data_sovereignty",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "error_boundaries",
+        "confidence": "low",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "experimentation",
+        "confidence": "medium",
+        "evidenceCount": 1
+      },
+      {
+        "blockId": "persistence_strategy",
+        "confidence": "low",
+        "evidenceCount": 1
+      }
+    ],
+    "topFileBlocks": [
+      {
+        "filePath": "package.json",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "core_rendering",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "interaction_design",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "asset_delivery",
+        "confidence": "low"
+      },
+      {
+        "filePath": "package.json",
+        "blockId": "traffic_control",
+        "confidence": "low"
+      },
+      {
+        "filePath": "prisma/seed.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "prisma.config.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "state_management",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "traffic_control",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/app.ts",
+        "blockId": "analytical_intelligence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/env.ts",
+        "blockId": "interaction_design",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/env.ts",
+        "blockId": "data_persistence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/env.ts",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/env.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/env.ts",
+        "blockId": "analytical_intelligence",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/config/index.ts",
+        "blockId": "error_boundaries",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/index.ts",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/config/index.ts",
+        "blockId": "security_ops",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/ResetPasswordEmail.tsx",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/emails/ResetPasswordEmail.tsx",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/ResetPasswordEmail.tsx",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/VerifyEmail.tsx",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/emails/VerifyEmail.tsx",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/VerifyEmail.tsx",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/WelcomeEmail.tsx",
+        "blockId": "core_rendering",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/emails/WelcomeEmail.tsx",
+        "blockId": "global_interface",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/emails/WelcomeEmail.tsx",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "search_architecture",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "state_management",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "system_telemetry",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/index.ts",
+        "blockId": "background_processing",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/lib/logger.ts",
+        "blockId": "system_telemetry",
+        "confidence": "medium"
+      },
+      {
+        "filePath": "src/lib/logger.ts",
+        "blockId": "state_management",
+        "confidence": "low"
+      },
+      {
+        "filePath": "src/lib/prisma.ts",
+        "blockId": "data_persistence",
+        "confidence": "high"
+      },
+      {
+        "filePath": "src/lib/supabase.ts",
+        "blockId": "data_persistence",
+        "confidence": "medium"
+      }
+    ]
+  }
+]

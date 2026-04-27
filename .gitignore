@@ -1,12 +1,14 @@
+backend/.venv/
+backend/.venv-win/
+backend/.pytest_cache/
+backend/.pytest_tmp/
+.heart-transplant/
+.repocity/
+.pytest_tmp/
+vendor/github-repos/
 node_modules/
-backend/node_modules/
-frontend/node_modules/
-cli/node_modules/
-
-frontend/dist/
-frontend/.vite/
-frontend/src/wasm/generated/
-backend/.repocity/
+__pycache__/
+*.egg-info/
 
 *.log
 .DS_Store

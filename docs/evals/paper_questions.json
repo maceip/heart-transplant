@@ -1,0 +1,17 @@
+[
+  {
+    "id": "ac-1",
+    "category": "access_control",
+    "question": "Where is access control enforced for API requests in this codebase?"
+  },
+  {
+    "id": "identity-1",
+    "category": "identity",
+    "question": "Trace how a user session or identity is established from HTTP entry to persistence."
+  },
+  {
+    "id": "data-1",
+    "category": "data",
+    "question": "Which files or modules implement data persistence or schema for the main domain?"
+  }
+]

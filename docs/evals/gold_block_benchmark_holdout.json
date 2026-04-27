@@ -1,0 +1,162 @@
+[
+  {
+    "id": "clean-elysia:drizzle.config.ts:data_persistence",
+    "repo_name": "clean-elysia",
+    "file_path": "drizzle.config.ts",
+    "expected_block": "Data Persistence",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/index.ts:background_processing",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/index.ts",
+    "expected_block": "Background Processing",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/queue/index.ts:background_processing",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/queue/index.ts",
+    "expected_block": "Background Processing",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/queue/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/queue/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/queue/send-mail-queue.ts:background_processing",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/queue/send-mail-queue.ts",
+    "expected_block": "Background Processing",
+    "confidence": "high",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/worker/index.ts:background_processing",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/worker/index.ts",
+    "expected_block": "Background Processing",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/worker/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/worker/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/bull/worker/send-mail-worker.ts:background_processing",
+    "repo_name": "clean-elysia",
+    "file_path": "src/bull/worker/send-mail-worker.ts",
+    "expected_block": "Background Processing",
+    "confidence": "high",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/cache/cache.ts:data_persistence",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/cache/cache.ts",
+    "expected_block": "Data Persistence",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/cache/cache.ts:persistence_strategy",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/cache/cache.ts",
+    "expected_block": "Persistence Strategy",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/cache/const.ts:persistence_strategy",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/cache/const.ts",
+    "expected_block": "Persistence Strategy",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/cache/index.ts:persistence_strategy",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/cache/index.ts",
+    "expected_block": "Persistence Strategy",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/cache/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/cache/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/config/database.config.ts:experimentation",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/config/database.config.ts",
+    "expected_block": "Experimentation",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/config/database.config.ts:data_persistence",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/config/database.config.ts",
+    "expected_block": "Data Persistence",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/config/env.config.ts:global_interface",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/config/env.config.ts",
+    "expected_block": "Global Interface",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/config/index.ts:search_architecture",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/config/index.ts",
+    "expected_block": "Search Architecture",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  },
+  {
+    "id": "clean-elysia:src/libs/database/clickhouse/client/client-manager.ts:data_persistence",
+    "repo_name": "clean-elysia",
+    "file_path": "src/libs/database/clickhouse/client/client-manager.ts",
+    "expected_block": "Data Persistence",
+    "confidence": "medium",
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+  }
+]
