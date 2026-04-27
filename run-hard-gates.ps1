@@ -1,6 +1,7 @@
 param(
     [string]$ArtifactDir = "",
-    [string]$GoldSet = ""
+    [string]$GoldSet = "",
+    [string]$HoldoutArtifactDir = ""
 )
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -8,25 +9,49 @@ $pythonExe = Join-Path $repoRoot "backend\.venv-win\Scripts\python.exe"
 if (-not (Test-Path $pythonExe)) {
     $pythonExe = Join-Path $repoRoot "backend\.venv\Scripts\python.exe"
 }
-$harness = "C:\Users\mac\Documents\Codex\2026-04-22-github-plugin-github-openai-curated-you\heart_transplant_private\run_private_phase_gates.py"
 
 if (-not (Test-Path $pythonExe)) {
     Write-Error "Missing Python executable: $pythonExe"
     exit 1
 }
 
-if (-not (Test-Path $harness)) {
-    Write-Error "Missing private gate harness: $harness"
+if (-not $ArtifactDir) {
+    Write-Error "ArtifactDir is required. Run ingest-local/classify first, then pass --ArtifactDir <artifact-directory>."
     exit 1
 }
 
-$args = @($harness, "--repo-root", $repoRoot)
-if ($ArtifactDir) {
-    $args += @("--artifact-dir", $ArtifactDir)
-}
-if ($GoldSet) {
-    $args += @("--gold-set", $GoldSet)
+if (-not $GoldSet) {
+    $GoldSet = Join-Path $repoRoot "docs\evals\gold_block_benchmark.json"
 }
 
-& $pythonExe @args
-exit $LASTEXITCODE
+function Invoke-Gate {
+    param(
+        [string]$Name,
+        [string[]]$Args
+    )
+
+    Write-Host "==> $Name"
+    & $pythonExe @Args
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "$Name failed with exit code $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
+}
+
+Push-Location (Join-Path $repoRoot "backend")
+try {
+    Invoke-Gate "pytest" @("-m", "pytest")
+    Invoke-Gate "program-surface" @("-m", "heart_transplant.cli", "program-surface")
+    Invoke-Gate "validate-gates" @("-m", "heart_transplant.cli", "validate-gates", "--artifact-dir", $ArtifactDir)
+
+    $maximizeArgs = @("-m", "heart_transplant.cli", "maximize-gates", $ArtifactDir, "--gold-set", $GoldSet)
+    if ($HoldoutArtifactDir) {
+        $maximizeArgs += @("--holdout-artifact-dir", $HoldoutArtifactDir)
+    }
+    Invoke-Gate "maximize-gates" $maximizeArgs
+} finally {
+    Pop-Location
+}
+
+Write-Host "All in-repo hard gates passed."
+exit 0
