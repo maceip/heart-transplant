@@ -38,7 +38,9 @@ The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`pr
 - `docs/evals/gold_block_benchmark.json` — Gate benchmark (25+ items, 4+ repos, 8+ blocks; main split excludes holdout repo `clean-elysia`)
 - `docs/evals/gold_block_benchmark_holdout.json` — Holdout split for `clean-elysia` only
 - `docs/evals/gold_block_benchmark_broad.json` — Broader exploratory benchmark used to expose classifier weaknesses
+- `docs/evals/block-classification-benchmark-2026-04-27.md` — Latest measured block-classification benchmark readout
 - `docs/evals/trending-repos-2026-04-27.json` — Dated daily-trending input manifest for private beta corpus refreshes
+- `docs/roadmaps/alignment-and-trajectory-2026-04-27.md` — Current alignment doc for LogicLens-backend and Regret SDK trajectory
 
 ### Useful Commands
 

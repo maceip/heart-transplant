@@ -52,6 +52,9 @@ _KIND_PRIORS: dict[str, tuple[str, float, str]] = {
 
 _PATH_PRIORS: tuple[Signal, ...] = (
     Signal("Data Persistence", r"(^|/)prisma(/|\.config)|(^|/)schema\.prisma$|(^|/)lib/prisma\.", 2.3, "persistence path"),
+    Signal("Persistence Strategy", r"(^|/)(libs?/)?cache(/|\.)|(^|/)cache\.", 4.2, "cache/persistence strategy path"),
+    Signal("Background Processing", r"(^|/)(bull|queues?|workers?)(/|\.)|(^|/).*(queue|worker)[^/]*\.", 3.2, "queue/worker path"),
+    Signal("Global Interface", r"(^|/)(env|environment)\.config\.|(^|/)config/(env|environment)\.", 2.6, "environment interface path"),
     Signal("System Telemetry", r"(^|/)(logger|telemetry|tracing)\.", 2.0, "telemetry path"),
     Signal("Access Control", r"(^|/)(auth|passwords?|sessions?|permissions?)[^/]*\.", 1.7, "access-control path"),
     Signal("Access Control", r"(^|/)utils/(auth|docs-guard)\.", 1.7, "auth utility path"),

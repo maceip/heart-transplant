@@ -207,6 +207,24 @@ def test_gold_benchmark_catches_supabase_adapter_as_data_persistence(tmp_path: P
     assert report["rows"][0]["match"] is True
 
 
+def test_gold_benchmark_treats_cache_wrappers_as_persistence_strategy(tmp_path: Path) -> None:
+    repo = tmp_path / "r"
+    (repo / "src" / "libs" / "cache").mkdir(parents=True)
+    (repo / "src" / "libs" / "cache" / "cache.ts").write_text(
+        "import Redis from 'ioredis';\n"
+        "export class Cache { async remember(key: string) { return Redis.get(key); } }\n",
+        encoding="utf-8",
+    )
+    artifact = ingest_repository(repo, "test/cache-gold")
+
+    report = run_benchmark(
+        artifact.model_dump(mode="json"),
+        [{"file_path": "src/libs/cache/cache.ts", "expected_block": "Persistence Strategy"}],
+    )
+
+    assert report["rows"][0]["match"] is True
+
+
 def test_committed_gold_benchmark_meets_phase_8_5_breadth_thresholds() -> None:
     gold_path = Path(__file__).resolve().parents[2] / "docs" / "evals" / "gold_block_benchmark.json"
     if not gold_path.is_file():
