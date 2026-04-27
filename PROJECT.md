@@ -1,16 +1,17 @@
 # heart-transplant — Master Project Document
 
-**Last Updated**: 2026-04-26  
-**Current Phase**: **Phase 8.5 proof-tightening** and **Phase 9 practical temporal layer** are in `main`. **Phases 10–13** now have first-pass implementations (structural Monte Carlo impact, heuristic regret + surgery JSON, transplant planner + ledger + compileall validation hook, multimodal test/OpenAPI/infra correlation). Roadmap **non-gamable gates** for 10–13 are **not** claimed yet; **Phase 14** `program-surface` tracks import health for these entrypoints.
+**Last Updated**: 2026-04-27  
+**Current Phase**: **Phase 8.5 proof-tightening** and **Phase 9 practical temporal layer** are in `main`. **Phases 10–13** have first-pass implementations, but the repo-root launch gate is the source of truth for beta readiness. Roadmap **non-gamable gates** for 10–13 are **not** claimed yet; **Phase 14** `program-surface` tracks import health for these entrypoints.
 
 ## Current Honest State
 
-We have a real, working foundation across the original Phase 0-8 roadmap, with one explicit caveat:
+We have a real foundation across the original Phase 0-8 roadmap, with explicit launch caveats:
 
-- Phases 0-5, 7, and 8 currently pass the protected hard gates on the latest reference artifact.
+- `run-hard-gates.cmd` / `run-hard-gates.ps1` are the reproducible repo-local beta gate. A phase is not launch-green unless that script reports pass on the artifact being shipped.
+- Current review found the previous hard-gate shortcut depended on a private harness and the latest local gate run was not fully green. Treat older claims that phases 0-5, 7, and 8 “pass protected hard gates” as stale until regenerated with the in-repo shortcut.
 - Phase 6 has a real Continue-facing integration module, but the local operator proof is not complete because `cn` / Continue CLI is not currently on PATH.
 
-So the honest status is: the graph, semantic, persistence, MCP, blast-radius, and evaluation foundation is real; the Continue operator surface still needs local end-to-end proof.
+So the honest status is: the graph, semantic, persistence, MCP, blast-radius, and evaluation foundation is real; the beta launch claim depends on a fresh in-repo hard-gate run, and the Continue operator surface still needs local end-to-end proof.
 
 ### What Has Been Built (Real & Solid)
 - Clean, well-architected Python backend (`backend/src/heart_transplant/`)
@@ -44,12 +45,12 @@ The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`pr
 ```powershell
 cd backend
 
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir <artifact-directory> --gold-set C:\Users\mac\heart-transplant\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli test-graph <artifact-directory>
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-audit --artifact-dir <artifact-directory> --gold-set C:\Users\mac\heart-transplant\docs\evals\gold_block_benchmark.json
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-report <artifact-directory> --gold-set C:\Users\mac\heart-transplant\docs\evals\gold_block_benchmark.json
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-gates <artifact-directory> --gold-set C:\Users\mac\heart-transplant\docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory>
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-audit --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-report <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-gates <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli temporal-scan C:\path\to\git\repo --max-commits 25
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli program-surface
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli simulate-change "refactor auth middleware" --artifact-dir <artifact-directory> --temporal-report <optional-phase-9-report.json>
@@ -69,7 +70,7 @@ Regenerate gate gold from `vendored-ground-truth.json` after editing ground trut
 Shortcut from repo root:
 
 ```powershell
-.\run-hard-gates.cmd --artifact-dir <artifact-directory> --gold-set C:\Users\mac\heart-transplant\docs\evals\gold_block_benchmark.json
+.\run-hard-gates.cmd --artifact-dir <artifact-directory> --gold-set docs\evals\gold_block_benchmark.json
 ```
 
 ### Next Engineer Instructions

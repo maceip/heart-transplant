@@ -19,11 +19,10 @@ Canonical restart of the project around a verified stack:
 
 ## What We Archived
 
-The previous exploratory implementation now lives under:
-
-- [archive/legacy-prototype](C:/Users/mac/heart-transplant/archive/legacy-prototype)
-
-That code is no longer the canonical backend path.
+This clean-room restart intentionally does not include the previous exploratory
+prototype in the checkout. The canonical backend path is `backend/src/heart_transplant/`;
+legacy code was excluded during the transplant rather than preserved under an
+`archive/` directory in this repository.
 
 ## First Milestone
 

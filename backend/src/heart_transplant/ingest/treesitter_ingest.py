@@ -193,7 +193,29 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
 
 
 def walk_source_files(root: Path) -> Iterable[Path]:
-    ignored_dirs = {".git", "node_modules", "dist", "build", ".next", ".turbo", "__pycache__", ".venv"}
+    ignored_dirs = {
+        ".git",
+        ".hg",
+        ".svn",
+        "node_modules",
+        "dist",
+        "build",
+        ".next",
+        ".nuxt",
+        ".turbo",
+        ".cache",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        "__pycache__",
+        ".venv",
+        ".venv-win",
+        "venv",
+        "env",
+        "ENV",
+        ".tox",
+        ".nox",
+    }
     for path in root.rglob("*"):
         if not path.is_file():
             continue
