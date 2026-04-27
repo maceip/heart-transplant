@@ -11,9 +11,12 @@ if TYPE_CHECKING:
 
 
 def _walk(n: "Node") -> list["Node"]:
-    out: list = [n]
-    for c in n.children:
-        out.extend(_walk(c))
+    out: list = []
+    stack = [n]
+    while stack:
+        node = stack.pop()
+        out.append(node)
+        stack.extend(reversed(node.children))
     return out
 
 

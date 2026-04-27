@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-04-27",
+  "source": "GitHub daily trending pages",
+  "since": "daily",
+  "total_repo_count": 50,
+  "categories": [
+    {
+      "language": "TypeScript",
+      "source_url": "https://github.com/trending/typescript?since=daily",
+      "repos": [
+        "abhigyanpatwari/GitNexus",
+        "openclaw/openclaw",
+        "dreamhunter2333/cloudflare_temp_email",
+        "different-ai/openwork",
+        "ruvnet/ruflo",
+        "CherryHQ/cherry-studio",
+        "immich-app/immich",
+        "linshenkx/prompt-optimizer",
+        "RooCodeInc/Roo-Code",
+        "Vendicated/Vencord"
+      ]
+    },
+    {
+      "language": "Rust",
+      "source_url": "https://github.com/trending/rust?since=daily",
+      "repos": [
+        "zhom/donutbrowser",
+        "farion1231/cc-switch",
+        "brave/adblock-rust",
+        "zed-industries/zed",
+        "dani-garcia/vaultwarden",
+        "EricLBuehler/mistral.rs",
+        "lakehq/sail",
+        "denoland/deno",
+        "openai/codex",
+        "GraphiteEditor/Graphite"
+      ]
+    },
+    {
+      "language": "Go",
+      "source_url": "https://github.com/trending/go?since=daily",
+      "repos": [
+        "microsoft/typescript-go",
+        "gastownhall/beads",
+        "google/osv-scanner",
+        "go-gitea/gitea",
+        "masterking32/MasterDnsVPN",
+        "CJackHwang/ds2api",
+        "dolthub/dolt",
+        "5rahim/seanime",
+        "ltaoo/wx_channels_download",
+        "gastownhall/gascity"
+      ]
+    },
+    {
+      "language": "C++",
+      "source_url": "https://github.com/trending/c%2B%2B?since=daily",
+      "repos": [
+        "LadybirdBrowser/ladybird",
+        "amnezia-vpn/amnezia-client",
+        "imputnet/helium",
+        "tensorflow/tensorflow",
+        "hyprwm/Hyprland",
+        "FreeCAD/FreeCAD",
+        "ggml-org/ggml",
+        "esphome/esphome",
+        "capnproto/capnproto",
+        "k4yt3x/video2x"
+      ]
+    },
+    {
+      "language": "Java",
+      "source_url": "https://github.com/trending/java?since=daily",
+      "repos": [
+        "yuliskov/SmartTube",
+        "Anuken/Mindustry",
+        "ashishps1/awesome-low-level-design",
+        "Creators-of-Create/Create",
+        "JingMatrix/Vector",
+        "cryptomator/cryptomator",
+        "TeamNewPipe/NewPipe",
+        "apache/hadoop",
+        "woheller69/FreeDroidWarn",
+        "MCRcortex/voxy"
+      ]
+    }
+  ]
+}

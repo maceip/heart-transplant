@@ -37,3 +37,19 @@ def test_walk_source_files_skips_windows_virtualenv(tmp_path: Path) -> None:
 
     assert discovered == {"app.py"}
 
+
+def test_ingest_repository_handles_deep_parse_trees_without_recursion(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "deep-repo"
+    repo_dir.mkdir()
+    nested = "value"
+    for _ in range(1600):
+        nested = f"({nested})"
+    (repo_dir / "deep.ts").write_text(
+        f"export function deeplyNested() {{ return {nested}; }}\n",
+        encoding="utf-8",
+    )
+
+    artifact = ingest_repository(repo_dir, "deep-repo")
+
+    assert any(node.name == "deeplyNested" for node in artifact.code_nodes)
+

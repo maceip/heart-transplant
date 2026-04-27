@@ -347,10 +347,12 @@ def extract_code_nodes(
         if language in {"javascript", "typescript", "tsx"} and is_route_handler_call(n):
             add_node(name=_route_handler_label(n), kind=SymbolKind.ROUTE_HANDLER, node=n)
 
-        for c in n.children:
-            visit(c)
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        visit(node)
+        stack.extend(reversed(node.children))
 
-    visit(root)
     if not code_nodes and is_file_level_config_boundary(rel_path, content):
         add_node(name=file_level_boundary_name(rel_path), kind=SymbolKind.CONFIG_OBJECT, node=root)
 
