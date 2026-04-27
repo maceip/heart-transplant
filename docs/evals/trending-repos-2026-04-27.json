@@ -1,0 +1,76 @@
+{
+  "source": "https://github.com/trending",
+  "captured_at": "2026-04-27",
+  "selection_policy": [
+    "Use daily GitHub Trending as a fresh, external beta corpus.",
+    "Prefer real application/tooling repos with parsable source over markdown-only lists.",
+    "Avoid security/hacking repos and repos that are primarily prompt/skill collections for the default beta corpus.",
+    "Vendor as local shallow clones under vendor/github-repos; do not commit cloned repositories."
+  ],
+  "repos": [
+    {
+      "full_name": "abhigyanpatwari/GitNexus",
+      "url": "https://github.com/abhigyanpatwari/GitNexus.git",
+      "language": "TypeScript",
+      "stars_today": 700,
+      "reason": "Code-intelligence application; directly exercises graph and multimodal claims.",
+      "beta_default": true
+    },
+    {
+      "full_name": "PostHog/posthog",
+      "url": "https://github.com/PostHog/posthog.git",
+      "language": "Python",
+      "stars_today": 337,
+      "reason": "Large production analytics app; good stress test for Python backend/domain structure.",
+      "beta_default": true
+    },
+    {
+      "full_name": "microsoft/typescript-go",
+      "url": "https://github.com/microsoft/typescript-go.git",
+      "language": "Go",
+      "stars_today": 23,
+      "reason": "Compiler/toolchain repo; strong structural signal despite lower daily star count.",
+      "beta_default": true
+    },
+    {
+      "full_name": "trycua/cua",
+      "url": "https://github.com/trycua/cua.git",
+      "language": "HTML",
+      "stars_today": 182,
+      "reason": "Computer-use agent infrastructure; useful for agent/runtime architecture questions.",
+      "beta_default": true
+    },
+    {
+      "full_name": "gastownhall/beads",
+      "url": "https://github.com/gastownhall/beads.git",
+      "language": "Go",
+      "stars_today": 152,
+      "reason": "Agent memory/tooling repo with compact Go structure.",
+      "beta_default": true
+    },
+    {
+      "full_name": "Alishahryar1/free-claude-code",
+      "url": "https://github.com/Alishahryar1/free-claude-code.git",
+      "language": "Python",
+      "stars_today": 1701,
+      "reason": "High-momentum Python CLI/tooling repo; default-disabled until reviewed for policy and quality fit.",
+      "beta_default": false
+    },
+    {
+      "full_name": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills.git",
+      "language": "Shell",
+      "stars_today": 2519,
+      "reason": "Very high momentum, but mostly agent skill/prompt material rather than source-architecture corpus.",
+      "beta_default": false
+    },
+    {
+      "full_name": "ComposioHQ/awesome-codex-skills",
+      "url": "https://github.com/ComposioHQ/awesome-codex-skills.git",
+      "language": "Python",
+      "stars_today": 517,
+      "reason": "Codex-adjacent repo; useful as optional agent-tooling content, not a default architecture target.",
+      "beta_default": false
+    }
+  ]
+}

@@ -69,8 +69,19 @@ Real now:
 - SCIP→artifact consumption, optional corpus symbol index, and SurrealDB load/verify
 - block classification and optional persistence of semantics to Surreal
 - **MCP stdio server** (`heart-transplant mcp-serve` or `python -m heart_transplant.mcp_server`) exposing graph tools when Surreal is running and loaded
+- dated trending-repo input manifests for beta corpus refreshes (`docs/evals/trending-repos-2026-04-27.json`)
 
 Deferred / in progress (see [docs/roadmaps/logiclens-paper-grade-roadmap.md](docs/roadmaps/logiclens-paper-grade-roadmap.md)):
 
 - end-to-end **Continue** operator session proof on your machine
 - full paper-style eval harness and scoring (starter gold file: [docs/evals/gold_block_benchmark.json](docs/evals/gold_block_benchmark.json))
+
+## Beta Corpus
+
+Trending repos are vendored locally, not committed:
+
+```powershell
+.\scripts\vendor-trending-inputs.ps1
+cd backend
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli ingest-vendor-corpus ..\vendor\github-repos
+```

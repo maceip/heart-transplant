@@ -38,6 +38,7 @@ The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`pr
 - `docs/evals/gold_block_benchmark.json` — Gate benchmark (25+ items, 4+ repos, 8+ blocks; main split excludes holdout repo `clean-elysia`)
 - `docs/evals/gold_block_benchmark_holdout.json` — Holdout split for `clean-elysia` only
 - `docs/evals/gold_block_benchmark_broad.json` — Broader exploratory benchmark used to expose classifier weaknesses
+- `docs/evals/trending-repos-2026-04-27.json` — Dated daily-trending input manifest for private beta corpus refreshes
 
 ### Useful Commands
 
@@ -57,6 +58,14 @@ cd backend
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli execute-transplant <regret_id> --artifact-dir <artifact-directory> --plan .heart-transplant\reports\regret-plan.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli multimodal-ingest C:\path\to\repo --out .heart-transplant\reports\multimodal.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli mcp-serve
+```
+
+Refresh the local beta corpus from the dated trending manifest:
+
+```powershell
+.\scripts\vendor-trending-inputs.ps1
+cd backend
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli ingest-vendor-corpus ..\vendor\github-repos
 ```
 
 Regenerate gate gold from `vendored-ground-truth.json` after editing ground truth:
