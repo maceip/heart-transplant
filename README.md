@@ -70,6 +70,26 @@ Real now:
 - **MCP stdio server** (`heart-transplant mcp-serve` or `python -m heart_transplant.mcp_server`) exposing graph tools when Surreal is running and loaded
 - dated trending-repo input manifests for beta corpus refreshes (`docs/evals/trending-repos-2026-04-27.json`)
 
+## LogicLens Paper Feature Map
+
+This table maps the paper-shaped capabilities we are rebuilding to the current
+implementation surface. Status is intentionally conservative: "partial" means
+the path exists, but the paper-grade gate or benchmark is not fully green yet.
+
+| Paper feature | Current status | Implemented in | CLI / artifact / benchmark |
+| --- | --- | --- | --- |
+| Repository program graph construction | Implemented | `backend/src/heart_transplant/ingest/treesitter_ingest.py`, `backend/src/heart_transplant/models.py` | `heart-transplant ingest-local`, `structural-artifact.json`, `validate-gates` |
+| Stable symbol identity and reference graph | Partial | `backend/src/heart_transplant/scip_typescript.py`, `backend/src/heart_transplant/scip_consume.py`, `backend/src/heart_transplant/scip/` | `ingest-local --with-scip`, `index.scip`, `scip-consumed.json`, `scip_actually_resolves_nodes` |
+| Canonical multi-layer architecture graph | Partial | `backend/src/heart_transplant/canonical_graph.py`, `backend/src/heart_transplant/multimodal/` | `heart-transplant canonical-graph`, `canonical-graph.json`, `graph-integrity` |
+| Semantic component/block labeling | Partial | `backend/src/heart_transplant/ontology.py`, `backend/src/heart_transplant/classify/`, `backend/src/heart_transplant/semantic/` | `classify`, `semantic-artifact.json`, `block-benchmark`, `docs/evals/gold_block_benchmark*.json` |
+| Evidence-grounded architecture Q&A | Partial | `backend/src/heart_transplant/evidence.py`, `backend/src/heart_transplant/db/graph_queries.py`, `backend/src/heart_transplant/mcp_server.py` | `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence` |
+| Queryable graph backend | Partial | `backend/src/heart_transplant/db/`, `backend/src/heart_transplant/mcp_server.py` | `load-surreal`, `verify-surreal`, `mcp-serve`, SurrealDB `ht_code` / `ht_edge` rows |
+| Architecture evolution over time | Partial | `backend/src/heart_transplant/temporal/` | `temporal-scan`, `temporal-scan --replay-snapshots`, `temporal-diff`, `temporal-gates` |
+| Cross-layer code/test/API/infra reasoning | Partial | `backend/src/heart_transplant/multimodal/`, `backend/src/heart_transplant/canonical_graph.py` | `multimodal-ingest`, `canonical-graph`, future correlation accuracy benchmark |
+| Blast radius / impact reasoning | Partial | `backend/src/heart_transplant/blast_radius.py`, `backend/src/heart_transplant/causal/` | `simulate-change`, `get_impact_radius` MCP tool, causal simulation reports |
+| Regret detection and remediation planning | Partial, beyond original paper scope | `backend/src/heart_transplant/regret/`, `backend/src/heart_transplant/execution/` | `regret-scan`, `regret-sdk-scan`, `execute-transplant`, `RegretSurface` / `SurgeryPlan` JSON |
+| Paper reproduction checklist | Implemented as tracking surface | `backend/src/heart_transplant/paper_checklist.py` | `heart-transplant paper-checklist` maps feature → status → gate/test → artifact → benchmark |
+
 Deferred / in progress (see [docs/roadmaps/logiclens-paper-grade-roadmap.md](docs/roadmaps/logiclens-paper-grade-roadmap.md)):
 
 - end-to-end **Continue** operator session proof on your machine
