@@ -12,6 +12,7 @@ from heart_transplant.ingest.treesitter_ingest import ingest_repository
 from heart_transplant.multimodal.ingest import run_multimodal_ingest
 from heart_transplant.regret.models import RegretItem
 from heart_transplant.regret.scan import run_regret_scan
+from heart_transplant.regret.scan import run_regret_sdk_scan
 from heart_transplant.regret.surgery_planner import plan_for_regret
 
 
@@ -63,6 +64,29 @@ def test_phase_11_regret_scan_emits_report(tmp_path: Path) -> None:
     report = run_regret_scan(adir, min_confidence=0.2)
     assert report.phase_id == "phase_11"
     assert isinstance(report.regrets, list)
+
+
+def test_regret_sdk_scan_emits_typed_surfaces(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "logger.ts").write_text(
+        "export function logThing() { console.log('missing context'); }\n",
+        encoding="utf-8",
+    )
+    art = ingest_repository(repo, "test/regret-sdk")
+    adir = tmp_path / "artifact"
+    adir.mkdir()
+    (adir / "structural-artifact.json").write_text(
+        json.dumps(art.model_dump(mode="json"), indent=2),
+        encoding="utf-8",
+    )
+
+    report = run_regret_sdk_scan(adir, min_confidence=0.2)
+
+    assert report.sdk_schema_version == "regret-sdk.v1"
+    assert report.surfaces
+    assert report.surfaces[0].evidence_bundle
+    assert report.surfaces[0].execution_ledger.validation_commands
 
 
 def test_phase_11_logging_regret_gets_logging_specific_plan() -> None:

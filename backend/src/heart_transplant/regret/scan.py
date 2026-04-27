@@ -5,7 +5,14 @@ from pathlib import Path
 from heart_transplant.artifact_store import read_json
 from heart_transplant.models import StructuralArtifact
 from heart_transplant.regret.detector import detect_regrets
-from heart_transplant.regret.models import RegretScanReport
+from heart_transplant.regret.models import (
+    ExecutionLedger,
+    RegretEvidence,
+    RegretScanReport,
+    RegretSdkReport,
+    RegretSurface,
+    SimulationResult,
+)
 from heart_transplant.regret.surgery_planner import plan_for_regret
 
 
@@ -35,4 +42,58 @@ def run_regret_scan(
         regrets=regrets,
         surgery_plans=plans,
         limitations=limitations,
+    )
+
+
+def run_regret_sdk_scan(
+    artifact_dir: Path,
+    *,
+    min_confidence: float = 0.35,
+) -> RegretSdkReport:
+    """Return the stable SDK contract for agent consumers.
+
+    This wraps the Phase 11 scan without requiring callers to correlate separate
+    regret and surgery-plan arrays.
+    """
+
+    report = run_regret_scan(artifact_dir, min_confidence=min_confidence)
+    plans_by_id = {plan.regret_id: plan for plan in report.surgery_plans}
+    surfaces: list[RegretSurface] = []
+    for regret in report.regrets:
+        surfaces.append(
+            RegretSurface(
+                regret=regret,
+                evidence_bundle=[
+                    RegretEvidence(
+                        kind="keyword",
+                        summary=line,
+                        node_ids=regret.node_ids,
+                        file_paths=regret.file_paths,
+                        confidence=regret.confidence,
+                    )
+                    for line in regret.evidence
+                ],
+                surgery_plan=plans_by_id.get(regret.regret_id),
+                simulation=SimulationResult(
+                    status="not_run",
+                    summary="Run simulate-change with this regret's affected files before execution.",
+                    impacted_node_ids=regret.node_ids,
+                    risk_score=regret.score,
+                ),
+                execution_ledger=ExecutionLedger(
+                    status="planned" if regret.regret_id in plans_by_id else "not_started",
+                    validation_commands=[
+                        "python -m compileall backend/src",
+                        "python -m pytest",
+                    ],
+                    notes=["No source edits are performed by regret-sdk-scan."],
+                ),
+            )
+        )
+
+    return RegretSdkReport(
+        repo_name=report.repo_name,
+        artifact_dir=report.artifact_dir,
+        surfaces=surfaces,
+        limitations=report.limitations,
     )
