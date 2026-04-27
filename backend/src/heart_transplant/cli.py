@@ -6,10 +6,13 @@ from pathlib import Path
 import typer
 
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
+from heart_transplant.canonical_graph import build_canonical_graph
+from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
 from heart_transplant.graph_smoke import run_graph_smoke
 from heart_transplant.ingest.corpus_ingest import ingest_vendors
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
 from heart_transplant.ontology import iter_blocks
+from heart_transplant.paper_checklist import build_paper_reproduction_checklist
 from heart_transplant.phase_metrics import collect_phase_metrics
 from heart_transplant.classify.pipeline import persist_semantic_to_surreal, run_classification_on_artifact
 from heart_transplant.db.surreal_loader import load_artifact
@@ -109,6 +112,82 @@ def test_graph(
     typer.echo(json.dumps(report, indent=2))
     if strict and str(report.get("scip_integration_status", "")).startswith("fail:"):
         raise typer.Exit(code=1)
+
+
+@app.command("canonical-graph")
+def canonical_graph(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON output path."),
+) -> None:
+    """Export one canonical architecture graph across structural, semantic, and report layers."""
+
+    report = build_canonical_graph(artifact_dir.resolve())
+    if out:
+        write_json(out.resolve(), report)
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("explain-node")
+def explain_node_command(
+    node_id: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Return a LogicLens evidence bundle explaining one node from artifact JSON."""
+
+    typer.echo(explain_node(artifact_dir.resolve(), node_id).model_dump_json(indent=2))
+
+
+@app.command("explain-file")
+def explain_file_command(
+    file_path: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Return evidence for all nodes materialized from a file path."""
+
+    typer.echo(explain_file(artifact_dir.resolve(), file_path).model_dump_json(indent=2))
+
+
+@app.command("trace-dependency")
+def trace_dependency_command(
+    start_id: str,
+    end_id: str | None = typer.Option(None, "--end-id"),
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    max_depth: int = typer.Option(5, "--max-depth"),
+) -> None:
+    """Trace an artifact-local graph path and return evidence with node/edge receipts."""
+
+    typer.echo(trace_dependency(artifact_dir.resolve(), start_id, end_id=end_id, max_depth=max_depth).model_dump_json(indent=2))
+
+
+@app.command("find-architectural-block")
+def find_architectural_block_command(
+    block_label: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    min_confidence: float = typer.Option(0.0, "--min-confidence"),
+) -> None:
+    """Find block-assigned nodes with evidence rather than prose-only answers."""
+
+    typer.echo(find_block_evidence(artifact_dir.resolve(), block_label, min_confidence=min_confidence).model_dump_json(indent=2))
+
+
+@app.command("answer-with-evidence")
+def answer_with_evidence_command(
+    question: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Answer a narrow architecture question from artifact evidence, or say evidence is insufficient."""
+
+    typer.echo(answer_with_evidence(artifact_dir.resolve(), question).model_dump_json(indent=2))
+
+
+@app.command("paper-checklist")
+def paper_checklist(
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Map LogicLens paper features to implementation status, gates/tests, artifacts, and benchmarks."""
+
+    checklist = build_paper_reproduction_checklist(artifact_dir.resolve() if artifact_dir else None)
+    typer.echo(checklist.model_dump_json(indent=2))
 
 
 @app.command("consume-scip")
