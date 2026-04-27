@@ -55,3 +55,48 @@ def test_ingest_repository_handles_deep_parse_trees_without_recursion(tmp_path: 
 
     assert any(node.name == "deeplyNested" for node in artifact.code_nodes)
 
+
+def test_ingest_repository_extracts_java_nodes(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "java-repo"
+    repo_dir.mkdir()
+    (repo_dir / "App.java").write_text(
+        "public class App { public void run() {} }\n",
+        encoding="utf-8",
+    )
+
+    artifact = ingest_repository(repo_dir, "java-repo")
+
+    names = {node.name for node in artifact.code_nodes}
+    assert {"App.java", "App", "run"} <= names
+    assert "java" in artifact.parser_backends
+
+
+def test_ingest_repository_extracts_rust_nodes(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "rust-repo"
+    repo_dir.mkdir()
+    (repo_dir / "lib.rs").write_text(
+        "pub trait Store {}\npub struct DiskStore;\npub fn sync() {}\n",
+        encoding="utf-8",
+    )
+
+    artifact = ingest_repository(repo_dir, "rust-repo")
+
+    names = {node.name for node in artifact.code_nodes}
+    assert {"lib.rs", "Store", "DiskStore", "sync"} <= names
+    assert "rust" in artifact.parser_backends
+
+
+def test_ingest_repository_extracts_cpp_nodes(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "cpp-repo"
+    repo_dir.mkdir()
+    (repo_dir / "engine.cpp").write_text(
+        "class Engine {};\nint boot() { return 0; }\n",
+        encoding="utf-8",
+    )
+
+    artifact = ingest_repository(repo_dir, "cpp-repo")
+
+    names = {node.name for node in artifact.code_nodes}
+    assert {"engine.cpp", "Engine", "boot"} <= names
+    assert "cpp" in artifact.parser_backends
+

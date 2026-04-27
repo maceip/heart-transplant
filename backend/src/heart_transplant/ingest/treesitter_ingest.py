@@ -34,6 +34,16 @@ TREE_SITTER_LANGUAGES = {
     ".tsx": "tsx",
     ".py": "python",
     ".go": "go",
+    ".rs": "rust",
+    ".java": "java",
+    ".c": "c",
+    ".h": "c",
+    ".cc": "cpp",
+    ".cpp": "cpp",
+    ".cxx": "cpp",
+    ".hh": "cpp",
+    ".hpp": "cpp",
+    ".hxx": "cpp",
 }
 CUSTOM_LANGUAGES = {
     ".prisma": "prisma",
@@ -92,6 +102,32 @@ LANGUAGE_RULES: dict[str, list[NodeRule]] = {
         NodeRule("function_declaration", SymbolKind.FUNCTION),
         NodeRule("method_declaration", SymbolKind.METHOD),
         NodeRule("interface_type", SymbolKind.INTERFACE, None),
+    ],
+    "rust": [
+        NodeRule("function_item", SymbolKind.FUNCTION),
+        NodeRule("struct_item", SymbolKind.CLASS),
+        NodeRule("enum_item", SymbolKind.CLASS),
+        NodeRule("trait_item", SymbolKind.INTERFACE),
+        NodeRule("impl_item", SymbolKind.CLASS, None),
+    ],
+    "java": [
+        NodeRule("class_declaration", SymbolKind.CLASS),
+        NodeRule("interface_declaration", SymbolKind.INTERFACE),
+        NodeRule("enum_declaration", SymbolKind.CLASS),
+        NodeRule("record_declaration", SymbolKind.CLASS),
+        NodeRule("method_declaration", SymbolKind.METHOD),
+        NodeRule("constructor_declaration", SymbolKind.METHOD),
+    ],
+    "c": [
+        NodeRule("function_definition", SymbolKind.FUNCTION, "declarator"),
+        NodeRule("struct_specifier", SymbolKind.CLASS, "name"),
+        NodeRule("enum_specifier", SymbolKind.CLASS, "name"),
+    ],
+    "cpp": [
+        NodeRule("function_definition", SymbolKind.FUNCTION, "declarator"),
+        NodeRule("class_specifier", SymbolKind.CLASS, "name"),
+        NodeRule("struct_specifier", SymbolKind.CLASS, "name"),
+        NodeRule("enum_specifier", SymbolKind.CLASS, "name"),
     ],
 }
 
@@ -508,6 +544,17 @@ def extract_node_name(node: Node, lines: list[str], rule: NodeRule) -> str | Non
     if node.type == "interface_type":
         type_node = node.parent.child_by_field_name("name") if node.parent else None
         return decode_node_text(type_node, lines)
+    if node.type == "impl_item":
+        trait_node = node.child_by_field_name("trait")
+        type_node = node.child_by_field_name("type")
+        trait_name = decode_node_text(trait_node, lines)
+        type_name = decode_node_text(type_node, lines)
+        if trait_name and type_name:
+            return f"{trait_name} for {type_name}"
+        return type_name or trait_name
+    if node.type == "function_definition":
+        declarator = node.child_by_field_name("declarator")
+        return extract_c_like_declarator_name(declarator, lines)
 
     if node.type == "variable_declarator":
         value_node = node.child_by_field_name("value")
@@ -533,6 +580,23 @@ def extract_node_name(node: Node, lines: list[str], rule: NodeRule) -> str | Non
         if child.type == "identifier":
             return decode_node_text(child, lines)
     return None
+
+
+def extract_c_like_declarator_name(node: Node | None, lines: list[str]) -> str | None:
+    """Find the terminal identifier in C/C++ declarators such as pointers or qualified names."""
+
+    if node is None:
+        return None
+    stack = [node]
+    candidate: str | None = None
+    while stack:
+        current = stack.pop()
+        if current.type in {"identifier", "field_identifier", "qualified_identifier", "operator_name"}:
+            text = decode_node_text(current, lines)
+            if text:
+                candidate = text
+        stack.extend(reversed(current.children))
+    return candidate
 
 
 def is_addressable_variable_declarator(node: Node) -> bool:

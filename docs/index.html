@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Heart Transplant - Repo Surgery Console</title>
-    <link rel="stylesheet" href="./assets/pages.css" />
+    <link rel="stylesheet" href="./assets/pages.css?v=20260427-no-row-stripes" />
   </head>
   <body>
     <main class="app-shell">
@@ -38,6 +38,17 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <section class="case-band" aria-labelledby="case-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">case board</p>
+            <h2 id="case-title">Recognizable Patients From The 50-Repo Run</h2>
+          </div>
+          <p class="section-note">Pick one name, then the console turns its files into block leaves.</p>
+        </div>
+        <div class="case-grid" id="case-grid"></div>
       </section>
 
       <section class="tool-band" aria-labelledby="ingest-title">
@@ -81,6 +92,10 @@ cd backend
           </div>
           <div class="block-list" id="block-list"></div>
         </div>
+        <div class="tree-panel">
+          <h3>Repo → directory → block leaves</h3>
+          <div id="block-tree" class="block-tree"></div>
+        </div>
         <div class="surface-table-wrap">
           <table>
             <thead>
@@ -116,8 +131,9 @@ cd backend
           </div>
         </div>
         <div class="findings-strip" id="bench-findings"></div>
+        <div class="complication-panel" id="complication-panel"></div>
       </section>
     </main>
-    <script src="./assets/pages.js"></script>
+    <script src="./assets/pages.js?v=20260427-no-row-stripes"></script>
   </body>
 </html>

@@ -38,6 +38,7 @@ body {
 }
 
 .hero-band,
+.case-band,
 .tool-band,
 .results-band,
 .benchmark-band {
@@ -100,6 +101,7 @@ h3 {
 .handoff-panel,
 .chart-card,
 .block-list,
+.complication-panel,
 .surface-table-wrap {
   border: 1px solid rgba(169, 184, 199, 0.2);
   background: rgba(17, 24, 33, 0.86);
@@ -134,7 +136,7 @@ h3 {
   min-height: 86px;
   padding: 14px;
   background: var(--panel-2);
-  border-left: 4px solid var(--blood);
+  border: 1px solid rgba(169, 184, 199, 0.16);
 }
 
 .vital-grid span {
@@ -150,6 +152,7 @@ h3 {
 }
 
 .tool-band,
+.case-band,
 .results-band,
 .benchmark-band {
   display: grid;
@@ -161,6 +164,78 @@ h3 {
   justify-content: space-between;
   align-items: end;
   gap: 18px;
+}
+
+.section-note {
+  max-width: 360px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.case-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.case-card {
+  min-height: 172px;
+  padding: 16px;
+  border: 1px solid rgba(169, 184, 199, 0.2);
+  background: rgba(17, 24, 33, 0.86);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  align-content: space-between;
+  gap: 14px;
+}
+
+.case-card:hover,
+.case-card:focus-visible {
+  border-color: var(--oxygen);
+  outline: none;
+}
+
+.case-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.case-head img {
+  width: 42px;
+  height: 42px;
+  border: 2px solid rgba(130, 209, 115, 0.38);
+  background: #071015;
+}
+
+.case-head strong,
+.case-head span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.case-head span,
+.case-meta {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.case-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.case-meta span {
+  padding: 5px 8px;
+  background: rgba(34, 184, 199, 0.12);
+  border: 1px solid rgba(34, 184, 199, 0.24);
 }
 
 .repo-form {
@@ -253,7 +328,7 @@ canvas {
   gap: 6px;
   padding: 12px;
   background: rgba(23, 32, 43, 0.92);
-  border-left: 4px solid var(--artery);
+  border: 1px solid rgba(169, 184, 199, 0.14);
 }
 
 .block-pill strong,
@@ -270,6 +345,53 @@ canvas {
 .surface-table-wrap {
   max-height: 420px;
   overflow: auto;
+}
+
+.tree-panel {
+  padding: 18px;
+  border: 1px solid rgba(169, 184, 199, 0.2);
+  background: rgba(17, 24, 33, 0.86);
+}
+
+.block-tree {
+  display: grid;
+  gap: 12px;
+}
+
+.tree-root,
+.tree-branch,
+.tree-leaf {
+  display: grid;
+  gap: 8px;
+}
+
+.tree-root {
+  padding-left: 0;
+}
+
+.tree-branch {
+  margin-left: 18px;
+  padding: 12px;
+  border: 1px solid rgba(169, 184, 199, 0.12);
+}
+
+.tree-leaf {
+  margin-left: 18px;
+  padding: 9px 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  background: rgba(23, 32, 43, 0.92);
+  border: 1px solid rgba(169, 184, 199, 0.14);
+}
+
+.tree-label {
+  color: #f7fbff;
+  font-weight: 750;
+}
+
+.tree-count {
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
 table {
@@ -310,10 +432,39 @@ td:first-child {
   gap: 14px;
 }
 
+.complication-panel {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.complication-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.complication-summary div {
+  padding: 14px;
+  background: rgba(23, 32, 43, 0.92);
+  border: 1px solid rgba(169, 184, 199, 0.14);
+}
+
+.complication-summary strong {
+  display: block;
+  font-size: 1.6rem;
+}
+
+.complication-table {
+  overflow-x: auto;
+}
+
 @media (max-width: 840px) {
   .hero-band,
   .results-layout,
   .benchmark-grid,
+  .case-grid,
+  .complication-summary,
   .findings-strip {
     grid-template-columns: 1fr;
   }

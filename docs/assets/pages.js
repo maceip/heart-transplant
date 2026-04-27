@@ -61,6 +61,16 @@ const PATH_SIGNALS = [
 const COLORS = ["#de3d54", "#22b8c7", "#82d173", "#f5c45d", "#a68cff", "#ff8a65", "#7bdff2", "#b2f7ef"];
 const SOURCE_EXTENSIONS = /\.(ts|tsx|js|jsx|mjs|cjs|py|go|prisma|java|rs|cpp|cc|cxx|h|hpp)$/i;
 const SKIP_PATHS = /(^|\/)(node_modules|\.git|dist|build|target|vendor|coverage|\.next|\.venv|\.venv-win)\//i;
+const FEATURED_CASES = [
+  "immich-app/immich",
+  "denoland/deno",
+  "tensorflow/tensorflow",
+  "go-gitea/gitea",
+  "zed-industries/zed",
+  "apache/hadoop",
+  "openai/codex",
+  "CherryHQ/cherry-studio",
+];
 
 const state = {
   currentRepo: "immich-app/immich",
@@ -73,6 +83,7 @@ const $ = (id) => document.getElementById(id);
 document.addEventListener("DOMContentLoaded", () => {
   $("repo-form").addEventListener("submit", onRepoSubmit);
   loadBenchmark();
+  renderCaseBoard();
   ingestRepo(state.currentRepo);
 });
 
@@ -190,7 +201,7 @@ function renderRepoResults() {
   const rows = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
   drawBarChart($("repo-block-chart"), rows, { title: "Primary block count", suffix: " files" });
   $("block-list").innerHTML = rows
-    .map(([block, count], index) => `<div class="block-pill" style="border-color:${COLORS[index % COLORS.length]}"><strong>${escapeHtml(block)}</strong><span>${count} file surfaces on the table</span></div>`)
+    .map(([block, count]) => `<div class="block-pill"><strong>${escapeHtml(block)}</strong><span>${count} file surfaces on the table</span></div>`)
     .join("");
   $("surface-table").innerHTML = state.surfaces
     .slice()
@@ -200,15 +211,88 @@ function renderRepoResults() {
       (surface) => `<tr><td>${escapeHtml(surface.path)}</td><td>${escapeHtml(surface.block)}</td><td>${Math.round(surface.confidence * 100)}%</td><td>${escapeHtml(surface.signal)}</td></tr>`,
     )
     .join("");
+  renderBlockTree();
+}
+
+function renderBlockTree() {
+  const byDirectory = new Map();
+  for (const surface of state.surfaces) {
+    const parts = surface.path.split("/");
+    const directory = parts.length > 1 ? parts[0] : ".";
+    if (!byDirectory.has(directory)) byDirectory.set(directory, []);
+    byDirectory.get(directory).push(surface);
+  }
+  const branches = [...byDirectory.entries()]
+    .map(([directory, surfaces]) => {
+      const blockCounts = [...countBy(surfaces, (surface) => surface.block).entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+      return { directory, total: surfaces.length, blockCounts };
+    })
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
+  $("block-tree").innerHTML = `
+    <div class="tree-root">
+      <div class="tree-label">${escapeHtml(state.currentRepo)}</div>
+      ${branches
+        .map(
+          (branch, branchIndex) => `
+            <div class="tree-branch">
+              <div><span class="tree-label">${escapeHtml(branch.directory)}/</span> <span class="tree-count">${branch.total} file surfaces</span></div>
+              ${branch.blockCounts
+                .map(
+                  ([block, count]) => `
+                    <div class="tree-leaf">
+                      <span>${escapeHtml(block)}</span>
+                      <span class="tree-count">${count}</span>
+                    </div>`,
+                )
+                .join("")}
+            </div>`,
+        )
+        .join("")}
+    </div>`;
 }
 
 async function loadBenchmark() {
   try {
     state.benchmark = await fetchJson("./evals/trending-top50-ec2-summary-2026-04-27.json");
     renderBenchmark();
+    renderCaseBoard();
   } catch (error) {
     $("bench-findings").innerHTML = `<div class="finding"><strong>Benchmark unavailable</strong><span>${escapeHtml(error.message)}</span></div>`;
   }
+}
+
+function renderCaseBoard() {
+  const resultByRepo = new Map((state.benchmark?.results || []).map((item) => [item.full_name, item]));
+  $("case-grid").innerHTML = FEATURED_CASES.map((repo) => {
+    const [owner, name] = repo.split("/");
+    const result = resultByRepo.get(repo);
+    const nodes = result?.node_count != null ? compactNumber(Number(result.node_count)) : "live";
+    const status = result?.status === "ok" ? "EC2 ok" : result?.status === "ingest_failed" ? "first-run fail" : "live demo";
+    const language = result?.language || "repo";
+    return `
+      <button class="case-card" type="button" data-repo="${escapeHtml(repo)}">
+        <span class="case-head">
+          <img src="https://github.com/${escapeHtml(owner)}.png?size=96" alt="" loading="lazy" />
+          <span>
+            <strong>${escapeHtml(name)}</strong>
+            <span>${escapeHtml(owner)}</span>
+          </span>
+        </span>
+        <span class="case-meta">
+          <span>${escapeHtml(language)}</span>
+          <span>${escapeHtml(status)}</span>
+          <span>${nodes} nodes</span>
+        </span>
+      </button>`;
+  }).join("");
+  document.querySelectorAll(".case-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const repo = card.getAttribute("data-repo");
+      $("repo-input").value = repo;
+      ingestRepo(repo);
+    });
+  });
 }
 
 function renderBenchmark() {
@@ -242,11 +326,52 @@ function renderBenchmark() {
   $("bench-findings").innerHTML = [
     ["Attempted", `${benchmark.total} repos across TypeScript, Rust, Go, C++, and Java trending.`],
     ["Successful", `${benchmark.by_status?.ok || 0} completed ingest and phase metrics.`],
-    ["Complications", `${failed} first-run ingest failures preserved, bugs and all.`],
-    ["Coverage smell", `${zeroNode} zero-node successes kept visible as quality gate pressure.`],
+    ["Complications", `${failed + zeroNode} first-run issues: ${failed} crashes and ${zeroNode} zero-node successes.`],
+    ["Fix status", `Crash class fixed; Rust, Java, C, and C++ parser coverage added for zero-node pressure.`],
   ]
     .map(([title, body]) => `<div class="finding"><strong>${title}</strong><span>${body}</span></div>`)
     .join("");
+  renderComplications(benchmark);
+}
+
+function renderComplications(benchmark) {
+  const failedRows = (benchmark.results || []).filter((item) => item.status === "ingest_failed");
+  const zeroRows = (benchmark.results || []).filter((item) => item.status === "ok" && Number(item.node_count || 0) === 0);
+  $("complication-panel").innerHTML = `
+    <h3>Complications and fix status</h3>
+    <div class="complication-summary">
+      <div><strong>${failedRows.length}</strong><span>first-run ingest crashes. Root cause: recursive Tree-sitter traversal hit Python recursion depth on deep parse trees. Fix: iterative traversal in backend ingest.</span></div>
+      <div><strong>${zeroRows.length}</strong><span>zero-node successes. Root cause: repos in Java/C++/Rust trending categories had unsupported first-class source languages. Fix: Rust, Java, C, and C++ parser coverage.</span></div>
+      <div><strong>${failedRows.length + zeroRows.length}</strong><span>total first-synthesis complications kept visible as the quality gate bar.</span></div>
+    </div>
+    <div class="complication-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Repo</th>
+            <th>First-run issue</th>
+            <th>What happened</th>
+            <th>Current fix</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${failedRows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.full_name)}</td>
+              <td>ingest crash</td>
+              <td>Deep parse tree triggered recursive visitor overflow.</td>
+              <td>Tree-sitter walker is iterative now.</td>
+            </tr>`).join("")}
+          ${zeroRows.map((row) => `
+            <tr>
+              <td>${escapeHtml(row.full_name)}</td>
+              <td>zero-node success</td>
+              <td>Run completed, but no first-class source symbols were extracted.</td>
+              <td>Added direct source coverage for Rust, Java, C, and C++.</td>
+            </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 function drawBarChart(canvas, rows, options = {}) {
