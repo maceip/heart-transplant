@@ -15,6 +15,7 @@ from heart_transplant.classify.pipeline import persist_semantic_to_surreal, run_
 from heart_transplant.db.surreal_loader import load_artifact
 from heart_transplant.db.verify import verify_artifact_in_db
 from heart_transplant.evals.build_gold import write_gold_from_ground_truth
+from heart_transplant.evals.corpus_gate import evaluate_corpus_gate
 from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set
 from heart_transplant.graph_integrity import run_graph_integrity
 from heart_transplant.maximize.report import build_maximize_report, write_maximize_report
@@ -340,6 +341,28 @@ def block_benchmark(
     typer.echo(json.dumps(report, indent=2))
 
 
+@app.command("corpus-gate")
+def corpus_gate(
+    results_jsonl: Path = typer.Argument(..., exists=True, dir_okay=False),
+    min_attempted: int = typer.Option(50, "--min-attempted", help="Minimum repository attempts required."),
+    min_ok_rate: float = typer.Option(1.0, "--min-ok-rate", help="Minimum successful ingest+metrics rate."),
+    max_ingest_failed: int = typer.Option(0, "--max-ingest-failed", help="Maximum allowed ingest failures."),
+    max_zero_node_ok: int = typer.Option(0, "--max-zero-node-ok", help="Maximum successful artifacts allowed to have zero code nodes."),
+) -> None:
+    """Evaluate a multi-repo corpus run as a trust and quality-gate artifact."""
+
+    report = evaluate_corpus_gate(
+        results_jsonl.resolve(),
+        min_attempted=min_attempted,
+        min_ok_rate=min_ok_rate,
+        max_ingest_failed=max_ingest_failed,
+        max_zero_node_ok=max_zero_node_ok,
+    )
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["overall_status"] != "pass":
+        raise typer.Exit(code=1)
+
+
 @app.command("graph-integrity")
 def graph_integrity(
     artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
@@ -410,6 +433,13 @@ def maximize_gates_cmd(
         file_okay=False,
         dir_okay=True,
     ),
+    holdout_gold_set: Path | None = typer.Option(
+        None,
+        "--holdout-gold-set",
+        exists=True,
+        dir_okay=False,
+        help="Optional holdout-only gold benchmark JSON. Defaults to --gold-set.",
+    ),
     skip_demos: bool = typer.Option(False, "--skip-demos", help="Skip five-CLI JSON replay checks."),
 ) -> None:
     """Run Phase 8.5 maximize gates; exits 1 if any gate fails."""
@@ -418,6 +448,7 @@ def maximize_gates_cmd(
         artifact_dir.resolve(),
         gold_set.resolve(),
         holdout_artifact_dir=holdout_artifact_dir.resolve() if holdout_artifact_dir else None,
+        holdout_gold_set_path=holdout_gold_set.resolve() if holdout_gold_set else None,
         run_demos=not skip_demos,
     )
     typer.echo(json.dumps(report, indent=2))

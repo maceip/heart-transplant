@@ -28,6 +28,12 @@ if "%~1"=="--holdout-artifact-dir" (
   shift
   goto parse_args
 )
+if "%~1"=="--holdout-gold-set" (
+  set "HOLDOUT_GOLD_SET=%~2"
+  shift
+  shift
+  goto parse_args
+)
 if "%ARTIFACT_DIR%"=="" (
   set "ARTIFACT_DIR=%~1"
 ) else if "%GOLD_SET_ARG_SEEN%"=="" (
@@ -45,10 +51,12 @@ if not exist "%PYTHON_EXE%" (
   exit /b 1
 )
 
+if "%HOLDOUT_GOLD_SET%"=="" if exist "%REPO_ROOT%\docs\evals\gold_block_benchmark_holdout.json" set "HOLDOUT_GOLD_SET=%REPO_ROOT%\docs\evals\gold_block_benchmark_holdout.json"
+
 if "%ARTIFACT_DIR%"=="" (
-  echo Usage: run-hard-gates.cmd --artifact-dir ^<artifact-directory^> [--gold-set ^<gold-json^>] [--holdout-artifact-dir ^<artifact-directory^>]
+  echo Usage: run-hard-gates.cmd --artifact-dir ^<artifact-directory^> [--gold-set ^<gold-json^>] [--holdout-artifact-dir ^<artifact-directory^>] [--holdout-gold-set ^<gold-json^>]
   echo        run-hard-gates.cmd ^<artifact-directory^> [gold-set] [holdout-artifact-directory]
-  echo Or set ARTIFACT_DIR, GOLD_SET, and HOLDOUT_ARTIFACT_DIR environment variables.
+  echo Or set ARTIFACT_DIR, GOLD_SET, HOLDOUT_ARTIFACT_DIR, and HOLDOUT_GOLD_SET environment variables.
   exit /b 2
 )
 
@@ -58,6 +66,10 @@ if not exist "%ARTIFACT_DIR%" (
 )
 if not exist "%GOLD_SET%" (
   echo Missing gold set: "%GOLD_SET%"
+  exit /b 1
+)
+if not "%HOLDOUT_ARTIFACT_DIR%"=="" if not "%HOLDOUT_GOLD_SET%"=="" if not exist "%HOLDOUT_GOLD_SET%" (
+  echo Missing holdout gold set: "%HOLDOUT_GOLD_SET%"
   exit /b 1
 )
 
@@ -75,7 +87,11 @@ if errorlevel 1 exit /b %ERRORLEVEL%
 if "%HOLDOUT_ARTIFACT_DIR%"=="" (
   "%PYTHON_EXE%" -m heart_transplant.cli maximize-gates "%ARTIFACT_DIR%" --gold-set "%GOLD_SET%"
 ) else (
-  "%PYTHON_EXE%" -m heart_transplant.cli maximize-gates "%ARTIFACT_DIR%" --gold-set "%GOLD_SET%" --holdout-artifact-dir "%HOLDOUT_ARTIFACT_DIR%"
+  if "%HOLDOUT_GOLD_SET%"=="" (
+    "%PYTHON_EXE%" -m heart_transplant.cli maximize-gates "%ARTIFACT_DIR%" --gold-set "%GOLD_SET%" --holdout-artifact-dir "%HOLDOUT_ARTIFACT_DIR%"
+  ) else (
+    "%PYTHON_EXE%" -m heart_transplant.cli maximize-gates "%ARTIFACT_DIR%" --gold-set "%GOLD_SET%" --holdout-artifact-dir "%HOLDOUT_ARTIFACT_DIR%" --holdout-gold-set "%HOLDOUT_GOLD_SET%"
+  )
 )
 if errorlevel 1 exit /b %ERRORLEVEL%
 

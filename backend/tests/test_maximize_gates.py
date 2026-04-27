@@ -124,6 +124,62 @@ def test_maximize_gates_scores_holdout_semantic_benchmark(tmp_path: Path, monkey
     assert generalization_gate["status"] == "pass"
     assert generalization_gate["outputs"]["holdout_semantic_summary"]["total"] == 1
     assert generalization_gate["outputs"]["holdout_semantic_summary"]["accuracy"] == 1.0
+    assert generalization_gate["outputs"]["holdout_block_benchmark_summary"]["scorable_accuracy"] == 1.0
+
+
+def test_maximize_gates_accepts_separate_holdout_gold_set(tmp_path: Path, monkeypatch) -> None:
+    repo_path = tmp_path / "repo-source"
+    repo_path.mkdir()
+    artifact_dir = tmp_path / "artifact"
+    reference_gold = tmp_path / "reference-gold.json"
+    holdout_gold = tmp_path / "holdout-gold.json"
+    package_root = _make_package_root(tmp_path)
+    _write_structural_artifact(artifact_dir, repo_path)
+    _write_gold_set(reference_gold)
+
+    holdout_repo = tmp_path / "holdout-repo"
+    holdout_repo.mkdir()
+    (holdout_repo / "auth.ts").write_text("export function login() { return true; }\n", encoding="utf-8")
+    holdout_artifact = ingest_repository(holdout_repo, "holdout-repo")
+    holdout_artifact_dir = tmp_path / "holdout-artifact"
+    holdout_artifact_dir.mkdir()
+    (holdout_artifact_dir / "structural-artifact.json").write_text(
+        json.dumps(holdout_artifact.model_dump(mode="json")),
+        encoding="utf-8",
+    )
+    holdout_gold.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "holdout-auth",
+                    "repo_name": "holdout-repo",
+                    "file_path": "auth.ts",
+                    "expected_block": "Access Control",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        maximize_gates,
+        "run_validation_gates",
+        lambda repo_path, artifact_dir: {"summary": {"overall_status": "pass"}},
+    )
+
+    report = maximize_gates.run_maximize_gates(
+        artifact_dir,
+        reference_gold,
+        holdout_artifact_dir=holdout_artifact_dir,
+        holdout_gold_set_path=holdout_gold,
+        package_root=package_root,
+        run_demos=False,
+    )
+
+    generalization_gate = next(g for g in report["gates"] if g["gate_id"] == "maximize_gate_generalization")
+    assert generalization_gate["status"] == "pass"
+    assert generalization_gate["outputs"]["holdout_gold_set_path"] == str(holdout_gold.resolve())
+    assert generalization_gate["outputs"]["holdout_semantic_summary"]["total"] == 1
 
 
 def test_scan_for_scaffold_markers_uses_dynamic_vendor_repo_names(tmp_path: Path) -> None:

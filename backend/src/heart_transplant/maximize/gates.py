@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from heart_transplant.evals.gold_benchmark import load_gold_set, run_benchmark
+from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set, run_benchmark
 from heart_transplant.validation_gates import run_validation_gates
 
 
@@ -15,6 +15,7 @@ def run_maximize_gates(
     gold_set_path: Path,
     *,
     holdout_artifact_dir: Path | None = None,
+    holdout_gold_set_path: Path | None = None,
     package_root: Path | None = None,
     run_demos: bool = True,
 ) -> dict[str, Any]:
@@ -22,6 +23,7 @@ def run_maximize_gates(
 
     artifact_dir = artifact_dir.resolve()
     gold_set_path = gold_set_path.resolve()
+    holdout_gold_set_path = holdout_gold_set_path.resolve() if holdout_gold_set_path else gold_set_path
     pkg = (package_root or _infer_package_root()).resolve()
 
     gates: list[dict[str, Any]] = []
@@ -70,13 +72,21 @@ def run_maximize_gates(
 
     holdout_report: dict[str, Any] | None = None
     holdout_semantic_report: dict[str, Any] | None = None
+    holdout_block_report: dict[str, Any] | None = None
     holdout_semantic_threshold = 0.5
     if holdout_artifact_dir is not None:
         h = holdout_artifact_dir.resolve()
         h_struct = json.loads((h / "structural-artifact.json").read_text(encoding="utf-8"))
         h_repo = Path(str(h_struct["repo_path"])).resolve()
         holdout_report = run_validation_gates(h_repo, h)
-        holdout_semantic_report = run_benchmark(h_struct, gold_items)
+        holdout_gold_items = load_gold_set(holdout_gold_set_path)
+        holdout_semantic_report = run_benchmark(h_struct, holdout_gold_items)
+        holdout_block_report = build_block_benchmark_report(
+            h_struct,
+            holdout_gold_items,
+            artifact_dir=h,
+            gold_set_path=holdout_gold_set_path,
+        )
         validation_ok = holdout_report.get("summary", {}).get("overall_status") == "pass"
         semantic_total = int(holdout_semantic_report.get("total", 0))
         semantic_accuracy = float(holdout_semantic_report.get("accuracy", 0.0))
@@ -90,6 +100,7 @@ def run_maximize_gates(
             "status": "pass" if hold_ok else "fail",
             "outputs": {
                 "holdout_artifact_dir": str(holdout_artifact_dir) if holdout_artifact_dir else None,
+                "holdout_gold_set_path": str(holdout_gold_set_path) if holdout_artifact_dir else None,
                 "holdout_validation_summary": holdout_report.get("summary") if holdout_report else None,
                 "holdout_semantic_summary": (
                     {
@@ -100,6 +111,9 @@ def run_maximize_gates(
                     }
                     if holdout_semantic_report
                     else None
+                ),
+                "holdout_block_benchmark_summary": (
+                    holdout_block_report.get("summary") if holdout_block_report else None
                 ),
                 "note": (
                     None

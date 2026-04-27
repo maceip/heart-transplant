@@ -57,7 +57,7 @@ Holdout scorable misses:
 
 ## Next Benchmark Step
 
-Before making this a beta headline, add a dedicated `block-benchmark` command that reports:
+Before making this a beta headline, keep using the dedicated `block-benchmark` command to report:
 
 1. end-to-end primary-block accuracy,
 2. scorable-node primary-block accuracy,

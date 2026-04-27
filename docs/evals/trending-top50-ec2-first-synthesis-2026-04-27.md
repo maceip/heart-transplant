@@ -2,6 +2,11 @@
 
 Purpose: preserve the first one-at-a-time EC2 smell test exactly as it behaved, bugs and all.
 
+This corpus has two jobs:
+
+1. Marketing / trust: show that the system has been exercised against recognizable, current, popular repositories instead of hand-picked toys.
+2. Quality gate pressure: keep a recurring, machine-readable bar that fails when ingest crashes, parser coverage is misleading, or a run reports zero-node "successes."
+
 This run used the 50-repo manifest in `docs/evals/trending-repos-top50-2026-04-27.json`:
 
 - top 10 TypeScript daily trending repos
@@ -95,6 +100,25 @@ These runs technically succeeded but produced no code nodes. This is a coverage 
 - The EC2 runner can exercise 50 popular repos sequentially without keeping all clones on disk.
 - The app can ingest and score large real-world repos; the largest successful artifacts exceeded 70k code nodes.
 - The first synthesis is already useful as a stress test for runtime, memory, parser coverage, and graph scale.
+
+## Quality Gate Command
+
+The preserved first synthesis intentionally fails the strict quality gate:
+
+```powershell
+cd backend
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli corpus-gate ..\docs\evals\trending-top50-ec2-results-2026-04-27.jsonl
+```
+
+Expected first-synthesis result:
+
+- `attempted = 50`
+- `ok = 47`
+- `ingest_failed = 3`
+- `zero_node_ok = 6`
+- strict status: `fail`
+
+That failure is the point. For marketing/trust we can truthfully say we ran the 50-repo corpus. For engineering quality, the same corpus tells us exactly what must improve before the result becomes a launch gate.
 
 ## What It Exposes
 

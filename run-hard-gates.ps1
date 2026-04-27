@@ -1,7 +1,8 @@
 param(
     [string]$ArtifactDir = "",
     [string]$GoldSet = "",
-    [string]$HoldoutArtifactDir = ""
+    [string]$HoldoutArtifactDir = "",
+    [string]$HoldoutGoldSet = ""
 )
 
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -22,6 +23,12 @@ if (-not $ArtifactDir) {
 
 if (-not $GoldSet) {
     $GoldSet = Join-Path $repoRoot "docs\evals\gold_block_benchmark.json"
+}
+if (-not $HoldoutGoldSet) {
+    $defaultHoldoutGold = Join-Path $repoRoot "docs\evals\gold_block_benchmark_holdout.json"
+    if (Test-Path $defaultHoldoutGold) {
+        $HoldoutGoldSet = $defaultHoldoutGold
+    }
 }
 
 function Invoke-Gate {
@@ -47,6 +54,9 @@ try {
     $maximizeArgs = @("-m", "heart_transplant.cli", "maximize-gates", $ArtifactDir, "--gold-set", $GoldSet)
     if ($HoldoutArtifactDir) {
         $maximizeArgs += @("--holdout-artifact-dir", $HoldoutArtifactDir)
+        if ($HoldoutGoldSet) {
+            $maximizeArgs += @("--holdout-gold-set", $HoldoutGoldSet)
+        }
     }
     Invoke-Gate "maximize-gates" $maximizeArgs
 } finally {

@@ -54,6 +54,8 @@ cd backend
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-audit --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-report <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-gates <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory>
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-gates <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory> --holdout-gold-set ..\docs\evals\gold_block_benchmark_holdout.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli corpus-gate ..\docs\evals\trending-top50-ec2-results-2026-04-27.jsonl
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli temporal-scan C:\path\to\git\repo --max-commits 25
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli program-surface
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli simulate-change "refactor auth middleware" --artifact-dir <artifact-directory> --temporal-report <optional-phase-9-report.json>
@@ -82,6 +84,7 @@ Shortcut from repo root:
 
 ```powershell
 .\run-hard-gates.cmd --artifact-dir <artifact-directory> --gold-set docs\evals\gold_block_benchmark.json
+.\run-hard-gates.cmd --artifact-dir <artifact-directory> --gold-set docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory> --holdout-gold-set docs\evals\gold_block_benchmark_holdout.json
 ```
 
 ### Next Engineer Instructions
