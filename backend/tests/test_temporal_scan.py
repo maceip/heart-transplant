@@ -51,6 +51,30 @@ def test_temporal_scan_reports_block_churn_from_real_git_history(tmp_path: Path)
     assert report.limitations
 
 
+@pytest.mark.skipif(shutil.which("git") is None, reason="git is required for temporal replay tests")
+def test_temporal_scan_can_replay_tree_sitter_ingest_for_selected_commits(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    run(["git", "init"], repo)
+    run(["git", "config", "user.email", "test@example.com"], repo)
+    run(["git", "config", "user.name", "Tester"], repo)
+
+    (repo / "src").mkdir()
+    (repo / "src" / "auth.ts").write_text("export function login() { return true; }\n", encoding="utf-8")
+    run(["git", "add", "."], repo)
+    run(["git", "commit", "-m", "add auth"], repo)
+
+    (repo / "src" / "db.ts").write_text("export function query() { return []; }\n", encoding="utf-8")
+    run(["git", "add", "."], repo)
+    run(["git", "commit", "-m", "add db"], repo)
+
+    report = temporal_scan(repo, max_commits=2, replay_snapshots=True, replay_limit=2)
+
+    assert len(report.replayed_snapshots) == 2
+    assert {snapshot.reconstruction_mode for snapshot in report.replayed_snapshots} == {"tree_sitter_replay"}
+    assert all(snapshot.node_count > 0 for snapshot in report.replayed_snapshots)
+
+
 @pytest.mark.skipif(shutil.which("git") is None, reason="git is required for temporal scan tests")
 def test_temporal_snapshot_diff_metrics_and_gates_are_exact_and_reproducible(tmp_path: Path) -> None:
     repo = tmp_path / "repo"

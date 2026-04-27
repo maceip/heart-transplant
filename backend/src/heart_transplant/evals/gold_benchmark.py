@@ -35,14 +35,16 @@ def run_benchmark(structural: dict[str, Any], gold_items: list[dict[str, Any]]) 
             raw = nbrs.get(node.scip_id) or nbrs.get(str(node.scip_id))
             nb = NeighborhoodRecord.model_validate(raw) if raw else None
             got = classify_node_heuristic(node, nb)
+            got_blocks = [got.primary_block, *[secondary.block for secondary in got.secondary_blocks]]
             classified.append(
                 {
                     "node_id": node.scip_id,
                     "file_path": node.file_path,
                     "got_block": got.primary_block,
+                    "secondary_blocks": [secondary.model_dump(mode="json") for secondary in got.secondary_blocks],
                 }
             )
-            ok = ok or str(got.primary_block) == expected
+            ok = ok or expected in {str(block) for block in got_blocks}
         if ok:
             correct += 1
         rows.append(

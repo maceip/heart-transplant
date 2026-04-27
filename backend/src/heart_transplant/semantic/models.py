@@ -33,9 +33,16 @@ class BlockClassifyResult(BaseModel):
     reasoning: str
 
 
+class SecondaryBlock(BaseModel):
+    block: str
+    confidence: float = Field(ge=0, le=1)
+    reasoning: str
+
+
 class BlockAssignment(BaseModel):
     node_id: str
     primary_block: str
+    secondary_blocks: list[SecondaryBlock] = Field(default_factory=list)
     confidence: float = Field(ge=0, le=1)
     reasoning: str
     supporting_neighbors: list[str] = Field(default_factory=list)

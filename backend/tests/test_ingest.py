@@ -20,6 +20,8 @@ def test_ingest_repository_extracts_code_nodes_from_typescript(tmp_path: Path) -
 
     names = {node.name for node in artifact.code_nodes}
     assert {"SessionUser", "AuthService", "createSession"} <= names
+    assert "auth.ts" in names
+    assert any(node.kind == "file_surface" for node in artifact.code_nodes)
     assert artifact.node_count == len(artifact.code_nodes)
     assert artifact.edge_count == len(artifact.edges)
     assert "typescript" in artifact.parser_backends

@@ -430,11 +430,19 @@ def temporal_scan_command(
     repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
     max_commits: int = typer.Option(50, "--max-commits", help="Maximum commits to inspect."),
     since: str | None = typer.Option(None, "--since", help="Optional git --since value, e.g. 2026-01-01."),
+    replay_snapshots: bool = typer.Option(False, "--replay-snapshots", help="Replay Tree-sitter ingest on selected historical commits."),
+    replay_limit: int = typer.Option(5, "--replay-limit", help="Maximum commits to replay when --replay-snapshots is set."),
     out: Path | None = typer.Option(None, "--out", help="Output JSON path. Defaults to .heart-transplant/reports/<timestamp>__phase-9-temporal-scan.json."),
 ) -> None:
     """Phase 9 deterministic git-history scan with block-churn metrics."""
 
-    report = temporal_scan(repo_path.resolve(), max_commits=max_commits, since=since)
+    report = temporal_scan(
+        repo_path.resolve(),
+        max_commits=max_commits,
+        since=since,
+        replay_snapshots=replay_snapshots,
+        replay_limit=replay_limit,
+    )
     dest = write_temporal_scan(report, out.resolve() if out else None)
     typer.echo(json.dumps({"wrote": str(dest), "commit_count": report.commit_count, "block_churn": report.block_churn}, indent=2))
 

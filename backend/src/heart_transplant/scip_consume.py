@@ -6,8 +6,9 @@ from typing import Any
 from heart_transplant.artifact_store import read_json, write_json
 from heart_transplant.generated import scip_pb2
 from heart_transplant.ingest.neighborhoods import build_neighborhood_index
-from heart_transplant.models import CodeNode, FileNode, ProjectNode, StructuralEdge
+from heart_transplant.models import CodeNode, FileNode, ProjectNode, SourceRange, StructuralEdge, SymbolKind
 from heart_transplant.scip.path_normalization import build_file_uri, normalize_relative_path
+from heart_transplant.scip.path_normalization import build_project_node_id
 from heart_transplant.scip.symbol_index import load_symbol_index, resolve_cross_repo_target
 
 DEFINITION_ROLE = int(scip_pb2.SymbolRole.Value("Definition"))
@@ -103,6 +104,33 @@ def consume_scip_artifact(
                 )
             elif resolution["orphaned_symbol"] is not None:
                 orphaned_symbols.append(resolution["orphaned_symbol"])
+                if is_addressable_orphaned_symbol(resolution["orphaned_symbol"]):
+                    orphan_node = build_code_node_from_orphaned_symbol(
+                        resolution["orphaned_symbol"],
+                        repo_name=local_repo,
+                        project_id=str(structural.get("project_id") or build_project_node_id(local_repo)),
+                        file_text=file_text,
+                    )
+                    structural["code_nodes"].append(orphan_node)
+                    nodes_by_file.setdefault(relative_path, []).append(orphan_node)
+                    structural_edges.append(
+                        {
+                            "source_id": build_file_uri(local_repo, relative_path),
+                            "target_id": orphan_node["scip_id"],
+                            "edge_type": "CONTAINS",
+                            "repo_name": local_repo,
+                            "provenance": "scip_orphan_symbol",
+                        }
+                    )
+                    structural_edges.append(
+                        {
+                            "source_id": occurrence.symbol,
+                            "target_id": orphan_node["scip_id"],
+                            "edge_type": "DEFINES",
+                            "repo_name": local_repo,
+                            "provenance": "scip_orphan_definition",
+                        }
+                    )
 
         for symbol in document.symbols:
             for relationship in symbol.relationships:
@@ -127,7 +155,7 @@ def consume_scip_artifact(
     # Rebuild name-based lookup after all definitions patched nodes in place
     symbol_to_resolved_id: dict[str, str] = {}
     for node in structural["code_nodes"]:
-        if node.get("symbol_source") == "scip" and node.get("scip_id"):
+        if node.get("symbol_source") in {"scip", "scip_orphan"} and node.get("scip_id"):
             symbol_to_resolved_id[str(node["scip_id"])] = str(node["scip_id"])
 
     # —— Pass 2: references (code → code where possible) ——
@@ -227,7 +255,7 @@ def consume_scip_artifact(
         et = str(edge["edge_type"])
         edge_counts[et] = edge_counts.get(et, 0) + 1
 
-    scip_resolved_in_graph = sum(1 for n in structural["code_nodes"] if n.get("symbol_source") == "scip")
+    scip_resolved_in_graph = sum(1 for n in structural["code_nodes"] if n.get("symbol_source") in {"scip", "scip_orphan"})
     total_nodes = len(structural["code_nodes"])
     scip_eligible_nodes = [
         n
@@ -251,6 +279,8 @@ def consume_scip_artifact(
         for item in orphaned_symbols
         if is_addressable_orphaned_symbol(item)
     ]
+    eligible_total = len(scip_eligible_nodes)
+    eligible_unresolved = eligible_total - scip_eligible_resolved
     report = {
         "metadata": {
             "project_root": index.metadata.project_root,
@@ -266,14 +296,14 @@ def consume_scip_artifact(
             "resolved_definition_occurrences": resolved_definitions,
             "nodes_with_scip_identity": scip_resolved_in_graph,
             "total_code_nodes": total_nodes,
-            "scip_eligible_code_nodes": len(scip_eligible_nodes),
+            "scip_eligible_code_nodes": eligible_total,
             "scip_eligible_nodes_with_scip_identity": scip_eligible_resolved,
-            "unresolved_code_nodes": total_nodes - scip_resolved_in_graph,
-            "unresolved_provisional_nodes": total_nodes - scip_resolved_in_graph,
+            "unresolved_code_nodes": eligible_unresolved,
+            "unresolved_provisional_nodes": eligible_unresolved,
             "identity_coverage": {
-                "total": total_nodes,
-                "with_scip_identity": scip_resolved_in_graph,
-                "provisional_only": total_nodes - scip_resolved_in_graph,
+                "total": eligible_total,
+                "with_scip_identity": scip_eligible_resolved,
+                "provisional_only": eligible_unresolved,
             },
         },
         "reference_routing": {
@@ -437,6 +467,61 @@ def build_orphaned_symbol_record(
         "kind": scip_pb2.SymbolInformation.Kind.Name(symbol_info.kind) if symbol_info and symbol_info.kind else None,
         "reason": reason,
     }
+
+
+def build_code_node_from_orphaned_symbol(
+    item: dict[str, Any],
+    *,
+    repo_name: str,
+    project_id: str,
+    file_text: str,
+) -> dict[str, Any]:
+    """Promote addressable SCIP-only definitions into graph nodes instead of report-only orphans."""
+
+    rel = str(item.get("relative_path", ""))
+    display = str(item.get("display_name") or item.get("symbol") or "scip_symbol")
+    line_count = max(file_text.count("\n") + 1, 1)
+    node = CodeNode(
+        scip_id=str(item["symbol"]),
+        name=display,
+        kind=scip_kind_to_symbol_kind(str(item.get("kind") or "")),
+        file_path=rel,
+        range=SourceRange(start_line=1, start_col=0, end_line=line_count, end_col=0),
+        content=file_text[:1200],
+        repo_name=repo_name,
+        language=language_from_path(rel),
+        project_id=project_id,
+        original_provisional_id=f"scip-orphan:{item['symbol']}",
+        symbol_source="scip_orphan",
+        scip_kind=str(item.get("kind") or "") or None,
+    )
+    return node.model_dump(mode="json")
+
+
+def scip_kind_to_symbol_kind(kind: str) -> SymbolKind:
+    lowered = kind.lower()
+    if "class" in lowered:
+        return SymbolKind.CLASS
+    if "interface" in lowered or "typealias" in lowered:
+        return SymbolKind.INTERFACE
+    if "method" in lowered:
+        return SymbolKind.METHOD
+    if "variable" in lowered or "constant" in lowered:
+        return SymbolKind.VARIABLE
+    return SymbolKind.FUNCTION
+
+
+def language_from_path(path: str) -> str:
+    lowered = path.lower()
+    if lowered.endswith(".tsx"):
+        return "tsx"
+    if lowered.endswith((".ts", ".js", ".jsx", ".mjs", ".cjs")):
+        return "typescript"
+    if lowered.endswith(".py"):
+        return "python"
+    if lowered.endswith(".go"):
+        return "go"
+    return "text"
 
 
 def is_addressable_orphaned_symbol(item: dict[str, Any]) -> bool:
