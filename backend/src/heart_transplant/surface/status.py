@@ -12,8 +12,10 @@ def program_surface_status() -> dict[str, Any]:
         _phase("phase_9", "heart_transplant.temporal.scan", "temporal_scan"),
         _phase("phase_10", "heart_transplant.causal.simulation", "run_change_simulation"),
         _phase("phase_11", "heart_transplant.regret.scan", "run_regret_scan"),
+        _phase("phase_11_sdk", "heart_transplant.regret.scan", "run_regret_sdk_scan"),
         _phase("phase_12", "heart_transplant.execution.orchestrator", "run_transplant"),
         _phase("phase_13", "heart_transplant.multimodal.ingest", "run_multimodal_ingest"),
+        _phase("graph_integrity", "heart_transplant.graph_integrity", "run_graph_integrity"),
     ]
     return {
         "report_type": "phase_14_program_surface",

@@ -15,6 +15,8 @@ from heart_transplant.classify.pipeline import persist_semantic_to_surreal, run_
 from heart_transplant.db.surreal_loader import load_artifact
 from heart_transplant.db.verify import verify_artifact_in_db
 from heart_transplant.evals.build_gold import write_gold_from_ground_truth
+from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set
+from heart_transplant.graph_integrity import run_graph_integrity
 from heart_transplant.maximize.report import build_maximize_report, write_maximize_report
 from heart_transplant.maximize.gates import run_maximize_gates
 from heart_transplant.scip_consume import consume_scip_artifact
@@ -28,7 +30,7 @@ from heart_transplant.temporal.persist import persist_temporal_metrics
 from heart_transplant.temporal.scan import temporal_scan, write_temporal_scan
 from heart_transplant.temporal.snapshot import architecture_snapshot
 from heart_transplant.causal.simulation import run_change_simulation
-from heart_transplant.regret.scan import run_regret_scan
+from heart_transplant.regret.scan import run_regret_scan, run_regret_sdk_scan
 from heart_transplant.execution.orchestrator import run_transplant
 from heart_transplant.multimodal.ingest import run_multimodal_ingest
 from heart_transplant.surface.status import program_surface_status
@@ -311,6 +313,45 @@ def build_gold(
     typer.echo(json.dumps({"wrote": str(out.resolve()), "item_count": len(items)}, indent=2))
 
 
+@app.command("block-benchmark")
+def block_benchmark(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    gold_set: Path = typer.Option(
+        ...,
+        "--gold-set",
+        exists=True,
+        dir_okay=False,
+        help="Gold benchmark JSON.",
+    ),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON report path."),
+) -> None:
+    """Track 2: report semantic block quality separately from graph materialization coverage."""
+
+    chosen_artifact_dir = artifact_dir.resolve()
+    structural = json.loads((chosen_artifact_dir / "structural-artifact.json").read_text(encoding="utf-8"))
+    report = build_block_benchmark_report(
+        structural,
+        load_gold_set(gold_set.resolve()),
+        artifact_dir=chosen_artifact_dir,
+        gold_set_path=gold_set.resolve(),
+    )
+    if out:
+        write_json(out.resolve(), report)
+    typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("graph-integrity")
+def graph_integrity(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Track 3: gate dangling graph targets and synthetic/provisional leakage."""
+
+    report = run_graph_integrity(artifact_dir.resolve())
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["overall_status"] != "pass":
+        raise typer.Exit(code=1)
+
+
 @app.command("maximize-audit")
 def maximize_audit(
     artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Artifact directory to audit. Defaults to latest artifact."),
@@ -548,6 +589,32 @@ def regret_scan_command(
 
     chosen = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
     report = run_regret_scan(chosen, min_confidence=min_confidence)
+    if output:
+        write_json(output.resolve(), report.model_dump(mode="json"))
+    typer.echo(report.model_dump_json(indent=2))
+
+
+@app.command("regret-sdk-scan")
+def regret_sdk_scan_command(
+    artifact_dir: Path | None = typer.Option(
+        None,
+        "--artifact-dir",
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        help="Defaults to latest artifact directory.",
+    ),
+    min_confidence: float = typer.Option(0.35, "--min-confidence", help="Minimum regret score to emit."),
+    output: Path | None = typer.Option(
+        None,
+        "--output",
+        help="Also write stable SDK JSON to this path.",
+    ),
+) -> None:
+    """Regret SDK contract: ranked surfaces with evidence, plan, simulation, and ledger fields."""
+
+    chosen = artifact_dir.resolve() if artifact_dir else latest_artifact_dir()
+    report = run_regret_sdk_scan(chosen, min_confidence=min_confidence)
     if output:
         write_json(output.resolve(), report.model_dump(mode="json"))
     typer.echo(report.model_dump_json(indent=2))

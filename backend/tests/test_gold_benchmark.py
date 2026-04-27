@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from heart_transplant.evals.build_gold import build_gold_from_ground_truth
-from heart_transplant.evals.gold_benchmark import run_benchmark
+from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, run_benchmark
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
 
 
@@ -22,6 +22,27 @@ def test_gold_benchmark_runs_against_ingest(tmp_path: Path) -> None:
     assert r["total"] == 1
     assert 0.0 <= r["accuracy"] <= 1.0
     assert "classified" in r["rows"][0]
+
+
+def test_block_benchmark_report_exposes_coverage_and_confusion(tmp_path: Path) -> None:
+    repo = tmp_path / "r"
+    repo.mkdir()
+    (repo / "auth.ts").write_text("export function sessionGuard() { return 'ok'; }\n", encoding="utf-8")
+    artifact = ingest_repository(repo, "test/block-report")
+
+    report = build_block_benchmark_report(
+        artifact.model_dump(mode="json"),
+        [
+            {"file_path": "auth.ts", "expected_block": "Access Control"},
+            {"file_path": "missing.ts", "expected_block": "Network Edge"},
+        ],
+    )
+
+    assert report["summary"]["end_to_end_accuracy"] == 0.5
+    assert report["summary"]["scorable_accuracy"] == 1.0
+    assert report["summary"]["missing_node_rate"] == 0.5
+    assert report["per_block"]["Access Control"]["correct"] == 1
+    assert report["confusion"]["Network Edge"]["__missing_node__"] == 1
 
 
 def test_gold_benchmark_supports_file_path_items(tmp_path: Path) -> None:
