@@ -59,6 +59,42 @@ def test_gold_benchmark_supports_file_path_items(tmp_path: Path) -> None:
     assert report["rows"][0]["match"] is True
 
 
+def test_gold_benchmark_uses_file_surface_when_file_has_no_symbols(tmp_path: Path) -> None:
+    repo = tmp_path / "r"
+    repo.mkdir()
+    (repo / "src").mkdir()
+    (repo / "src" / "index.ts").write_text("export * from './missing';\n", encoding="utf-8")
+    artifact = ingest_repository(repo, "test/file-surface-gold")
+
+    report = run_benchmark(
+        artifact.model_dump(mode="json"),
+        [{"file_path": "src/index.ts", "expected_block": "Search Architecture"}],
+    )
+
+    assert report["total"] == 1
+    assert report["rows"][0]["match"] is True
+    assert any(row["node_id"] == "codefile:src/index.ts" for row in report["rows"][0]["classified"])
+
+
+def test_gold_benchmark_counts_secondary_block_matches(tmp_path: Path) -> None:
+    repo = tmp_path / "r"
+    repo.mkdir()
+    (repo / "src").mkdir()
+    (repo / "src" / "config").mkdir()
+    (repo / "src" / "config" / "index.ts").write_text(
+        "export const envConfig = { DATABASE_URL: 'postgres://x', redis: true };\n",
+        encoding="utf-8",
+    )
+    artifact = ingest_repository(repo, "test/multilabel")
+
+    report = run_benchmark(
+        artifact.model_dump(mode="json"),
+        [{"file_path": "src/config/index.ts", "expected_block": "Data Persistence"}],
+    )
+
+    assert report["rows"][0]["match"] is True
+
+
 def test_build_gold_from_ground_truth_uses_high_confidence_file_blocks(tmp_path: Path) -> None:
     gt = tmp_path / "ground.json"
     gt.write_text(
@@ -208,6 +244,23 @@ def test_gold_benchmark_catches_architectural_index_files(tmp_path: Path) -> Non
     )
 
     assert report["accuracy"] == 1.0
+
+
+def test_gold_benchmark_scores_file_surface_when_no_symbol_boundary(tmp_path: Path) -> None:
+    repo = tmp_path / "r"
+    (repo / "src" / "bull").mkdir(parents=True)
+    (repo / "src" / "bull" / "index.ts").write_text(
+        "export * from './queue';\nexport const queueName = 'mail';\n",
+        encoding="utf-8",
+    )
+    artifact = ingest_repository(repo, "test/file-surface")
+
+    report = run_benchmark(
+        artifact.model_dump(mode="json"),
+        [{"file_path": "src/bull/index.ts", "expected_block": "Background Processing"}],
+    )
+
+    assert report["rows"][0]["match"] is True
 
 
 def test_gold_benchmark_catches_supabase_adapter_as_data_persistence(tmp_path: Path) -> None:

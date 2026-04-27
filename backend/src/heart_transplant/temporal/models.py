@@ -16,12 +16,24 @@ class CommitRecord(BaseModel):
     changed_files: list[ChangedFile] = Field(default_factory=list)
 
 
+class TemporalGraphSnapshot(BaseModel):
+    commit_sha: str
+    authored_at: str
+    subject: str
+    reconstruction_mode: str = "tree_sitter_replay"
+    node_count: int
+    edge_count: int
+    file_node_count: int
+    parser_backends: list[str] = Field(default_factory=list)
+
+
 class TemporalScanReport(BaseModel):
     repo_path: str
     commit_count: int
     commits: list[CommitRecord]
     block_churn: dict[str, int]
     file_hotspots: dict[str, int]
+    replayed_snapshots: list[TemporalGraphSnapshot] = Field(default_factory=list)
     limitations: list[str] = Field(default_factory=list)
 
 
@@ -39,6 +51,26 @@ class ArchitectureSnapshot(BaseModel):
     file_count: int
     files: list[FileBlockSnapshot]
     block_file_counts: dict[str, int]
+    limitations: list[str] = Field(default_factory=list)
+
+
+class ReplaySnapshotRecord(BaseModel):
+    commit_sha: str
+    authored_at: str
+    subject: str
+    node_count: int
+    file_node_count: int
+    edge_count: int
+    parser_backends: list[str] = Field(default_factory=list)
+    block_counts: dict[str, int] = Field(default_factory=dict)
+    artifact_excerpt: dict[str, object] = Field(default_factory=dict)
+
+
+class TemporalReplayReport(BaseModel):
+    repo_path: str
+    commit_count: int
+    reconstruction_mode: str = "tree_sitter_replay"
+    snapshots: list[ReplaySnapshotRecord] = Field(default_factory=list)
     limitations: list[str] = Field(default_factory=list)
 
 

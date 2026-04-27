@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from heart_transplant.models import CodeNode, NeighborhoodRecord
 from heart_transplant.ontology import iter_blocks
-from heart_transplant.semantic.models import BlockAssignment
+from heart_transplant.semantic.models import BlockAssignment, SecondaryBlock
 
 
 @dataclass(frozen=True)
@@ -48,6 +48,7 @@ _KIND_PRIORS: dict[str, tuple[str, float, str]] = {
     "react_hook": ("State Management", 1.6, "custom hook seam"),
     "config_object": ("Security Ops", 0.4, "configuration seam"),
     "service_boundary": ("Connectivity Layer", 1.1, "service/client boundary"),
+    "file_surface": ("Search Architecture", 0.8, "file-level architecture surface"),
 }
 
 _PATH_PRIORS: tuple[Signal, ...] = (
@@ -107,12 +108,16 @@ def classify_node_heuristic(
     if node.kind.value == "react_hook" and re.search(r"\b(auth|session|user|profile)\b", hlower, re.I | re.S):
         scores["Identity UI"] += 1.7
         evidence.setdefault("Identity UI", []).append("identity hook")
+    if node.kind.value == "file_surface":
+        apply_file_surface_context(scores, evidence, node)
+
     if not scores:
         primary = blocks[0]
         conf = 0.1
         reasons = ["no matching deterministic signals"]
+        secondary_blocks: list[SecondaryBlock] = []
     else:
-        ranked = scores.most_common(2)
+        ranked = scores.most_common(4)
         primary, score = ranked[0]
         runner_up = ranked[1][1] if len(ranked) > 1 else 0.0
         margin = max(float(score) - float(runner_up), 0.0)
@@ -120,6 +125,15 @@ def classify_node_heuristic(
         if margin < 0.75 and score > 0:
             conf = min(conf, 0.66)
         reasons = evidence.get(primary, [])
+        secondary_blocks = [
+            SecondaryBlock(
+                block=block,
+                confidence=min(0.35 + 0.08 * float(block_score), 0.9),
+                reasoning="heuristic secondary signal: " + ", ".join(evidence.get(block, [])[:4]),
+            )
+            for block, block_score in ranked[1:]
+            if block in blocks and block_score >= max(1.5, float(score) * 0.45)
+        ]
     if primary not in blocks:
         primary = blocks[0]
     return BlockAssignment(
@@ -128,4 +142,28 @@ def classify_node_heuristic(
         confidence=conf,
         reasoning="heuristic: weighted block signals: " + ", ".join(reasons[:5]),
         supporting_neighbors=neighbor.imports if neighbor else [],
+        secondary_blocks=secondary_blocks,
     )
+
+
+def apply_file_surface_context(
+    scores: Counter[str],
+    evidence: dict[str, list[str]],
+    node: CodeNode,
+) -> None:
+    """Boost file-surface classification using module-level exports/imports and path role."""
+
+    content = node.content.lower()
+    path = node.file_path.lower()
+    export_count = len(re.findall(r"\bexport\b", content))
+    import_count = len(re.findall(r"\bimport\b", content))
+
+    if path.endswith(("/index.ts", "/index.tsx", "/index.js", "/index.jsx")) or path.endswith("index.ts"):
+        scores["Search Architecture"] += 2.0 + min(export_count, 4) * 0.25
+        evidence.setdefault("Search Architecture", []).append("file surface is an index/barrel module")
+    if re.search(r"(^|/)(config|env|settings|drizzle|prisma)(/|\.)", path):
+        scores["Global Interface"] += 1.6
+        evidence.setdefault("Global Interface", []).append("file surface exposes configuration boundary")
+    if import_count >= 2 and export_count >= 1:
+        scores["Connectivity Layer"] += 0.8
+        evidence.setdefault("Connectivity Layer", []).append("file surface bridges imports and exports")

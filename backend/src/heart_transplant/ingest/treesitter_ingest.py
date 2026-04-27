@@ -122,6 +122,14 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
             continue
         parsers_used.add(language)
         content = abs_path.read_text(encoding="utf-8", errors="ignore")
+        surface_node = build_file_surface_node(
+            repo_name=repo_name,
+            project_id=project_id,
+            rel_path=rel_path,
+            content=content,
+            language=language,
+        )
+        code_nodes.append(surface_node)
         file_nodes.append(
             FileNode(
                 node_id=build_file_uri(repo_name, rel_path),
@@ -139,7 +147,7 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
                 content=content,
             )
             code_nodes.extend(file_nodes_chunk)
-            edges.extend(build_contains_edges(repo_name, rel_path, file_nodes_chunk))
+            edges.extend(build_contains_edges(repo_name, rel_path, [surface_node, *file_nodes_chunk]))
         else:
             parser = get_parser(language)
             tree = parser.parse(content.encode("utf-8"))
@@ -152,7 +160,7 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
                 language=language,
             )
             code_nodes.extend(file_nodes_chunk)
-            edges.extend(build_contains_edges(repo_name, rel_path, file_nodes_chunk))
+            edges.extend(build_contains_edges(repo_name, rel_path, [surface_node, *file_nodes_chunk]))
             edges.extend(
                 extract_import_edges(
                     repo_name,
@@ -189,6 +197,32 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
         code_nodes=code_nodes,
         edges=edges,
         neighborhoods=nbrs,
+    )
+
+
+def build_file_surface_node(
+    *,
+    repo_name: str,
+    project_id: str,
+    rel_path: str,
+    content: str,
+    language: str,
+) -> CodeNode:
+    """Materialize the file as an architectural surface, not only as a symbol container."""
+
+    line_count = max(content.count("\n") + 1, 1)
+    return CodeNode(
+        scip_id=f"codefile:{rel_path}",
+        name=Path(rel_path).name,
+        kind=SymbolKind.FILE_SURFACE,
+        file_path=rel_path,
+        range=SourceRange(start_line=1, start_col=0, end_line=line_count, end_col=0),
+        content=content[:4000],
+        repo_name=repo_name,
+        language=language,
+        project_id=project_id,
+        original_provisional_id=f"codefile:{rel_path}",
+        symbol_source="file_surface",
     )
 
 

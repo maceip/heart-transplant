@@ -21,7 +21,7 @@ def test_maximize_report_summarizes_artifact_capabilities(tmp_path: Path) -> Non
     report = build_maximize_report(artifact_dir, include_validation=False)
 
     assert report["report_type"] == "phase_8_5_maximize_current_capabilities"
-    assert report["summary"]["node_count"] == 1
-    assert report["summary"]["semantic_assignment_count"] == 1
+    assert report["summary"]["node_count"] == 2
+    assert report["summary"]["semantic_assignment_count"] == 2
     assert report["capability_matrix"]
     assert report["demo_candidates"]["high_confidence_block_nodes"]

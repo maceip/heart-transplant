@@ -79,7 +79,7 @@ def _phase_zero_identity(structural: dict[str, Any], scip_metadata: dict[str, An
 
     resolution = scip_consumed.get("resolution", {})
     documents = scip_consumed.get("documents", [])
-    total_nodes = int(resolution.get("total_code_nodes", structural.get("node_count", 0)) or 0)
+    total_nodes = len(_structural_code_nodes(structural))
     scip_eligible_nodes = _scip_eligible_code_nodes(structural)
     total_scip_eligible_nodes = len(scip_eligible_nodes)
     with_scip = sum(1 for node in scip_eligible_nodes if node.get("symbol_source") == "scip")
@@ -493,7 +493,7 @@ def _stale_provisional_target_count(structural: dict[str, Any]) -> int:
 def _scip_eligible_code_nodes(structural: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         node
-        for node in structural.get("code_nodes", [])
+        for node in _structural_code_nodes(structural)
         if str(node.get("kind", ""))
         in {
             "function",
@@ -506,4 +506,13 @@ def _scip_eligible_code_nodes(structural: dict[str, Any]) -> list[dict[str, Any]
             "middleware",
             "service_boundary",
         }
+    ]
+
+
+def _structural_code_nodes(structural: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        node
+        for node in structural.get("code_nodes", [])
+        if str(node.get("kind", "")) != "file_surface"
+        and str(node.get("symbol_source", "")) != "file_surface"
     ]

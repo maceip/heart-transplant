@@ -106,10 +106,12 @@ def _build_fixture_artifact(tmp_path: Path, *, code: str | None = None) -> tuple
         json.dumps(
             {
                 "resolution": {
-                    "resolved_code_nodes": artifact.node_count,
-                    "nodes_with_scip_identity": artifact.node_count,
+                    "resolved_code_nodes": artifact.node_count - len(artifact.file_nodes),
+                    "nodes_with_scip_identity": artifact.node_count - len(artifact.file_nodes),
                     "total_code_nodes": artifact.node_count,
-                    "unresolved_code_nodes": 0,
+                    "scip_eligible_code_nodes": artifact.node_count - len(artifact.file_nodes),
+                    "scip_eligible_nodes_with_scip_identity": artifact.node_count - len(artifact.file_nodes),
+                    "unresolved_code_nodes": len(artifact.file_nodes),
                 },
                 "documents": [
                     {

@@ -25,6 +25,8 @@ class SymbolKind(str, Enum):
     """Top-level service/repository/client boundary."""
     DB_MODEL = "db_model"
     """Database model/schema definition, e.g. Prisma ``model User``."""
+    FILE_SURFACE = "file_surface"
+    """Addressable architectural surface for a source file/module, including barrels and config wrappers."""
 
 
 class SourceRange(BaseModel):
@@ -71,7 +73,7 @@ class CodeNode(BaseModel):
         description="Ingest-time provisional id; stable across SCIP resolution.",
     )
     provisional_scip_id: str | None = None
-    symbol_source: Literal["provisional", "scip"] = "provisional"
+    symbol_source: Literal["provisional", "scip", "file_surface", "scip_orphan"] = "provisional"
     scip_kind: str | None = None
 
     @computed_field
@@ -108,6 +110,7 @@ EdgeType = Literal[
     "DEPENDS_ON_FILE",
     "DEPENDS_ON",
     "CROSS_REFERENCE",
+    "DESCRIBES_FILE",
 ]
 
 
