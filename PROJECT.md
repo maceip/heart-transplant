@@ -42,6 +42,7 @@ The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`pr
 - `docs/evals/block-classification-benchmark-2026-04-27.md` — Latest measured block-classification benchmark readout
 - `docs/evals/trending-repos-2026-04-27.json` — Dated daily-trending input manifest for private beta corpus refreshes
 - `docs/roadmaps/alignment-and-trajectory-2026-04-27.md` — Current alignment doc for LogicLens-backend and Regret SDK trajectory
+- `docs/roadmaps/logiclens-next-tranche-2026-04-27.md` — Outcome-gated next tranche to reach a respectable LogicLens backend and Regret SDK baseline
 
 ### Useful Commands
 

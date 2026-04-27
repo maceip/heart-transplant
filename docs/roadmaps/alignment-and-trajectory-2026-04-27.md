@@ -146,3 +146,6 @@ The trajectory from here is not "more phases." It is tightening the rails around
 - LogicLens backend equals truthful graph plus measured semantic retrieval.
 - Regret SDK equals productized regret detection on top of that graph.
 - The beta launch becomes credible when the benchmark, gates, and operator path all agree.
+
+The execution tranche that turns this alignment into measurable exits is
+`docs/roadmaps/logiclens-next-tranche-2026-04-27.md`.
