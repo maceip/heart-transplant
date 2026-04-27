@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Heart Transplant - Repo Surgery Console</title>
+    <link rel="stylesheet" href="./assets/pages.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero-band" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">heart-transplant beta console</p>
+          <h1 id="page-title">Repository surgery, block by block.</h1>
+          <p class="lede">
+            Run a browser-safe GitHub repo intake, classify file surfaces into architecture blocks,
+            and compare the pulse against the preserved 50-repo EC2 smell test.
+          </p>
+        </div>
+        <div class="monitor-panel" aria-label="Benchmark vitals">
+          <div class="ecg-line" aria-hidden="true"></div>
+          <div class="vital-grid">
+            <div>
+              <span id="vital-total">50</span>
+              <label>repos tested</label>
+            </div>
+            <div>
+              <span id="vital-ok">47</span>
+              <label>successful</label>
+            </div>
+            <div>
+              <span id="vital-nodes">378K</span>
+              <label>code nodes</label>
+            </div>
+            <div>
+              <span id="vital-edges">571K</span>
+              <label>edges</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tool-band" aria-labelledby="ingest-title">
+        <div class="section-heading">
+          <p class="eyebrow">intake</p>
+          <h2 id="ingest-title">Ingest a GitHub Repo</h2>
+        </div>
+        <form id="repo-form" class="repo-form">
+          <label for="repo-input">GitHub repository URL or owner/name</label>
+          <div class="input-row">
+            <input
+              id="repo-input"
+              name="repo"
+              type="text"
+              value="immich-app/immich"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button type="submit">Start intake</button>
+          </div>
+          <p id="repo-status" class="status-text" role="status">Ready for a public GitHub repository.</p>
+        </form>
+
+        <div class="handoff-panel">
+          <h3>Full backend surgery path</h3>
+          <pre id="backend-command"><code>git clone https://github.com/immich-app/immich.git vendor/github-repos/immich
+cd backend
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli ingest-local ..\vendor\github-repos\immich --repo-name immich-app/immich
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli classify .heart-transplant\artifacts\&lt;artifact-dir&gt; --no-use-openai</code></pre>
+        </div>
+      </section>
+
+      <section class="results-band" aria-labelledby="blocks-title">
+        <div class="section-heading">
+          <p class="eyebrow">block output</p>
+          <h2 id="blocks-title">Architecture Block Vitals</h2>
+        </div>
+        <div class="results-layout">
+          <div class="chart-card">
+            <canvas id="repo-block-chart" width="760" height="360" aria-label="Classified block counts"></canvas>
+          </div>
+          <div class="block-list" id="block-list"></div>
+        </div>
+        <div class="surface-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>File surface</th>
+                <th>Primary block</th>
+                <th>Confidence</th>
+                <th>Signal</th>
+              </tr>
+            </thead>
+            <tbody id="surface-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="benchmark-band" aria-labelledby="bench-title">
+        <div class="section-heading">
+          <p class="eyebrow">50 repo test</p>
+          <h2 id="bench-title">Surgery Graphs From The EC2 Run</h2>
+        </div>
+        <div class="benchmark-grid">
+          <div class="chart-card">
+            <h3>Language triage</h3>
+            <canvas id="language-chart" width="620" height="340" aria-label="OK and failed repositories by language"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Node pressure</h3>
+            <canvas id="node-chart" width="620" height="340" aria-label="Code nodes by language"></canvas>
+          </div>
+          <div class="chart-card wide">
+            <h3>Largest successful grafts</h3>
+            <canvas id="largest-chart" width="1280" height="360" aria-label="Largest successful repository artifacts"></canvas>
+          </div>
+        </div>
+        <div class="findings-strip" id="bench-findings"></div>
+      </section>
+    </main>
+    <script src="./assets/pages.js"></script>
+  </body>
+</html>
