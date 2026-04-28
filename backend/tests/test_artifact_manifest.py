@@ -36,6 +36,21 @@ def test_run_manifest_cli_writes_manifest(tmp_path: Path) -> None:
     assert build_artifact_manifest(artifact_dir)["summary"]["file_count"] >= 1
 
 
+def test_run_manifest_cli_accepts_manifest_file(tmp_path: Path) -> None:
+    artifact_dir = _artifact_dir(tmp_path)
+    manifest = write_artifact_manifest(artifact_dir, command="test")
+    manifest_path = artifact_dir / "artifact-manifest.json"
+    runner = CliRunner()
+
+    result = runner.invoke(app, ["run-manifest", str(manifest_path)])
+
+    assert result.exit_code == 0
+    report = json.loads(result.output)
+    assert report["report_type"] == "manifest_run"
+    assert report["summary"]["overall_status"] == "pass"
+    assert manifest["schema"] == "heart-transplant.artifact-manifest.v1"
+
+
 def _artifact_dir(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()

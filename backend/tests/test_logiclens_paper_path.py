@@ -6,7 +6,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from heart_transplant.artifact_store import write_json
-from heart_transplant.canonical_graph import build_canonical_graph
+from heart_transplant.canonical_graph import build_canonical_graph, write_canonical_graph_for_artifact
 from heart_transplant.classify.pipeline import run_classification_on_artifact
 from heart_transplant.cli import app
 from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, trace_dependency
@@ -23,8 +23,70 @@ def test_canonical_graph_unifies_structural_and_semantic_layers(tmp_path: Path) 
     assert graph["summary"]["dangling_edge_count"] == 0
     layers = set(graph["summary"]["layers"])
     assert {"project", "file", "code", "semantic"} <= layers
-    assert any(edge["provenance"] == "semantic_classifier" for edge in graph["edges"])
+    assert any(edge["provenance"]["producer"] == "semantic_classifier" for edge in graph["edges"])
     assert any(node["node_id"] == artifact.code_nodes[0].scip_id for node in graph["nodes"])
+    assert graph["manifest"]["source_artifacts"]["structural"].endswith("structural-artifact.json")
+
+
+def test_canonical_graph_can_project_temporal_multimodal_and_regret_reports(tmp_path: Path) -> None:
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    temporal = tmp_path / "temporal.json"
+    temporal.write_text(
+        json.dumps(
+            {
+                "replayed_snapshots": [
+                    {
+                        "commit_sha": "abc123",
+                        "subject": "add auth",
+                        "node_count": 2,
+                        "edge_count": 1,
+                        "file_node_count": 1,
+                        "parser_backends": ["typescript"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    multimodal = tmp_path / "multimodal.json"
+    multimodal.write_text(
+        json.dumps(
+            {
+                "nodes": [{"node_id": "test:auth", "kind": "test", "path": "auth.test.ts", "name": "auth test"}],
+                "edges": [{"source_id": "test:auth", "target_id": "codefile:auth.ts", "edge_kind": "TESTS"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    regret = tmp_path / "regret.json"
+    regret.write_text(
+        json.dumps(
+            {
+                "surfaces": [
+                    {
+                        "regret": {"regret_id": "r1", "title": "Logging inconsistency"},
+                        "evidence_bundle": [{"node_ids": ["codefile:auth.ts"], "summary": "auth.ts evidence"}],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    out = write_canonical_graph_for_artifact(
+        artifact_dir,
+        temporal_report=temporal,
+        multimodal_report=multimodal,
+        regret_report=regret,
+    )
+    graph = json.loads(out.read_text(encoding="utf-8"))
+    layers = set(graph["summary"]["layers"])
+
+    assert {"temporal", "test", "regret"} <= layers
+    assert graph["manifest"]["source_artifacts"]["temporal"] == str(temporal.resolve())
+    assert any(edge["edge_type"] == "EVIDENCED_BY" for edge in graph["edges"])
+    assert all(edge["provenance"]["producer"] for edge in graph["edges"])
+    assert all(node["provenance"]["producer"] for node in graph["nodes"])
 
 
 def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:

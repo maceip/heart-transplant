@@ -5,7 +5,7 @@ from pathlib import Path
 
 import typer
 
-from heart_transplant.artifact_manifest import build_artifact_manifest, write_artifact_manifest
+from heart_transplant.artifact_manifest import build_artifact_manifest, run_artifact_manifest, summarize_artifact_manifest, write_artifact_manifest
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
 from heart_transplant.canonical_graph import build_canonical_graph
 from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
@@ -121,15 +121,33 @@ def test_graph(
 
 @app.command("run-manifest")
 def run_manifest(
-    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
-    write: bool = typer.Option(True, "--write/--no-write", help="Write artifact-manifest.json beside the artifact files."),
+    target: Path = typer.Argument(..., exists=True, help="Artifact directory or artifact-manifest.json path."),
+    write: bool = typer.Option(True, "--write/--no-write", help="Write artifact-manifest.json when target is an artifact directory."),
+    execute_commands: bool = typer.Option(False, "--execute-commands", help="Run additional manifest commands when present."),
 ) -> None:
-    """Generate the artifact manifest receipt for an existing ingest run."""
+    """Generate or run the artifact manifest receipt for an existing ingest run."""
 
-    report = write_artifact_manifest(artifact_dir.resolve()) if write else build_artifact_manifest(artifact_dir.resolve())
+    resolved = target.resolve()
+    if resolved.is_dir():
+        report = write_artifact_manifest(resolved) if write else build_artifact_manifest(resolved)
+        typer.echo(json.dumps(report, indent=2))
+        if not report["summary"]["required_artifacts_present"]:
+            raise typer.Exit(code=1)
+        return
+
+    report = run_artifact_manifest(resolved, execute_commands=execute_commands)
     typer.echo(json.dumps(report, indent=2))
-    if not report["summary"]["required_artifacts_present"]:
+    if report["summary"]["overall_status"] != "pass":
         raise typer.Exit(code=1)
+
+
+@app.command("current-status")
+def current_status(
+    manifest: Path = typer.Argument(..., exists=True, dir_okay=False),
+) -> None:
+    """Summarize artifact manifest status without executing commands."""
+
+    typer.echo(json.dumps(summarize_artifact_manifest(manifest.resolve()), indent=2))
 
 
 @app.command("canonical-graph")
