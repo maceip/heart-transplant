@@ -1,0 +1,20 @@
+[
+  {
+    "id": "sample-auth-block",
+    "repo_name": "sample",
+    "question": "Where is auth handled?",
+    "expected_blocks": ["Access Control"],
+    "unsupported": false,
+    "notes": "Seed format example; replace sample repo_name with real artifact repo rows as evidence fixtures mature."
+  },
+  {
+    "id": "sample-unsupported",
+    "repo_name": "sample",
+    "question": "Which Kafka topic owns invoice retries?",
+    "expected_node_ids": [],
+    "expected_file_paths": [],
+    "expected_blocks": [],
+    "unsupported": true,
+    "notes": "Unsupported questions must return insufficient evidence instead of invented graph structure."
+  }
+]

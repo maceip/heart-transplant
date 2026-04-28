@@ -7,7 +7,7 @@ import typer
 
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
 from heart_transplant.canonical_graph import build_canonical_graph, write_canonical_graph_for_artifact
-from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
+from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, run_evidence_benchmark, trace_dependency
 from heart_transplant.graph_smoke import run_graph_smoke
 from heart_transplant.ingest.corpus_ingest import ingest_vendors
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
@@ -19,6 +19,7 @@ from heart_transplant.db.surreal_loader import load_artifact
 from heart_transplant.db.verify import verify_artifact_in_db
 from heart_transplant.evals.build_gold import write_gold_from_ground_truth
 from heart_transplant.evals.corpus_gate import evaluate_corpus_gate
+from heart_transplant.evals.gold_audit import audit_gold_set
 from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set
 from heart_transplant.graph_integrity import run_graph_integrity
 from heart_transplant.maximize.report import build_maximize_report, write_maximize_report
@@ -35,6 +36,7 @@ from heart_transplant.temporal.scan import temporal_scan, write_temporal_scan
 from heart_transplant.temporal.snapshot import architecture_snapshot
 from heart_transplant.causal.simulation import run_change_simulation
 from heart_transplant.regret.scan import run_regret_scan, run_regret_sdk_scan
+from heart_transplant.repro_manifest import build_artifact_manifest, run_manifest, summarize_manifest
 from heart_transplant.execution.orchestrator import run_transplant
 from heart_transplant.multimodal.ingest import run_multimodal_ingest
 from heart_transplant.surface.status import program_surface_status
@@ -180,6 +182,20 @@ def answer_with_evidence_command(
     """Answer a narrow architecture question from artifact evidence, or say evidence is insufficient."""
 
     typer.echo(answer_with_evidence(artifact_dir.resolve(), question).model_dump_json(indent=2))
+
+
+@app.command("evidence-benchmark")
+def evidence_benchmark_command(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    questions: Path = typer.Option(..., "--questions", exists=True, dir_okay=False),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON report path."),
+) -> None:
+    """Benchmark evidence-question answers against expected nodes/files/blocks."""
+
+    report = run_evidence_benchmark(artifact_dir.resolve(), questions.resolve())
+    if out:
+        write_json(out.resolve(), report)
+    typer.echo(json.dumps(report, indent=2))
 
 
 @app.command("paper-checklist")
@@ -422,6 +438,55 @@ def block_benchmark(
     if out:
         write_json(out.resolve(), report)
     typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("gold-audit")
+def gold_audit(
+    gold_set: Path = typer.Argument(..., exists=True, dir_okay=False),
+) -> None:
+    """Audit gold rows before treating benchmark numbers as trustworthy."""
+
+    typer.echo(json.dumps(audit_gold_set(gold_set.resolve()), indent=2))
+
+
+@app.command("artifact-manifest")
+def artifact_manifest(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    gold_set: Path | None = typer.Option(None, "--gold-set", exists=True, dir_okay=False),
+    holdout_gold_set: Path | None = typer.Option(None, "--holdout-gold-set", exists=True, dir_okay=False),
+    out: Path | None = typer.Option(None, "--out", help="Output path. Defaults to <artifact>/artifact-manifest.json."),
+) -> None:
+    """Write a reproducibility manifest for a generated artifact."""
+
+    manifest = build_artifact_manifest(
+        artifact_dir.resolve(),
+        gold_set=gold_set.resolve() if gold_set else None,
+        holdout_gold_set=holdout_gold_set.resolve() if holdout_gold_set else None,
+    )
+    dest = write_artifact_manifest(manifest, out.resolve() if out else artifact_dir.resolve() / "artifact-manifest.json")
+    typer.echo(json.dumps({"wrote": str(dest), "manifest": manifest.model_dump(mode="json")}, indent=2))
+
+
+@app.command("run-manifest")
+def run_manifest_command(
+    manifest: Path = typer.Argument(..., exists=True, dir_okay=False),
+    execute_commands: bool = typer.Option(False, "--execute-commands", help="Also run non-built-in manifest commands."),
+) -> None:
+    """Run graph/validation checks from an artifact reproducibility manifest."""
+
+    report = run_manifest(manifest.resolve(), execute_commands=execute_commands)
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["overall_status"] != "pass":
+        raise typer.Exit(code=1)
+
+
+@app.command("current-status")
+def current_status(
+    manifest: Path = typer.Argument(..., exists=True, dir_okay=False),
+) -> None:
+    """Summarize manifest-driven reproducibility status without running commands."""
+
+    typer.echo(json.dumps(summarize_manifest(manifest.resolve()), indent=2))
 
 
 @app.command("corpus-gate")

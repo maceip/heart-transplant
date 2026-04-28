@@ -94,6 +94,17 @@ records the source artifacts used to build the projection. Derived nodes
 back to source evidence through canonical edges, and the graph must round-trip
 through the typed `CanonicalGraph` schema without loss.
 
+## Quality Rails
+
+The project now has four explicit quality rails that stabilize new feature work:
+
+| Rail | Command | Purpose |
+| --- | --- | --- |
+| Gold standards | `heart-transplant gold-audit docs/evals/gold_block_benchmark_holdout.json` | Find duplicate rows, contradictory targets, missing fields, and coverage gaps before treating benchmark scores as truth. |
+| Evidence benchmarks | `heart-transplant evidence-benchmark --artifact-dir <artifact> --questions docs/evals/evidence_questions.json` | Score evidence answers by node, file, block, and unsupported-question behavior. |
+| Graph integrity | `heart-transplant graph-integrity <artifact>` | Enforce structural and canonical graph integrity: no dangling targets, provenance, stable IDs, source evidence links, and round-trip reload. |
+| Reproducibility | `heart-transplant artifact-manifest <artifact>` then `heart-transplant run-manifest <manifest>` | Record artifacts, gold sets, commands, versions, and rerun core checks from a manifest. |
+
 ## LogicLens Paper Feature Map
 
 This table maps the paper-shaped capabilities we are rebuilding to the current

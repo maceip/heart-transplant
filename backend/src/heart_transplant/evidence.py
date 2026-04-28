@@ -165,9 +165,73 @@ def benchmark_with_evidence(artifact_dir: Path, gold_set: Path) -> dict[str, Any
     )
 
 
+def run_evidence_benchmark(artifact_dir: Path, questions_path: Path) -> dict[str, Any]:
+    questions = read_json(questions_path)
+    rows: list[dict[str, Any]] = []
+    for item in questions:
+        if not gold_item_applies_to_artifact_like(item, artifact_dir):
+            continue
+        bundle = answer_with_evidence(artifact_dir, str(item.get("question", "")))
+        actual_node_ids = {node.node_id for node in bundle.source_nodes}
+        actual_file_paths = {node.file_path for node in bundle.source_nodes if node.file_path}
+        expected_node_ids = set(item.get("expected_node_ids", []) or [])
+        expected_file_paths = set(item.get("expected_file_paths", []) or [])
+        expected_blocks = set(item.get("expected_blocks", []) or [])
+        unsupported = bool(item.get("unsupported", False))
+        claim_insufficient = bundle.confidence == 0.0 or "insufficient evidence" in bundle.claim.lower()
+        row = {
+            "id": item.get("id"),
+            "question": item.get("question"),
+            "unsupported": unsupported,
+            "node_match": bool(expected_node_ids & actual_node_ids) if expected_node_ids else None,
+            "file_match": bool(expected_file_paths & actual_file_paths) if expected_file_paths else None,
+            "block_match": any(block.lower() in bundle.claim.lower() for block in expected_blocks) if expected_blocks else None,
+            "unsupported_correct": claim_insufficient if unsupported else None,
+            "hallucinated": unsupported and not claim_insufficient,
+            "actual_claim": bundle.claim,
+            "actual_confidence": bundle.confidence,
+        }
+        rows.append(row)
+
+    supported_rows = [row for row in rows if not row["unsupported"]]
+    unsupported_rows = [row for row in rows if row["unsupported"]]
+    return {
+        "report_type": "evidence_benchmark",
+        "artifact_dir": str(Path(artifact_dir).resolve()),
+        "questions_path": str(Path(questions_path).resolve()),
+        "summary": {
+            "question_count": len(rows),
+            "supported_count": len(supported_rows),
+            "unsupported_count": len(unsupported_rows),
+            "node_match_rate": ratio(sum(1 for row in supported_rows if row["node_match"] is True), sum(1 for row in supported_rows if row["node_match"] is not None)),
+            "file_match_rate": ratio(sum(1 for row in supported_rows if row["file_match"] is True), sum(1 for row in supported_rows if row["file_match"] is not None)),
+            "block_match_rate": ratio(sum(1 for row in supported_rows if row["block_match"] is True), sum(1 for row in supported_rows if row["block_match"] is not None)),
+            "unsupported_correct_rate": ratio(sum(1 for row in unsupported_rows if row["unsupported_correct"] is True), len(unsupported_rows)),
+            "hallucination_count": sum(1 for row in rows if row["hallucinated"]),
+        },
+        "rows": rows,
+    }
+
+
 def _load_graph(artifact_dir: Path) -> dict[str, Any]:
     structural = read_json(Path(artifact_dir) / "structural-artifact.json")
     return {"structural": structural, "nodes_by_id": _nodes_by_id(structural)}
+
+
+def gold_item_applies_to_artifact_like(item: dict[str, Any], artifact_dir: Path) -> bool:
+    structural = read_json(Path(artifact_dir) / "structural-artifact.json")
+    repo_name = str(item.get("repo_name", "")).strip()
+    if not repo_name:
+        return True
+    artifact_repo = str(structural.get("repo_name", "")).strip()
+    short = artifact_repo.rsplit("/", 1)[-1]
+    return repo_name in {artifact_repo, short} or artifact_repo.endswith(f"/{repo_name}")
+
+
+def ratio(numerator: int, denominator: int) -> float:
+    if denominator <= 0:
+        return 0.0
+    return numerator / denominator
 
 
 def _nodes_by_id(structural: dict[str, Any]) -> dict[str, dict[str, Any]]:
