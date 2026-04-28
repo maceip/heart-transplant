@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Collection
 from pathlib import Path
 from typing import Any
@@ -64,7 +65,7 @@ def build_gold_from_ground_truth(
             continue
         if name in excluded:
             continue
-        repo_items: list[dict[str, Any]] = []
+        by_file: dict[str, list[dict[str, str]]] = defaultdict(list)
         seen: set[tuple[str, str, str]] = set()
         for row in repo.get("topFileBlocks", []):
             confidence = str(row.get("confidence"))
@@ -79,14 +80,31 @@ def build_gold_from_ground_truth(
             if key in seen:
                 continue
             seen.add(key)
+            by_file[file_path].append(
+                {
+                    "block_id": block_id,
+                    "block": block,
+                    "confidence": confidence,
+                }
+            )
+        repo_items: list[dict[str, Any]] = []
+        for file_path, blocks in by_file.items():
+            accepted_blocks = [item["block"] for item in blocks]
+            primary = accepted_blocks[0]
+            confidence = strongest_confidence([item["confidence"] for item in blocks])
+            id_suffix = "multi_label" if len(blocks) > 1 else blocks[0]["block_id"]
             repo_items.append(
                 {
-                    "id": f"{name}:{file_path}:{block_id}",
+                    "id": f"{name}:{file_path}:{id_suffix}",
                     "repo_name": name,
+                    "node_id": "",
                     "file_path": file_path,
-                    "expected_block": block,
+                    "accepted_blocks": accepted_blocks,
+                    "primary_block": primary,
                     "confidence": confidence,
                     "source": str(ground_truth_path),
+                    "notes": "Generated as a multi-label file target." if len(blocks) > 1 else "",
+                    "status": "active",
                 }
             )
         if repo_items:
@@ -113,6 +131,11 @@ def round_robin(groups: list[list[dict[str, Any]]], max_items: int) -> list[dict
             break
         index += 1
     return out
+
+
+def strongest_confidence(values: list[str]) -> str:
+    order = {"high": 3, "medium": 2, "low": 1}
+    return max(values, key=lambda value: order.get(value, 0), default="")
 
 
 def write_gold_from_ground_truth(

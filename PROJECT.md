@@ -42,6 +42,7 @@ The next build target is not “more pages.” It is making the LogicLens-style 
 - `docs/evals/gold_block_benchmark.json` — Gate benchmark (25+ items, 4+ repos, 8+ blocks; main split excludes holdout repo `clean-elysia`)
 - `docs/evals/gold_block_benchmark_holdout.json` — Holdout split for `clean-elysia` only
 - `docs/evals/gold_block_benchmark_broad.json` — Broader exploratory benchmark used to expose classifier weaknesses
+- `docs/evals/gold-standards.md` — Gold row schema, audit command, and holdout policy
 - `docs/evals/block-classification-benchmark-2026-04-27.md` — Latest measured block-classification benchmark readout
 - `docs/evals/trending-repos-2026-04-27.json` and `docs/evals/trending-repos-top50-2026-04-27.json` — Dated daily-trending input manifests for private beta corpus refreshes
 - `docs/evals/trending-top50-ec2-first-synthesis-2026-04-27.md` — First 50-repo EC2 synthesis with landed fix notes for the nine first-run complications
@@ -53,6 +54,8 @@ The next build target is not “more pages.” It is making the LogicLens-style 
 cd backend
 
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark_holdout.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli test-graph <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-audit --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json

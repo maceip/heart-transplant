@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from heart_transplant.evals.build_gold import build_gold_from_ground_truth
+from heart_transplant.evals.gold_audit import audit_gold_rows
 from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, run_benchmark
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
 
@@ -17,7 +18,19 @@ def test_gold_benchmark_runs_against_ingest(tmp_path: Path) -> None:
     a = ingest_repository(repo, "test/gold")
     d = a.model_dump(mode="json")
     nid = a.code_nodes[0].scip_id
-    gold = [{"node_id": nid, "expected_block": "Access Control"}]
+    gold = [
+        {
+            "id": "test:sessionGuard:access_control",
+            "repo_name": "gold",
+            "node_id": nid,
+            "accepted_blocks": ["Access Control"],
+            "primary_block": "Access Control",
+            "confidence": "high",
+            "source": "test",
+            "notes": "",
+            "status": "active",
+        }
+    ]
     r = run_benchmark(d, gold)
     assert r["total"] == 1
     assert 0.0 <= r["accuracy"] <= 1.0
@@ -41,6 +54,7 @@ def test_block_benchmark_report_exposes_coverage_and_confusion(tmp_path: Path) -
     assert report["summary"]["end_to_end_accuracy"] == 0.5
     assert report["summary"]["scorable_accuracy"] == 1.0
     assert report["summary"]["missing_node_rate"] == 0.5
+    assert report["summary"]["gold_health_status"] == "fail"
     assert report["per_block"]["Access Control"]["correct"] == 1
     assert report["confusion"]["Network Edge"]["__missing_node__"] == 1
 
@@ -119,10 +133,14 @@ def test_build_gold_from_ground_truth_uses_high_confidence_file_blocks(tmp_path:
         {
             "id": "demo:src/auth.ts:access_control",
             "repo_name": "demo",
+            "node_id": "",
             "file_path": "src/auth.ts",
-            "expected_block": "Access Control",
+            "accepted_blocks": ["Access Control"],
+            "primary_block": "Access Control",
             "confidence": "high",
             "source": str(gt),
+            "notes": "",
+            "status": "active",
         }
     ]
 
@@ -305,7 +323,12 @@ def test_committed_gold_benchmark_meets_phase_8_5_breadth_thresholds() -> None:
         pytest.skip("docs/evals/gold_block_benchmark.json not present in this checkout")
     items = json.loads(gold_path.read_text(encoding="utf-8"))
     repos = {str(i.get("repo_name")) for i in items if i.get("repo_name")}
-    blocks = {str(i.get("expected_block")) for i in items if i.get("expected_block")}
+    blocks = {
+        str(block)
+        for item in items
+        for block in item.get("accepted_blocks", [item.get("primary_block")])
+        if block
+    }
     assert len(items) >= 25
     assert len(repos) >= 4
     assert len(blocks) >= 8
@@ -319,6 +342,70 @@ def test_committed_gold_benchmark_excludes_invalid_supabase_experimentation_row(
     assert not any(
         item.get("repo_name") == "elysia-supabase-tempate"
         and item.get("file_path") == "src/lib/supabase.ts"
-        and item.get("expected_block") == "Experimentation"
+        and item.get("primary_block") == "Experimentation"
         for item in items
     )
+
+
+def test_gold_audit_reports_schema_health() -> None:
+    rows = [
+        {
+            "id": "demo:src/db.ts:multi_label",
+            "repo_name": "demo",
+            "file_path": "src/db.ts",
+            "node_id": "",
+            "accepted_blocks": ["Data Persistence", "Persistence Strategy"],
+            "primary_block": "Data Persistence",
+            "confidence": "high",
+            "source": "fixture",
+            "notes": "Multi-label target.",
+            "status": "active",
+        }
+    ]
+
+    report = audit_gold_rows(rows)
+
+    assert report["summary"]["overall_status"] == "pass"
+    assert report["summary"]["multi_label_row_count"] == 1
+    assert report["block_coverage"]["Data Persistence"] == 1
+
+
+def test_gold_audit_fails_missing_duplicate_and_active_contradiction() -> None:
+    rows = [
+        {
+            "id": "dup",
+            "repo_name": "demo",
+            "file_path": "src/db.ts",
+            "accepted_blocks": ["Data Persistence"],
+            "primary_block": "Data Persistence",
+            "confidence": "high",
+            "source": "fixture",
+            "status": "active",
+        },
+        {
+            "id": "dup",
+            "repo_name": "demo",
+            "file_path": "src/db.ts",
+            "accepted_blocks": ["Persistence Strategy"],
+            "primary_block": "Persistence Strategy",
+            "confidence": "high",
+            "source": "fixture",
+            "status": "active",
+        },
+        {"repo_name": "demo", "file_path": "src/empty.ts"},
+    ]
+
+    report = audit_gold_rows(rows)
+
+    assert report["summary"]["overall_status"] == "fail"
+    assert report["summary"]["duplicate_row_count"] >= 1
+    assert report["summary"]["active_contradictory_target_count"] == 1
+    assert report["summary"]["missing_required_field_count"] == 1
+
+
+def test_committed_holdout_gold_audit_passes() -> None:
+    gold_path = Path(__file__).resolve().parents[2] / "docs" / "evals" / "gold_block_benchmark_holdout.json"
+    if not gold_path.is_file():
+        pytest.skip("docs/evals/gold_block_benchmark_holdout.json not present in this checkout")
+    report = audit_gold_rows(json.loads(gold_path.read_text(encoding="utf-8")))
+    assert report["summary"]["overall_status"] == "pass"

@@ -3,440 +3,601 @@
     "id": "Elysia-routing-controllers:src/database/database.ts:data_persistence",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/database/database.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "bun-api:apps/backend/package.json:identity_ui",
+    "id": "bun-api:apps/backend/package.json:multi_label",
     "repo_name": "bun-api",
     "file_path": "apps/backend/package.json",
-    "expected_block": "Identity UI",
+    "node_id": "",
+    "accepted_blocks": [
+      "Identity UI",
+      "Data Persistence"
+    ],
+    "primary_block": "Identity UI",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-kickstart:api/index.tsx:connectivity_layer",
     "repo_name": "elysia-kickstart",
     "file_path": "api/index.tsx",
-    "expected_block": "Connectivity Layer",
+    "node_id": "",
+    "accepted_blocks": [
+      "Connectivity Layer"
+    ],
+    "primary_block": "Connectivity Layer",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:prisma/seed.ts:data_persistence",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "prisma/seed.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "Elysia-routing-controllers:src/database/index.ts:data_persistence",
+    "id": "Elysia-routing-controllers:src/database/index.ts:multi_label",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/database/index.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence",
+      "Search Architecture"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "bun-api:apps/backend/package.json:data_persistence",
-    "repo_name": "bun-api",
-    "file_path": "apps/backend/package.json",
-    "expected_block": "Data Persistence",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-kickstart:drizzle.config.ts:data_persistence",
     "repo_name": "elysia-kickstart",
     "file_path": "drizzle.config.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:prisma.config.ts:data_persistence",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "prisma.config.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "Elysia-routing-controllers:src/database/index.ts:search_architecture",
-    "repo_name": "Elysia-routing-controllers",
-    "file_path": "src/database/index.ts",
-    "expected_block": "Search Architecture",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/scripts/generate-crud.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/scripts/generate-crud.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "elysia-kickstart:public/htmx@1.9.5.min.js:data_persistence",
+    "id": "elysia-kickstart:public/htmx@1.9.5.min.js:multi_label",
     "repo_name": "elysia-kickstart",
     "file_path": "public/htmx@1.9.5.min.js",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence",
+      "Search Architecture"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/config/index.ts:search_architecture",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/config/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/database/schema.ts:data_persistence",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/database/schema.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/index.ts:search_architecture",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:public/htmx@1.9.5.min.js:search_architecture",
-    "repo_name": "elysia-kickstart",
-    "file_path": "public/htmx@1.9.5.min.js",
-    "expected_block": "Search Architecture",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/emails/ResetPasswordEmail.tsx:core_rendering",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/emails/ResetPasswordEmail.tsx",
-    "expected_block": "Core Rendering",
+    "node_id": "",
+    "accepted_blocks": [
+      "Core Rendering"
+    ],
+    "primary_block": "Core Rendering",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/index.ts:search_architecture",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/lib/prisma.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/lib/prisma.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "elysia-kickstart:src/app/api/auth/index.ts:identity_ui",
+    "id": "elysia-kickstart:src/app/api/auth/index.ts:multi_label",
     "repo_name": "elysia-kickstart",
     "file_path": "src/app/api/auth/index.ts",
-    "expected_block": "Identity UI",
+    "node_id": "",
+    "accepted_blocks": [
+      "Identity UI",
+      "Core Rendering",
+      "Access Control",
+      "Connectivity Layer"
+    ],
+    "primary_block": "Identity UI",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/emails/VerifyEmail.tsx:core_rendering",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/emails/VerifyEmail.tsx",
-    "expected_block": "Core Rendering",
+    "node_id": "",
+    "accepted_blocks": [
+      "Core Rendering"
+    ],
+    "primary_block": "Core Rendering",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/middlewares/index.ts:search_architecture",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/middlewares/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/lib/redis.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/lib/redis.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/auth/index.ts:core_rendering",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/api/auth/index.ts",
-    "expected_block": "Core Rendering",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/emails/WelcomeEmail.tsx:core_rendering",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/emails/WelcomeEmail.tsx",
-    "expected_block": "Core Rendering",
+    "node_id": "",
+    "accepted_blocks": [
+      "Core Rendering"
+    ],
+    "primary_block": "Core Rendering",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/modules/index.ts:search_architecture",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/modules/index.ts:search_architecture",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/auth/index.ts:access_control",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/api/auth/index.ts",
-    "expected_block": "Access Control",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/index.ts:search_architecture",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/modules/notes/index.ts:search_architecture",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/notes/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "bun-api:apps/backend/src/modules/post/index.ts:data_persistence",
+    "id": "bun-api:apps/backend/src/modules/post/index.ts:multi_label",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/post/index.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence",
+      "Search Architecture"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/auth/index.ts:connectivity_layer",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/api/auth/index.ts",
-    "expected_block": "Connectivity Layer",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/lib/logger.ts:system_telemetry",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/lib/logger.ts",
-    "expected_block": "System Telemetry",
+    "node_id": "",
+    "accepted_blocks": [
+      "System Telemetry"
+    ],
+    "primary_block": "System Telemetry",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/modules/notes/notes.controller.ts:data_persistence",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/notes/notes.controller.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "bun-api:apps/backend/src/modules/post/index.ts:search_architecture",
-    "repo_name": "bun-api",
-    "file_path": "apps/backend/src/modules/post/index.ts",
-    "expected_block": "Search Architecture",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/index.test.ts:core_rendering",
+    "id": "elysia-kickstart:src/app/api/index.test.ts:multi_label",
     "repo_name": "elysia-kickstart",
     "file_path": "src/app/api/index.test.ts",
-    "expected_block": "Core Rendering",
+    "node_id": "",
+    "accepted_blocks": [
+      "Core Rendering",
+      "Connectivity Layer"
+    ],
+    "primary_block": "Core Rendering",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/lib/prisma.ts:data_persistence",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/lib/prisma.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/modules/notes/notes.dto.ts:data_persistence",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/notes/notes.dto.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/modules/post/model.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/post/model.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/index.test.ts:connectivity_layer",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/api/index.test.ts",
-    "expected_block": "Connectivity Layer",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-supabase-tempate:src/lib/supabase.ts:data_persistence",
     "repo_name": "elysia-supabase-tempate",
     "file_path": "src/lib/supabase.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "Elysia-routing-controllers:src/modules/notes/notes.service.ts:data_persistence",
+    "id": "Elysia-routing-controllers:src/modules/notes/notes.service.ts:multi_label",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/notes/notes.service.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence",
+      "Connectivity Layer"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
-    "id": "bun-api:apps/backend/src/modules/post/service.ts:data_persistence",
+    "id": "bun-api:apps/backend/src/modules/post/service.ts:multi_label",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/post/service.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence",
+      "Connectivity Layer"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
-    "id": "elysia-kickstart:src/app/api/index.ts:core_rendering",
+    "id": "elysia-kickstart:src/app/api/index.ts:multi_label",
     "repo_name": "elysia-kickstart",
     "file_path": "src/app/api/index.ts",
-    "expected_block": "Core Rendering",
+    "node_id": "",
+    "accepted_blocks": [
+      "Core Rendering",
+      "Connectivity Layer"
+    ],
+    "primary_block": "Core Rendering",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
-    "id": "Elysia-routing-controllers:src/modules/notes/notes.service.ts:connectivity_layer",
-    "repo_name": "Elysia-routing-controllers",
-    "file_path": "src/modules/notes/notes.service.ts",
-    "expected_block": "Connectivity Layer",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "bun-api:apps/backend/src/modules/post/service.ts:connectivity_layer",
-    "repo_name": "bun-api",
-    "file_path": "apps/backend/src/modules/post/service.ts",
-    "expected_block": "Connectivity Layer",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/api/index.ts:connectivity_layer",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/api/index.ts",
-    "expected_block": "Connectivity Layer",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "Elysia-routing-controllers:src/modules/tasks/index.ts:background_processing",
+    "id": "Elysia-routing-controllers:src/modules/tasks/index.ts:multi_label",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/tasks/index.ts",
-    "expected_block": "Background Processing",
+    "node_id": "",
+    "accepted_blocks": [
+      "Background Processing",
+      "Search Architecture"
+    ],
+    "primary_block": "Background Processing",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/modules/user/index.ts:search_architecture",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/user/index.ts",
-    "expected_block": "Search Architecture",
+    "node_id": "",
+    "accepted_blocks": [
+      "Search Architecture"
+    ],
+    "primary_block": "Search Architecture",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
-    "id": "elysia-kickstart:src/app/index.tsx:identity_ui",
+    "id": "elysia-kickstart:src/app/index.tsx:multi_label",
     "repo_name": "elysia-kickstart",
     "file_path": "src/app/index.tsx",
-    "expected_block": "Identity UI",
+    "node_id": "",
+    "accepted_blocks": [
+      "Identity UI",
+      "Search Architecture"
+    ],
+    "primary_block": "Identity UI",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "Elysia-routing-controllers:src/modules/tasks/index.ts:search_architecture",
-    "repo_name": "Elysia-routing-controllers",
-    "file_path": "src/modules/tasks/index.ts",
-    "expected_block": "Search Architecture",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "Consolidated multi-label gold target; benchmark accepts any listed block.",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/modules/user/model.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/user/model.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "high",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
-  },
-  {
-    "id": "elysia-kickstart:src/app/index.tsx:search_architecture",
-    "repo_name": "elysia-kickstart",
-    "file_path": "src/app/index.tsx",
-    "expected_block": "Search Architecture",
-    "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "Elysia-routing-controllers:src/modules/tasks/tasks.controller.ts:data_persistence",
     "repo_name": "Elysia-routing-controllers",
     "file_path": "src/modules/tasks/tasks.controller.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "bun-api:apps/backend/src/modules/user/service.ts:data_persistence",
     "repo_name": "bun-api",
     "file_path": "apps/backend/src/modules/user/service.ts",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   },
   {
     "id": "elysia-kickstart:src/app/todos/components.tsx:data_persistence",
     "repo_name": "elysia-kickstart",
     "file_path": "src/app/todos/components.tsx",
-    "expected_block": "Data Persistence",
+    "node_id": "",
+    "accepted_blocks": [
+      "Data Persistence"
+    ],
+    "primary_block": "Data Persistence",
     "confidence": "medium",
-    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json"
+    "source": "C:\\Users\\mac\\heart-transplant\\docs\\evals\\vendored-ground-truth.json",
+    "notes": "",
+    "status": "active"
   }
 ]

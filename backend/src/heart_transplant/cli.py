@@ -19,6 +19,7 @@ from heart_transplant.db.surreal_loader import load_artifact
 from heart_transplant.db.verify import verify_artifact_in_db
 from heart_transplant.evals.build_gold import write_gold_from_ground_truth
 from heart_transplant.evals.corpus_gate import evaluate_corpus_gate
+from heart_transplant.evals.gold_audit import audit_gold_file
 from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set
 from heart_transplant.graph_integrity import run_graph_integrity
 from heart_transplant.maximize.report import build_maximize_report, write_maximize_report
@@ -391,6 +392,18 @@ def build_gold(
         only_repo_names=only,
     )
     typer.echo(json.dumps({"wrote": str(out.resolve()), "item_count": len(items)}, indent=2))
+
+
+@app.command("gold-audit")
+def gold_audit(
+    gold_set: Path = typer.Argument(..., exists=True, dir_okay=False, help="Gold benchmark JSON to audit."),
+) -> None:
+    """Rail 1: audit gold rows before optimizing classifier or graph behavior."""
+
+    report = audit_gold_file(gold_set.resolve())
+    typer.echo(json.dumps(report, indent=2))
+    if report.get("summary", {}).get("overall_status") != "pass":
+        raise typer.Exit(code=1)
 
 
 @app.command("block-benchmark")

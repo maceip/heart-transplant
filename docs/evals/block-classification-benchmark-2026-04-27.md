@@ -10,10 +10,12 @@ From `C:\Users\mac\heart-transplant\backend`:
 $env:PYTHONPATH='src'
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir ..\.heart-transplant\artifacts\2026-04-25T20-06-30Z__vendor__elysia-supabase-tempate --gold-set ..\docs\evals\gold_block_benchmark.json --classify-if-missing
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir ..\.heart-transplant\artifacts\2026-04-26T17-22-18Z__vendor__clean-elysia --gold-set ..\docs\evals\gold_block_benchmark_holdout.json --classify-if-missing
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark_holdout.json
 .\.venv-win\Scripts\python.exe -m pytest tests/test_gold_benchmark.py tests/test_phase_metrics.py
 ```
 
-Test result: `14 passed, 1 warning`.
+Current focused test result for the gold rail: `21 passed, 1 warning`.
 
 ## Results
 
@@ -25,6 +27,8 @@ Test result: `14 passed, 1 warning`.
 The reference score is a useful smoke proof, not the launch claim. The holdout split is the beta baseline from this run: on nodes the ingest actually materialized at the time, the heuristic block classifier got 8 of 11 rows right. End-to-end accuracy dropped to 8 of 20 because 9 gold rows pointed at files that did not become addressable `CodeNode` records.
 
 Update after the 50-repo hardening pass: file-surface nodes, secondary block scoring, and broader parser coverage have landed. This report remains the preserved baseline for the April 27 artifact pair; rerun the benchmark before treating these numbers as the current product score.
+
+Update after the Rail 1 gold-standard pass: the committed gold files now use the stable `accepted_blocks` / `primary_block` schema, duplicate same-target rows have been consolidated into multi-label rows, and `gold-audit` passes on the committed reference, broad, and holdout splits. New `block-benchmark` JSON reports include a `gold_health` object and summary fields for review rows, multi-label rows, missing required fields, and contradictory active targets.
 
 ## What This Proves
 
@@ -41,7 +45,7 @@ Update after the 50-repo hardening pass: file-surface nodes, secondary block sco
 
 ## Error Analysis
 
-Holdout missing rows:
+Historical holdout missing rows from the preserved April 27 artifact:
 
 - `src/bull/index.ts` appears twice in gold.
 - `src/bull/queue/index.ts` appears twice in gold.
@@ -51,7 +55,7 @@ Holdout missing rows:
 
 These are mostly barrel/index files. They are real architectural surfaces. File-surface materialization now exists, so these rows should be rerun before the missing-node rate is used in a launch claim.
 
-Holdout scorable misses:
+Historical holdout scorable misses from the preserved April 27 artifact:
 
 - `src/libs/cache/cache.ts`: gold contains conflicting expectations across rows; after the cache-path correction it classifies as `Persistence Strategy`, while one gold row expects `Data Persistence`.
 - `src/libs/config/database.config.ts`: expected `Experimentation`, classified `Data Persistence`; the code is a database config wrapper, so the gold label may need review.
