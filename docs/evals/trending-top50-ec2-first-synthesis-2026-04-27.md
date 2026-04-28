@@ -43,7 +43,7 @@ The runner cloned one repository at a time on EC2 host `16xl`, ran `heart_transp
 | C++ | 10 | 9 | 1 | 0 |
 | Java | 10 | 10 | 0 | 6 |
 
-Important interpretation: "manifest language" is GitHub Trending's category, not necessarily what our backend parsed. The current backend parses TypeScript/TSX/JavaScript/Python/Go/Prisma. It does not yet parse Rust, C++, or Java source as first-class languages. Several Rust/C++/Java-category repos still produced nodes because they contain supported-language tooling, bindings, scripts, examples, or web surfaces.
+Important interpretation: "manifest language" is GitHub Trending's category, not necessarily what our backend parsed during this first run. At the time, the backend parsed TypeScript/TSX/JavaScript/Python/Go/Prisma. After this synthesis, first-class Rust, Java, C, and C++ parser coverage landed. Several Rust/C++/Java-category repos in the preserved run produced nodes only because they contained supported-language tooling, bindings, scripts, examples, or web surfaces.
 
 ## Node And Edge Totals By Manifest Language
 
@@ -120,18 +120,18 @@ Expected first-synthesis result:
 - `zero_node_ok = 6`
 - strict status: `fail`
 
-That failure is the point. For marketing/trust we can truthfully say we ran the 50-repo corpus. For engineering quality, the same corpus tells us exactly what must improve before the result becomes a launch gate.
+That failure is the point. For marketing/trust we can say we ran the 50-repo corpus and preserved the result. For engineering quality, the same corpus tells us exactly what must improve before the result becomes a launch gate.
 
 ## What It Exposes
 
-- Parser coverage is not aligned with the requested language set. Rust, C++, and Java categories are currently only partially represented through supported-language files inside those repos.
+- Parser coverage was not aligned with the requested language set during the preserved run. Rust, C++, and Java parser coverage has since landed and needs a full corpus rerun.
 - Deep parse trees can break recursive traversal. This is now a concrete P1 ingestion hardening item.
 - Phase metrics can be expensive on large artifacts: `openclaw/openclaw` and `tensorflow/tensorflow` each spent about nine minutes in metrics.
 - "OK" does not always mean useful. Zero-node artifacts must be separated from successful architecture understanding.
 
 ## Immediate Next Assessment Questions
 
-1. Which parser backends must be added before we can honestly benchmark Rust, C++, and Java repos?
+1. Does the post-fix rerun eliminate the three ingest crashes and the six zero-node successes?
 2. Should zero-node artifacts fail the smell-test gate instead of reporting `ok`?
 3. Should phase metrics skip Surreal/semantic work for zero-node artifacts?
 4. Should large-repo metrics be sampled, capped, or split into a structural pass and semantic pass?

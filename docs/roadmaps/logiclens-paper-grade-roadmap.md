@@ -1,34 +1,35 @@
 # LogicLens-Paper-Grade Roadmap
 
-Last updated: 2026-04-25
+Last updated: 2026-04-28
 
-**Major update**: Added Phases 9–13 covering the five critical missing capabilities (Temporal Understanding, Causal Simulation, Proactive Regret Detection, Closed-Loop Execution, and Multi-Modal Understanding), plus **Phase 14** (Program Surface & Cross-Phase Readiness). Each phase includes opinionated production targets and non-gamable gates where applicable.
+**Major update**: The roadmap now reflects the April 27-28 work: 50-repo corpus synthesis, iterative ingest traversal, Rust/Java/C/C++ parser coverage, file-surface nodes, SCIP-only orphan promotion, canonical graph/evidence surfaces, `paper-checklist`, and the GitHub Pages repo-surgery console. Phases 9–14 remain the organizing structure, but the current claim is narrower: 1 paper feature implemented, 7 partial, 0 missing according to `heart-transplant paper-checklist`.
 
 ## Purpose
 
-This document is a hard reset on truthfulness.
+This document is a hard reset on project claims.
 
 Its job is to describe:
 
 - what `heart-transplant` actually does today
 - what is only partial or broken
-- what exact baby steps are needed to reach a system that is as good as, and eventually better than, the LogicLens paper architecture
+- what exact steps are needed to reach a system that is as good as, and eventually better than, the LogicLens paper architecture
 
 This document is intentionally based only on real code, real files, and real command output from the current repo.
 
 ## Evidence Used For This Assessment
 
-The assessment below is based on these real commands and artifacts:
+This roadmap started from the older commands below and has been updated with the current April 28 code surface. Use `paper-checklist`, `program-surface`, and the repo-root gates for the latest machine-readable status.
 
-- `C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m pytest -q`
-  - result: `8 passed in 0.24s`
-- `C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m heart_transplant.cli test-graph C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate`
-- `C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m heart_transplant.cli consume-scip C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate`
-- `C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate`
-- `Get-Content C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate\scip-consumed.json`
-- `Get-Content C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate\scip-index.json`
+- `.\.venv-win\Scripts\python.exe -m pytest`
+  - current recently verified result: `61 passed, 1 warning`
+- `.\.venv-win\Scripts\python.exe -m heart_transplant.cli paper-checklist`
+  - current result: `8` features tracked, `1` implemented, `7` partial, `0` missing
+- `docs/evals/trending-top50-ec2-first-synthesis-2026-04-27.md`
+  - preserved first 50-repo EC2 synthesis with 3 ingest crashes and 6 zero-node successes documented
+- `docs/evals/block-classification-benchmark-2026-04-27.md`
+  - preserved block benchmark baseline; predates file-surface and secondary-block scoring
 
-Current reference artifact:
+Older reference artifact retained for comparison:
 
 - [2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate](C:/Users/mac/heart-transplant/.heart-transplant/artifacts/2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate)
 
@@ -46,8 +47,9 @@ Current reference artifact:
 1. `Tree-sitter-based local ingest`
 
 - Implemented in [treesitter_ingest.py](C:/Users/mac/heart-transplant/backend/src/heart_transplant/ingest/treesitter_ingest.py)
-- Supports `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.py`, `.go`
-- Produces `CodeNode` records and `CONTAINS` edges
+- Supports TypeScript/TSX/JavaScript/Python/Go/Prisma/Rust/Java/C/C++
+- Produces `FileNode`, file-surface `CodeNode`, symbol `CodeNode`, and `CONTAINS` edges
+- Uses iterative traversal for deep parse trees
 
 2. `Canonical Python backend`
 
@@ -79,6 +81,18 @@ Current reference artifact:
   - `40` contains edges
   - `0` missing containment edges
 
+6. `LogicLens evidence-contract surfaces`
+
+- Implemented through `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, and `paper-checklist`
+- Current status is partial because the question-answer benchmark and unsupported-answer scoring are not complete
+
+7. `50-repo corpus pressure`
+
+- The first 50-repo EC2 synthesis is preserved under `docs/evals/`
+- The three first-run ingest crashes were recursive traversal failures; iterative traversal has landed
+- The six zero-node successes were parser coverage failures; Rust/Java/C/C++ coverage has landed
+- The full 50-repo corpus still needs a post-fix rerun before replacing the preserved baseline
+
 ### What is partial today
 
 1. `SCIP consumption`
@@ -87,7 +101,7 @@ Current reference artifact:
 - It parses the real binary `index.scip` via official protobuf bindings from [scip_pb2.py](C:/Users/mac/heart-transplant/backend/src/heart_transplant/generated/scip_pb2.py)
 - It reads definitions, references, and symbol relationships
 
-But the critical truth today is:
+Current status:
 
 - latest reference artifact now shows `resolved_code_nodes = 40`
 - latest reference artifact still shows `implementation_edges = []`
@@ -102,44 +116,30 @@ The current canonical backend has a real SCIP integration seam now. The remainin
 - The latest graph smoke report shows `node_kind_counts = { "function": 40 }`
 - That means the current extractor is function-heavy and not yet giving us a rich structural spine across classes, methods, interfaces, routes, configs, schemas, imports, and symbol references
 
-This is not fake, but it is too shallow to be called paper-grade.
+This is useful, but still too shallow to be called paper-grade.
 
 ### What is missing today
 
-1. `SurrealDB graph persistence`
-
-- No canonical graph is stored in SurrealDB yet
-- Today the source of truth is JSON artifact files on disk
-
-2. `Cross-repo SCIP linking`
+1. `Cross-repo SCIP linking`
 
 - We do not yet stitch multiple repos together through shared symbol identities or external references
 
-3. `Pydantic-AI semantic classification`
-
-- The 24-block ontology exists
-- There is no canonical classifier in the new backend yet
-
-4. `MCP graph tools`
-
-- No MCP server yet
-- No tools like `get_node`, `trace_logic_path`, `get_impact_radius`, or `find_block_neighbors`
-
-5. `Continue CLI graph exploration`
+2. `Continue CLI graph exploration`
 
 - Continue is not yet acting against the new canonical graph backend
 
-6. `Paper-style evaluation harness`
+3. `Paper-style evaluation harness`
 
 - We do not yet have the equivalent of a reproducible question set with answer scoring against a baseline
+- We do have starter gold block benchmarks and a paper feature checklist
 
 ### What is archived and should not guide new architecture
 
-- The old JS/Semantica/frontend path in [archive/legacy-prototype](C:/Users/mac/heart-transplant/archive/legacy-prototype)
+- The old JS/Semantica/frontend path is not present in this checkout. Legacy code was excluded from the clean-room restart rather than preserved under an `archive/` path.
 
 That code may still contain useful ideas or reference implementations, but it is not the canonical path.
 
-## Honest Comparison To The LogicLens Paper
+## Comparison To The LogicLens Paper
 
 If the standard is:
 
@@ -148,23 +148,18 @@ If the standard is:
 then the current answer is:
 
 - `structural ingest`: yes, but shallow
-- `semantic enrichment`: no
-- `entity/action semantic layer`: no
-- `graph retrieval tooling`: no
+- `semantic enrichment`: partial
+- `entity/action semantic layer`: partial and not yet scored
+- `graph retrieval tooling`: partial
 - `paper-style evaluation`: no
 
 If the standard is:
 
 > “are we building something fake?”
 
-then the answer is:
+then the answer is: no. The current backend is implemented and testable, but most paper-shaped capabilities are still partial.
 
-- no, the current backend is real
-- but it is still only the first slice of the real stack
-
-The biggest present danger is not fabrication.
-
-The biggest present danger is stopping at “we have a SCIP file” instead of making SCIP actually determine identity and edges.
+The biggest present danger is stopping at “we have surfaces” instead of measuring whether they answer architecture questions better than a baseline.
 
 ## Architectural Target
 
@@ -198,8 +193,8 @@ It is:
 
 1. Do not add demo-only layers before the structural seam is correct.
 2. Do not claim cross-repo intelligence before SCIP-backed linking exists.
-3. Do not add semantic classification until `CodeNode` identity and neighborhoods are trustworthy.
-4. Do not add Continue orchestration until there is a real query surface to orchestrate.
+3. Do not call semantic classification product-ready until holdout scoring improves.
+4. Do not add Continue orchestration claims until the real query surface is exercised end to end.
 5. Prefer fewer real capabilities over more impressive-looking partial ones.
 6. Canonicalize identity early. File and node identity must not depend on operating-system path separators.
 7. Make parser ownership explicit. Tree-sitter owns spatial boundaries; SCIP owns logical identity and reference topology.
@@ -1330,7 +1325,7 @@ Acceptance criteria:
 
 ### Phase 7: Build A Paper-Style Evaluation Harness
 
-This is the point where we can honestly compare ourselves to paper-quality system behavior.
+This is the point where we can compare ourselves to paper-quality system behavior.
 
 #### Step 7.1: Create a question set over the vendored corpus
 
@@ -1403,10 +1398,10 @@ The likely ways to exceed it are:
 
 **Purpose**: Pause before Phase 9 and fully mine, stress-test, and demonstrate the current static graph system. This is not a new speculative feature phase. It is an evidence pass that tells us how good the existing Tree-sitter + SCIP + SurrealDB + semantic + MCP + blast-radius stack really is.
 
-**Current Honest Status**:
-- Phases 0-5, 7, and 8 pass the protected hard gates on the latest reference artifact.
+**Current Status**:
+- Phases 0-5, 7, and 8 have substantial implementations, but release claims should be tied to fresh repo-root hard-gate output on the shipping artifact.
 - Phase 6 has a Continue-facing integration module, but still needs local end-to-end operator proof because `cn` / Continue CLI is not currently on PATH.
-- The current system is real enough to evaluate and demo, but not yet enough to claim temporal, causal, proactive regret, or closed-loop execution capabilities.
+- The current system is strong enough to evaluate and demo internally, but not yet enough to claim temporal, causal, proactive regret, or closed-loop execution capabilities as product-ready.
 
 **Work Items**:
 1. Audit the current system against real artifacts:
@@ -1429,7 +1424,7 @@ The likely ways to exceed it are:
    - run the ablation review for repo/vendor-specific runtime shortcuts
    - record failures as evidence, not embarrassment
 5. Decide Phase 9 readiness:
-   - Phase 9 starts only after the static graph system has reproducible demos, broader benchmarks, and clearly documented limitations.
+   - Phase 9 is underway. The next readiness bar is moving from selected Tree-sitter replay to measured temporal answers over known-history fixtures.
 
 **Non-Gamable Gates**:
 1. `maximize_gate_reference_reproducible`: A fresh run against the reference artifact must reproduce the protected hard-gate results, with any external dependency failures explicitly named.
@@ -1441,7 +1436,7 @@ The likely ways to exceed it are:
 **Exit Criteria**:
 - We know exactly what the current system does well.
 - We know exactly where it fails.
-- The benchmark is broad enough to guide improvement without fooling ourselves.
+- The benchmark is broad enough to guide improvement without overfitting.
 - Operators have real demos they can rerun.
 - Phase 9 has a clear, evidence-backed start line.
 
@@ -1452,9 +1447,9 @@ The likely ways to exceed it are:
 **Purpose**: Move from static snapshots to understanding how architecture evolves over time. Detect architectural drift, successful patterns, painful migrations, and "tribal knowledge" encoded in git history.
 
 **Opinionated Production Implementation**:
-- New `temporal/` package with `git_miner.py`, `evolution_metrics.py`, `drift_detector.py`
-- Use `gitpython` + `pandas` to build time-series views of the 24-block ontology over commits
-- Store "architectural snapshots" in a dedicated SurrealDB table (`ht_temporal`)
+- Existing `temporal/` package with `git_miner.py`, `scan.py`, `snapshot.py`, `diff.py`, `metrics.py`, `drift.py`, and `gates.py`
+- Use deterministic git commands and replayed Tree-sitter snapshots for selected commits; add SCIP + semantic replay where needed for paper-grade claims
+- Store "architectural snapshots" in graph form once replay output is stable; current output is report JSON
 - Compute metrics like: block_churn_rate, coupling_tightness_trend, regret_accumulation_score
 - Build "pattern success index" based on commit frequency, bug-fix correlation, and test coverage trends
 
@@ -1578,7 +1573,8 @@ The likely ways to exceed it are:
 
 ### Phase 14: Program Surface & Cross-Phase Readiness
 
-**Purpose**: After Phases 9–13, the system risks becoming a bag of siloed capabilities. Phase 14 provides a single, honest readiness index: which modules import cleanly, which CLIs are wired, and where stubs remain. It is the integration layer *before* claiming production operator readiness.
+**Purpose**: After Phases 9–13, the system risks becoming a bag of siloed capabilities. Phase 14 provides a single readiness index: which modules import cleanly, which CLIs are wired, and where stubs remain. It is the integration layer *before* claiming production operator readiness.
+**Purpose**: After Phases 9–13, the system risks becoming a bag of siloed capabilities. Phase 14 provides a single readiness index: which modules import cleanly, which CLIs are wired, and where stubs remain. It is the integration layer *before* claiming production operator readiness.
 
 **Opinionated Production Implementation**:
 - `surface/status.py` — `program_surface_status()` reporting import health for maximize gates, temporal scan, and Phases 10–13 entrypoints
@@ -1588,7 +1584,7 @@ The likely ways to exceed it are:
 **Non-Gamable Gates** (lightweight; complements heavier phase gates):
 1. `surface_gate_import_health`: Every symbol declared in the program surface manifest must import without error in a clean venv with only production dependencies.
 2. `surface_gate_cli_parity`: Every phase with a documented CLI entrypoint must register the same command via `heart_transplant.cli` (no orphan scripts).
-3. `surface_gate_stub_truthfulness`: Any command that is still a stub must emit JSON with `"status": "stub"` and must not claim gate passage.
+3. `surface_gate_stub_contract`: Any command that is still a stub must emit JSON with `"status": "stub"` and must not claim gate passage.
 
 **Exit Criteria**:
 - One command answers “what is real vs stub across the roadmap?”
@@ -1598,12 +1594,12 @@ The likely ways to exceed it are:
 
 If we want the smallest sequence that moves us forward without fluff, it is:
 
-1. Fix SCIP path normalization in [scip_consume.py](C:/Users/mac/heart-transplant/backend/src/heart_transplant/scip_consume.py)
-2. Add a regression test for Windows-vs-posix path mismatches in [test_scip_consume.py](C:/Users/mac/heart-transplant/backend/tests/test_scip_consume.py)
-3. Re-run `consume-scip` on the reference artifact and prove `resolved_code_nodes > 0`
-4. Persist real SCIP-backed edges into `structural-artifact.json`
-5. Expand Tree-sitter structural extraction beyond function-heavy output
-6. Only then begin SurrealDB loading
+1. Rerun the full 50-repo corpus after iterative traversal and Rust/Java/C/C++ parser coverage.
+2. Rerun the block benchmark after file-surface and secondary-block scoring changes.
+3. Add a scored evidence-QA harness for `answer-with-evidence` and graph traversal commands.
+4. Extend temporal replay to SCIP + semantic replay for selected commits.
+5. Fix and fixture regret-specific surgery plans, starting with logging inconsistency.
+6. Run repo-root hard gates on the shipping artifact and publish exact reproduction inputs.
 
 ## Program-Level Exit Criteria
 
@@ -1704,7 +1700,7 @@ The original intent was not just code exploration. It was:
 - Human operators report that the system reduces (rather than increases) cognitive load during large-scale modernization work
 - The regret detection engine finds real issues that were not pre-programmed or hinted at in prompts
 
-## Final “No Self-Deception” Check
+## Final Claim Check
 
 Before claiming paper-grade or regret-SDK readiness, ask all three:
 
@@ -1716,7 +1712,7 @@ If any answer is “no,” we are not there yet.
 
 ## What We Should Not Do Yet (Updated Guidance)
 
-**Until Phases 0-8 are fully green:**
+**Until the repo-root gates and paper checklist support the claim:**
 
 - Do not add more frontend or elaborate UIs
 - Do not claim "agentic" capabilities beyond what the MCP tools actually deliver
@@ -1725,28 +1721,29 @@ If any answer is “no,” we are not there yet.
 **Once Phases 0-8 are complete, the focus must shift to:**
 
 - Implementing Phases 9-13 with the same rigor (non-gamable gates)
-- **Never** adding demo-only layers or marketing claims before the gates pass
+- Avoid adding demo-only layers or marketing claims before the gates pass
 - Maintaining the "no vendor-specific scaffolding" rule from Exit Criteria B
 
 The new phases (9-13) represent the real leap from "impressive analysis tool" to "architectural co-pilot." We only claim that leap after the gates prove it.
 
-## Bottom Line (Updated After Phase 9-13 Planning)
+## Bottom Line (Updated After April 28 Documentation Sweep)
 
-The current repo has a **production-grade foundation** for structural + semantic graph construction. With the additions in Phases 9-13, we are no longer building toward the LogicLens paper — we are building something meaningfully more ambitious: a **living architectural nervous system** that can proactively detect regret, simulate outcomes, plan surgery, execute transplants, and learn.
+The current repo has a useful foundation for structural graph construction and the beginning of a LogicLens-style evidence backend. It is not feature-complete against the paper. The current machine-readable checklist says: `1` implemented paper feature, `7` partial, `0` missing.
 
 **Today we have (real):**
-- Strong structural + SCIP identity backbone
-- Rich 24-block semantic classification with neighborhoods
-- Production SurrealDB persistence, MCP tools, and blast radius
-- Phase metrics, validation gates, and truthfulness discipline
+- Structural ingest with file surfaces, SCIP identity, orphan promotion, and broader parser coverage
+- 24-block semantic classification with neighborhoods, secondary labels, and preserved holdout benchmark baselines
+- SurrealDB persistence, MCP tools, blast radius, causal/regret/execution/multimodal first passes
+- Canonical graph/evidence commands and a `paper-checklist` status surface
+- 50-repo corpus evidence with failure/fix documentation
 
 **What Phases 9-13 must deliver:**
-- Temporal memory and evolutionary understanding
+- Temporal memory with measured replay/diff correctness
 - Causal simulation with calibrated confidence
-- Proactive (not just reactive) regret detection
-- Closed-loop execution that actually changes code and learns
-- True multi-modal understanding across the entire system
+- Proactive regret detection with fixture precision and plan specificity
+- Closed-loop execution that changes code safely and records validation
+- Multi-modal understanding across code, tests, infra, specs, and observability
 
-This is no longer research theater. When all gates pass, we will have a system that can meaningfully accelerate large-scale modernization work while reducing risk — something few organizations have ever built.
+When all gates pass, this can become a system that accelerates large-scale modernization work while reducing risk. The near-term job is to rerun the corpus, score evidence retrieval, and keep every claim tied to a reproducible artifact.
 
 The posture remains: **rigor first**. Every phase must ship non-gamable gates. We do not claim victory until a skeptical engineer can rerun every gate and get the same result on a new codebase.

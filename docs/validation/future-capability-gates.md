@@ -1,6 +1,6 @@
 # Future Capability Gates
 
-Last updated: 2026-04-24
+Last updated: 2026-04-28
 
 ## Purpose
 
@@ -643,7 +643,7 @@ Why it matters:
 
 ## G. Evaluation Gates
 
-These gates define when we can honestly say we have paper-level quality, not just paper-shaped architecture.
+These gates define when we can claim paper-level quality, not just paper-shaped architecture.
 
 ### Gate G1: Question benchmark gate
 

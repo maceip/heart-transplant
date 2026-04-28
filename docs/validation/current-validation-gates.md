@@ -1,6 +1,6 @@
 # Current Validation Gates
 
-Last updated: 2026-04-24
+Last updated: 2026-04-28
 
 ## Purpose
 
@@ -15,15 +15,12 @@ They are built from existing code in the canonical backend and run against a rea
 From the repo root:
 
 ```powershell
-C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir C:\Users\mac\heart-transplant\.heart-transplant\artifacts\2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir <artifact-directory>
 ```
 
-## Real Inputs
+## Reference Inputs
 
-- Repo path:
-  [vendor/github-repos/elysia-supabase-tempate](C:/Users/mac/heart-transplant/vendor/github-repos/elysia-supabase-tempate)
-- Artifact path:
-  [2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate](C:/Users/mac/heart-transplant/.heart-transplant/artifacts/2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate)
+The older captured reference used `vendor/github-repos/elysia-supabase-tempate` and artifact `2026-04-24T12-57-30Z__boomNDS__elysia-supabase-tempate`. For release work, rerun against the shipping artifact instead of treating this older artifact as the current launch proof.
 
 ## Gate Definitions
 
@@ -42,9 +39,9 @@ C:\Users\mac\heart-transplant\backend\.venv\Scripts\python.exe -m heart_transpla
 
 5. `scip_actually_resolves_nodes`
 - Checks whether SCIP has actually resolved symbol identities into the graph
-- This gate is intentionally allowed to fail today
+- This gate may fail on artifacts without `index.scip`; it should pass on TS/JS artifacts created with `ingest-local --with-scip`
 
-## Current Output
+## Captured Output From The Older Reference Artifact
 
 Current overall result:
 
@@ -112,7 +109,7 @@ Important remaining caveat:
 - `implementation_edge_count` is still `0`
 - the latest `scip-consumed.json` also reports a large `orphaned_symbol_count`
 
-So SCIP resolution is now real, but structural coverage is still shallower than the symbol graph available from SCIP.
+So SCIP resolution is real on this captured artifact, but structural coverage is still shallower than the symbol graph available from SCIP.
 
 ## Files Behind These Gates
 
@@ -143,3 +140,4 @@ It is structural coverage:
 - reduce orphaned symbols
 - enrich node kinds beyond functions
 - extract more addressable code units so SCIP and Tree-sitter align more completely
+- use the newer Rust/Java/C/C++ parser coverage and file-surface nodes when regenerating launch artifacts

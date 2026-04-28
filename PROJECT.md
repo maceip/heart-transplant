@@ -1,9 +1,9 @@
 # heart-transplant — Master Project Document
 
-**Last Updated**: 2026-04-27  
-**Current Phase**: **Phase 8.5 proof-tightening** and **Phase 9 practical temporal layer** are in `main`. **Phases 10–13** have first-pass implementations, but the repo-root launch gate is the source of truth for beta readiness. Roadmap **non-gamable gates** for 10–13 are **not** claimed yet; **Phase 14** `program-surface` tracks import health for these entrypoints.
+**Last Updated**: 2026-04-28
+**Current Phase**: **Phase 8.5 proof-tightening**, **Phase 9 practical temporal replay**, and the first LogicLens evidence-contract surfaces are in `main`. **Phases 10–13** have first-pass implementations, but their roadmap gates are not launch claims yet. The repo-root launch gate and `paper-checklist` are the source of truth for beta readiness and paper-alignment status.
 
-## Current Honest State
+## Current State
 
 We have a real foundation across the original Phase 0-8 roadmap, with explicit launch caveats:
 
@@ -11,23 +11,26 @@ We have a real foundation across the original Phase 0-8 roadmap, with explicit l
 - Current review found the previous hard-gate shortcut depended on a private harness and the latest local gate run was not fully green. Treat older claims that phases 0-5, 7, and 8 “pass protected hard gates” as stale until regenerated with the in-repo shortcut.
 - Phase 6 has a real Continue-facing integration module, but the local operator proof is not complete because `cn` / Continue CLI is not currently on PATH.
 
-So the honest status is: the graph, semantic, persistence, MCP, blast-radius, and evaluation foundation is real; the beta launch claim depends on a fresh in-repo hard-gate run, and the Continue operator surface still needs local end-to-end proof.
+Current paper-alignment status from `heart-transplant paper-checklist`: 8 tracked LogicLens-style features, 1 implemented, 7 partial, 0 missing. The implemented feature is repository program graph construction. The partial features are symbol identity/reference completeness, semantic blocks, evidence retrieval, graph persistence, temporal reasoning, cross-layer reasoning, and regret planning.
 
 ### What Has Been Built (Real & Solid)
 - Clean, well-architected Python backend (`backend/src/heart_transplant/`)
 - High-quality structural ingestion using Tree-sitter + real SCIP symbol resolution
+- First-class file-surface nodes, SCIP-only orphan promotion, and parser coverage for TypeScript/TSX/JavaScript/Python/Go/Prisma/Rust/Java/C/C++
 - 24-block semantic ontology with neighborhood-aware classification
 - Full SurrealDB persistence, schema, indexing, and query layer
 - Production-grade MCP server with useful graph tools (`get_node`, `get_neighbors`, `trace_symbol_path`, `find_block_nodes`, `get_impact_radius`, etc.)
 - Intelligent blast radius computation with pruning logic
 - Working evaluation harness (Phase 7) with gold benchmark
-- Strong truthfulness infrastructure (`phase_metrics.py`, `validation_gates.py`, non-gamable gates)
+- Strong validation infrastructure (`phase_metrics.py`, `validation_gates.py`, non-gamable gates)
 - **Phase 8.5 (implemented, proof surface tightening)**: `maximize-audit`, `maximize-report`, `maximize-gates`, expanded `gold_block_benchmark.json` + holdout file, `build-gold` holdout/main splits
-- **Phase 9 (implemented, not paper-grade yet)**: `temporal-scan` and related temporal commands are real, but historical snapshots still infer blocks from versioned file paths instead of replaying full historical Tree-sitter + SCIP ingest
+- **Phase 9 (implemented, not paper-grade yet)**: `temporal-scan`, `temporal-diff`, `temporal-gates`, and optional `temporal-scan --replay-snapshots` are real. Historical replay now runs Tree-sitter ingest for selected commits; SCIP + semantic replay across full histories is still future work.
+- **LogicLens evidence surfaces (partial)**: `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, and `paper-checklist` exist as CLI surfaces, with tests covering the current evidence contract.
+- **50-repo corpus rail (partial, useful)**: the first EC2 synthesis is preserved under `docs/evals/`; the three crash failures and six zero-node successes are documented, with landed fixes for deep traversal and Rust/Java/C/C++ parser coverage. The full corpus still needs rerun before replacing the historical baseline.
 
 ### After 8.5 / 9 — What’s Next
 
-The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`program-surface`) is the cross-phase readiness index so stubs cannot masquerade as shipped gates.
+The next build target is not “more pages.” It is making the LogicLens-style behavior measurable: run the 50-repo corpus again after the parser fixes, raise the block benchmark, and turn evidence retrieval into a scored question-answer harness. **Phase 14** (`program-surface`) remains the cross-phase readiness index so stubs cannot masquerade as shipped gates.
 
 **Phase 8.5 (current deliverable):** static graph system audited, benchmark broadened, and proof surface being tightened; use `maximize-gates` with a real artifact **and a holdout artifact** for evidence.
 
@@ -40,7 +43,8 @@ The roadmap’s **Phases 10–13** are the next build targets. **Phase 14** (`pr
 - `docs/evals/gold_block_benchmark_holdout.json` — Holdout split for `clean-elysia` only
 - `docs/evals/gold_block_benchmark_broad.json` — Broader exploratory benchmark used to expose classifier weaknesses
 - `docs/evals/block-classification-benchmark-2026-04-27.md` — Latest measured block-classification benchmark readout
-- `docs/evals/trending-repos-2026-04-27.json` — Dated daily-trending input manifest for private beta corpus refreshes
+- `docs/evals/trending-repos-2026-04-27.json` and `docs/evals/trending-repos-top50-2026-04-27.json` — Dated daily-trending input manifests for private beta corpus refreshes
+- `docs/evals/trending-top50-ec2-first-synthesis-2026-04-27.md` — First 50-repo EC2 synthesis with landed fix notes for the nine first-run complications
 - `docs/roadmaps/alignment-and-trajectory-2026-04-27.md` — Current alignment doc for LogicLens-backend and Regret SDK trajectory
 
 ### Useful Commands
@@ -57,7 +61,11 @@ cd backend
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-gates <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json --holdout-artifact-dir <holdout-artifact-directory> --holdout-gold-set ..\docs\evals\gold_block_benchmark_holdout.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli corpus-gate ..\docs\evals\trending-top50-ec2-results-2026-04-27.jsonl
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli temporal-scan C:\path\to\git\repo --max-commits 25
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli temporal-scan C:\path\to\git\repo --max-commits 25 --replay-snapshots --replay-limit 5
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli program-surface
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli paper-checklist
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli canonical-graph <artifact-directory>
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli answer-with-evidence <artifact-directory> "Which files own authentication?"
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli simulate-change "refactor auth middleware" --artifact-dir <artifact-directory> --temporal-report <optional-phase-9-report.json>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli regret-scan --artifact-dir <artifact-directory> --output .heart-transplant\reports\regret-plan.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli execute-transplant <regret_id> --artifact-dir <artifact-directory> --plan .heart-transplant\reports\regret-plan.json
@@ -92,5 +100,5 @@ Shortcut from repo root:
 Use `maximize-gates` on a full reference artifact plus a real holdout artifact when you need a single JSON answer for Phase 8.5 exit criteria. Use `program-surface` before a release to confirm which phase entrypoints are still stubs.
 
 ---
-**Status**: Phase 8.5 is implemented but still tightening its proof surface. Phase 9 is real and gated, but it is not yet the full historical graph replay system described by the paper-grade target. Phases 10–13 are CLI stubs pending real implementations and gates. Phase 6 still needs Continue CLI operator proof.
-**Decision**: Phase 10+ work proceeds only against implementations that can pass the phase-specific non-gamable gates in the roadmap; keep `program-surface` accurate as entrypoints grow.
+**Status**: Structural graph construction is the only LogicLens checklist item marked implemented. The other seven paper-shaped capabilities are partial and need scored gates before they become product claims. Phase 9 has Tree-sitter replay for selected commits, but not full SCIP + semantic historical replay. Phase 6 still needs Continue CLI operator proof.
+**Decision**: Near-term work should prioritize rerunning the 50-repo corpus after parser fixes, raising the holdout block benchmark, and scoring evidence-backed architecture answers. Keep `program-surface` and `paper-checklist` accurate as entrypoints grow.

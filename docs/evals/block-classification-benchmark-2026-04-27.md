@@ -22,7 +22,9 @@ Test result: `14 passed, 1 warning`.
 | Reference | `2026-04-25T20-06-30Z__vendor__elysia-supabase-tempate` | 10 | 10 | 100.0% | 0.0% | 100.0% |
 | Holdout | `2026-04-26T17-22-18Z__vendor__clean-elysia` | 20 | 8 | 40.0% | 45.0% | 72.7% |
 
-The reference score is a useful smoke proof, not the launch claim. The holdout split is the honest beta number: on nodes the ingest actually materializes, the heuristic block classifier gets 8 of 11 rows right. End-to-end accuracy drops to 8 of 20 because 9 gold rows point at files that did not become addressable `CodeNode` records.
+The reference score is a useful smoke proof, not the launch claim. The holdout split is the beta baseline from this run: on nodes the ingest actually materialized at the time, the heuristic block classifier got 8 of 11 rows right. End-to-end accuracy dropped to 8 of 20 because 9 gold rows pointed at files that did not become addressable `CodeNode` records.
+
+Update after the 50-repo hardening pass: file-surface nodes, secondary block scoring, and broader parser coverage have landed. This report remains the preserved baseline for the April 27 artifact pair; rerun the benchmark before treating these numbers as the current product score.
 
 ## What This Proves
 
@@ -34,7 +36,7 @@ The reference score is a useful smoke proof, not the launch claim. The holdout s
 ## What It Does Not Prove Yet
 
 - It does not prove broad language/framework generalization. The current scored gold sets are Elysia/TypeScript-family repos.
-- It does not prove multi-label block quality. Some files legitimately carry more than one architectural role, and the current benchmark only checks the primary block.
+- It does not yet provide a fresh multi-label launch score. Secondary block scoring exists now, but this preserved report predates that change.
 - It does not prove a paper-grade semantic model. The Phase 8.5 holdout gate still needs a first-class semantic score, not only structural gate reruns.
 
 ## Error Analysis
@@ -47,7 +49,7 @@ Holdout missing rows:
 - `src/libs/cache/index.ts` appears twice in gold.
 - `src/libs/config/index.ts` appears once in gold.
 
-These are mostly barrel/index files. They are real architectural surfaces, but the current ingest path does not always materialize them as code boundaries. For a beta claim, we should call this a coverage gap.
+These are mostly barrel/index files. They are real architectural surfaces. File-surface materialization now exists, so these rows should be rerun before the missing-node rate is used in a launch claim.
 
 Holdout scorable misses:
 
