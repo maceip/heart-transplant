@@ -15,6 +15,8 @@ def program_surface_status() -> dict[str, Any]:
         _phase("phase_11_sdk", "heart_transplant.regret.scan", "run_regret_sdk_scan"),
         _phase("phase_12", "heart_transplant.execution.orchestrator", "run_transplant"),
         _phase("phase_13", "heart_transplant.multimodal.ingest", "run_multimodal_ingest"),
+        _phase("artifact_manifest", "heart_transplant.artifact_manifest", "write_artifact_manifest"),
+        _phase("evidence_benchmark", "heart_transplant.evals.evidence_benchmark", "run_evidence_benchmark"),
         _phase("graph_integrity", "heart_transplant.graph_integrity", "run_graph_integrity"),
     ]
     return {

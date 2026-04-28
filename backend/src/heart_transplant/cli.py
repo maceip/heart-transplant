@@ -5,6 +5,7 @@ from pathlib import Path
 
 import typer
 
+from heart_transplant.artifact_manifest import build_artifact_manifest, write_artifact_manifest
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
 from heart_transplant.canonical_graph import build_canonical_graph
 from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
@@ -19,6 +20,7 @@ from heart_transplant.db.surreal_loader import load_artifact
 from heart_transplant.db.verify import verify_artifact_in_db
 from heart_transplant.evals.build_gold import write_gold_from_ground_truth
 from heart_transplant.evals.corpus_gate import evaluate_corpus_gate
+from heart_transplant.evals.evidence_benchmark import load_evidence_questions, run_evidence_benchmark
 from heart_transplant.evals.gold_audit import audit_gold_file
 from heart_transplant.evals.gold_benchmark import build_block_benchmark_report, load_gold_set
 from heart_transplant.graph_integrity import run_graph_integrity
@@ -81,6 +83,7 @@ def ingest_local(
     else:
         scip_consumed = None
 
+    manifest = write_artifact_manifest(target_dir, command="ingest-local")
     typer.echo(
         json.dumps(
             {
@@ -92,6 +95,7 @@ def ingest_local(
                 "parser_backends": artifact.parser_backends,
                 "scip": scip_metadata.model_dump(mode="json") if scip_metadata else None,
                 "scip_consumed": scip_consumed,
+                "manifest": manifest,
             },
             indent=2,
         )
@@ -112,6 +116,19 @@ def test_graph(
     report = run_graph_smoke(artifact_dir)
     typer.echo(json.dumps(report, indent=2))
     if strict and str(report.get("scip_integration_status", "")).startswith("fail:"):
+        raise typer.Exit(code=1)
+
+
+@app.command("run-manifest")
+def run_manifest(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    write: bool = typer.Option(True, "--write/--no-write", help="Write artifact-manifest.json beside the artifact files."),
+) -> None:
+    """Generate the artifact manifest receipt for an existing ingest run."""
+
+    report = write_artifact_manifest(artifact_dir.resolve()) if write else build_artifact_manifest(artifact_dir.resolve())
+    typer.echo(json.dumps(report, indent=2))
+    if not report["summary"]["required_artifacts_present"]:
         raise typer.Exit(code=1)
 
 
@@ -431,6 +448,32 @@ def block_benchmark(
     if out:
         write_json(out.resolve(), report)
     typer.echo(json.dumps(report, indent=2))
+
+
+@app.command("evidence-benchmark")
+def evidence_benchmark(
+    artifact_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    questions: Path = typer.Option(
+        "docs/evals/evidence_questions.json",
+        "--questions",
+        exists=True,
+        dir_okay=False,
+        help="Evidence question JSON set.",
+    ),
+    out: Path | None = typer.Option(None, "--out", help="Optional JSON report path."),
+) -> None:
+    """Score evidence-backed architecture answers against expected files and blocks."""
+
+    report = run_evidence_benchmark(
+        artifact_dir.resolve(),
+        load_evidence_questions(questions.resolve()),
+        question_set_path=questions.resolve(),
+    )
+    if out:
+        write_json(out.resolve(), report)
+    typer.echo(json.dumps(report, indent=2))
+    if report["summary"]["accuracy"] < 1.0:
+        raise typer.Exit(code=1)
 
 
 @app.command("corpus-gate")

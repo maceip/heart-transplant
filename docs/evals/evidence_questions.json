@@ -1,0 +1,46 @@
+[
+  {
+    "id": "clean-elysia-background-processing",
+    "repo_name": "clean-elysia",
+    "question": "Where is queue or worker processing handled?",
+    "expected_blocks": ["Background Processing"],
+    "expected_files": [],
+    "expected_file_globs": ["src/bull/**"],
+    "source": "Rail 2 seed question set",
+    "notes": "Current clean-elysia artifact does not retrieve this yet; keep as evidence-QA pressure before promoting.",
+    "status": "needs_review"
+  },
+  {
+    "id": "clean-elysia-data-persistence",
+    "repo_name": "clean-elysia",
+    "question": "Where is database persistence configured?",
+    "expected_blocks": ["Data Persistence", "Persistence Strategy"],
+    "expected_files": [],
+    "expected_file_globs": ["src/libs/**", "drizzle.config.ts"],
+    "source": "Rail 2 seed question set",
+    "notes": "Accepts persistence strategy because cache/database surfaces can be multi-label.",
+    "status": "active"
+  },
+  {
+    "id": "elysia-supabase-template-data-persistence",
+    "repo_name": "elysia-supabase-tempate",
+    "question": "Which files own persistence or database access?",
+    "expected_blocks": ["Data Persistence"],
+    "expected_files": [],
+    "expected_file_globs": ["src/lib/**", "src/libs/**", "drizzle.config.ts"],
+    "source": "Rail 2 seed question set",
+    "notes": "Uses the current misspelled repo name preserved in the vendored gold files.",
+    "status": "active"
+  },
+  {
+    "id": "fixture-access-control",
+    "repo_name": "test/logiclens",
+    "question": "Where is auth handled?",
+    "expected_blocks": ["Access Control"],
+    "expected_files": ["auth.ts"],
+    "expected_file_globs": [],
+    "source": "Unit-test fixture",
+    "notes": "Keeps the evidence benchmark covered by a tiny deterministic fixture.",
+    "status": "active"
+  }
+]

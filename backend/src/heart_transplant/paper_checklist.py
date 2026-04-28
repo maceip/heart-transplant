@@ -63,9 +63,9 @@ def build_paper_reproduction_checklist(repo_root: Path | None = None) -> PaperRe
             paper_feature="Evidence-grounded architecture question answering",
             backend_mapping="EvidenceBundle schema and artifact-backed explain/trace/find/answer helpers",
             status="partial",
-            gate_or_test="backend/tests/test_evidence.py (to expand into question fixtures)",
-            artifact="canonical-graph.json; structural-artifact.json; semantic-artifact.json",
-            benchmark_mapping="Next benchmark should score fixture questions for exact/partial evidence match and unsupported-answer rate.",
+            gate_or_test="evidence-benchmark; backend/tests/test_evidence_benchmark.py; backend/tests/test_logiclens_paper_path.py",
+            artifact="docs/evals/evidence_questions.json; canonical-graph.json; structural-artifact.json; semantic-artifact.json",
+            benchmark_mapping="evidence-benchmark scores expected blocks/files for active architecture questions; unsupported-answer scoring still needs expansion.",
         ),
         PaperFeatureStatus(
             feature_id="graph_persistence",

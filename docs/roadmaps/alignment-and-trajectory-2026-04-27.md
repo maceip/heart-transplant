@@ -14,7 +14,7 @@ We are not at self-serve private-beta product yet, but the backend spine is now 
 - Parser coverage for TypeScript/TSX/JavaScript/Python/Go/Prisma/Rust/Java/C/C++.
 - Durable structural artifacts and SurrealDB graph loading.
 - A 24-block ontology and deterministic block classifier.
-- MCP, canonical graph, and evidence-backed CLI graph surfaces.
+- MCP, canonical graph, evidence-backed CLI graph surfaces, and the first scored evidence-QA benchmark.
 - Blast-radius, temporal, causal, regret, execution, and multimodal first passes.
 - Gold benchmark files and dated trending-repo corpus input rails.
 - A preserved 50-repo EC2 synthesis with the nine first-run complications documented and fix notes landed.
@@ -50,7 +50,7 @@ Required capabilities:
 
 - Structural fidelity: every code/file/test/API/infra node that can be targeted by an edge must be materialized and addressable.
 - Semantic measurement: block labels, summaries, entities, and actions must be benchmarked against holdout repos, not only generated.
-- Retrieval evidence: graph traversal must return scoped evidence with stable IDs, file ranges, and reasons.
+- Retrieval evidence: graph traversal must return scoped evidence with stable IDs, file ranges, and reasons. The first `evidence-benchmark` harness now exists; the remaining work is broadening `docs/evals/evidence_questions.json` and moving beyond the deterministic router.
 - Temporal replay: historical snapshots must replay ingest over historical source; current replay covers selected Tree-sitter snapshots, while SCIP + semantic replay is still future work.
 - Multimodal joins: test, OpenAPI, infra, and code layers must join on real nodes, not synthetic dangling IDs.
 - Operator contract: CLI/MCP commands must run on a clean Windows checkout without private harnesses or encoding failures.
@@ -89,7 +89,7 @@ Exit criteria: run the landed trust rails on the shipping artifact and record th
 
 Goal: prove semantic block quality separately from graph coverage.
 
-- Keep the `block-benchmark` / `phase-metrics` path as the benchmark surface and make the report reproducible from committed commands.
+- Keep the `block-benchmark` / `phase-metrics` / `evidence-benchmark` paths as the benchmark surfaces and make the reports reproducible from committed commands.
 - Report end-to-end accuracy, scorable accuracy, missing-node rate, multi-label recall, and per-block confusion.
 - Clean contradictory gold rows in `clean-elysia`.
 - Continue using file-surface nodes and secondary block scoring to reduce missing-node and single-label failures.
@@ -138,7 +138,7 @@ The beta user gets architectural visibility and triage, not full autonomous migr
 1. Rerun the full 50-repo corpus after the traversal/parser fixes and publish the strict corpus-gate result.
 2. Rerun the holdout block benchmark after file-surface and multi-label scoring changes.
 3. Clean contradictory holdout gold rows and graduate stable 50-repo examples into gold.
-4. Add a scored evidence-QA benchmark for `answer-with-evidence` and graph traversal commands.
+4. Expand the scored evidence-QA benchmark for `answer-with-evidence` and graph traversal commands.
 5. Fix logging-regret surgery planning and add regret fixtures with hidden labels.
 6. Run beta trust rails on the shipping artifact and publish the exact reproduction inputs.
 7. Draft the first Regret SDK JSON schema document and test fixtures.

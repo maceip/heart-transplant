@@ -83,8 +83,8 @@ Older reference artifact retained for comparison:
 
 6. `LogicLens evidence-contract surfaces`
 
-- Implemented through `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, and `paper-checklist`
-- Current status is partial because the question-answer benchmark and unsupported-answer scoring are not complete
+- Implemented through `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, `evidence-benchmark`, and `paper-checklist`
+- Current status is partial because the question set is still tiny and unsupported-answer scoring is not complete
 
 7. `50-repo corpus pressure`
 
@@ -1596,7 +1596,7 @@ If we want the smallest sequence that moves us forward without fluff, it is:
 
 1. Rerun the full 50-repo corpus after iterative traversal and Rust/Java/C/C++ parser coverage.
 2. Rerun the block benchmark after file-surface and secondary-block scoring changes.
-3. Add a scored evidence-QA harness for `answer-with-evidence` and graph traversal commands.
+3. Expand the scored evidence-QA harness for `answer-with-evidence` and graph traversal commands.
 4. Extend temporal replay to SCIP + semantic replay for selected commits.
 5. Fix and fixture regret-specific surgery plans, starting with logging inconsistency.
 6. Run repo-root hard gates on the shipping artifact and publish exact reproduction inputs.
@@ -1734,7 +1734,7 @@ The current repo has a useful foundation for structural graph construction and t
 - Structural ingest with file surfaces, SCIP identity, orphan promotion, and broader parser coverage
 - 24-block semantic classification with neighborhoods, secondary labels, and preserved holdout benchmark baselines
 - SurrealDB persistence, MCP tools, blast radius, causal/regret/execution/multimodal first passes
-- Canonical graph/evidence commands and a `paper-checklist` status surface
+- Canonical graph/evidence commands, a first `evidence-benchmark`, artifact manifests, and a `paper-checklist` status surface
 - 50-repo corpus evidence with failure/fix documentation
 
 **What Phases 9-13 must deliver:**

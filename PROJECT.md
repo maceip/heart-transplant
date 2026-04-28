@@ -25,7 +25,8 @@ Current paper-alignment status from `heart-transplant paper-checklist`: 8 tracke
 - Strong validation infrastructure (`phase_metrics.py`, `validation_gates.py`, non-gamable gates)
 - **Phase 8.5 (implemented, proof surface tightening)**: `maximize-audit`, `maximize-report`, `maximize-gates`, expanded `gold_block_benchmark.json` + holdout file, `build-gold` holdout/main splits
 - **Phase 9 (implemented, not paper-grade yet)**: `temporal-scan`, `temporal-diff`, `temporal-gates`, and optional `temporal-scan --replay-snapshots` are real. Historical replay now runs Tree-sitter ingest for selected commits; SCIP + semantic replay across full histories is still future work.
-- **LogicLens evidence surfaces (partial)**: `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, and `paper-checklist` exist as CLI surfaces, with tests covering the current evidence contract.
+- **LogicLens evidence surfaces (partial)**: `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`, `evidence-benchmark`, and `paper-checklist` exist as CLI surfaces, with tests covering the current evidence contract.
+- **Artifact receipts (partial, useful)**: `ingest-local` now writes `artifact-manifest.json`, `run-manifest` can regenerate it for older artifacts, and `graph-integrity` checks structural, SCIP, semantic, and manifest layers separately.
 - **50-repo corpus rail (partial, useful)**: the first EC2 synthesis is preserved under `docs/evals/`; the three crash failures and six zero-node successes are documented, with landed fixes for deep traversal and Rust/Java/C/C++ parser coverage. The full corpus still needs rerun before replacing the historical baseline.
 
 ### After 8.5 / 9 — What’s Next
@@ -43,6 +44,7 @@ The next build target is not “more pages.” It is making the LogicLens-style 
 - `docs/evals/gold_block_benchmark_holdout.json` — Holdout split for `clean-elysia` only
 - `docs/evals/gold_block_benchmark_broad.json` — Broader exploratory benchmark used to expose classifier weaknesses
 - `docs/evals/gold-standards.md` — Gold row schema, audit command, and holdout policy
+- `docs/evals/evidence_questions.json` — First evidence-QA benchmark seed set
 - `docs/evals/block-classification-benchmark-2026-04-27.md` — Latest measured block-classification benchmark readout
 - `docs/evals/trending-repos-2026-04-27.json` and `docs/evals/trending-repos-top50-2026-04-27.json` — Dated daily-trending input manifests for private beta corpus refreshes
 - `docs/evals/trending-top50-ec2-first-synthesis-2026-04-27.md` — First 50-repo EC2 synthesis with landed fix notes for the nine first-run complications
@@ -56,6 +58,9 @@ cd backend
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli phase-metrics --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli gold-audit ..\docs\evals\gold_block_benchmark_holdout.json
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli run-manifest <artifact-directory>
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli graph-integrity <artifact-directory>
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli evidence-benchmark <artifact-directory> --questions ..\docs\evals\evidence_questions.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli validate-gates --artifact-dir <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli test-graph <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli maximize-audit --artifact-dir <artifact-directory> --gold-set ..\docs\evals\gold_block_benchmark.json
@@ -68,7 +73,7 @@ cd backend
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli program-surface
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli paper-checklist
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli canonical-graph <artifact-directory>
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli answer-with-evidence <artifact-directory> "Which files own authentication?"
+.\.venv-win\Scripts\python.exe -m heart_transplant.cli answer-with-evidence "Which files own authentication?" --artifact-dir <artifact-directory>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli simulate-change "refactor auth middleware" --artifact-dir <artifact-directory> --temporal-report <optional-phase-9-report.json>
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli regret-scan --artifact-dir <artifact-directory> --output .heart-transplant\reports\regret-plan.json
 .\.venv-win\Scripts\python.exe -m heart_transplant.cli execute-transplant <regret_id> --artifact-dir <artifact-directory> --plan .heart-transplant\reports\regret-plan.json
