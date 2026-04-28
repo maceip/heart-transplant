@@ -80,7 +80,7 @@ All three failures were `ingest_failed` and shared the same root symptom: recurs
 | 21 | Go | `microsoft/typescript-go` | `RecursionError: maximum recursion depth exceeded` in `treesitter_ingest.py` traversal |
 | 36 | C++ | `FreeCAD/FreeCAD` | `RecursionError: maximum recursion depth exceeded` in `treesitter_ingest.py` traversal |
 
-Follow-up fix in progress: convert Tree-sitter and import-extractor walkers from recursive traversal to iterative stack traversal. The original first-run result above remains the baseline smell test and should not be rewritten by reruns.
+Follow-up fix landed: Tree-sitter and import-extractor walkers now use iterative stack traversal instead of recursive descent, with a regression test for a deeply nested TypeScript parse tree. The original first-run result above remains the baseline smell test and should not be rewritten by reruns.
 
 ## Zero-Code-Node OK Artifacts
 
@@ -94,6 +94,8 @@ These runs technically succeeded but produced no code nodes. This is a coverage 
 | 46 | Java | `cryptomator/cryptomator` | none |
 | 49 | Java | `woheller69/FreeDroidWarn` | none |
 | 50 | Java | `MCRcortex/voxy` | none |
+
+Follow-up fix landed: ingest now includes first-class parser coverage for Rust, Java, C, and C++ source files, with focused regression tests for Java, Rust, and C++ node extraction. This addresses the zero-node-success failure mode at the parser-coverage layer; the first synthesis remains preserved as the historical baseline until the full 50-repo corpus is rerun.
 
 ## What This Proves
 
