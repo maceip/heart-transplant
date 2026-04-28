@@ -17,6 +17,14 @@ class ArtifactManifest(BaseModel):
     source_artifacts: dict[str, str] = Field(default_factory=dict)
 
 
+class GraphProvenance(BaseModel):
+    producer: str
+    source_artifact: str | None = None
+    source_id: str | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    notes: list[str] = Field(default_factory=list)
+
+
 class CanonicalNode(BaseModel):
     node_id: str
     layer: str
@@ -25,7 +33,7 @@ class CanonicalNode(BaseModel):
     repo_name: str | None = None
     file_path: str | None = None
     range: dict[str, Any] | None = None
-    provenance: str
+    provenance: GraphProvenance
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -35,7 +43,7 @@ class CanonicalEdge(BaseModel):
     edge_type: str
     repo_name: str | None = None
     target_repo: str | None = None
-    provenance: str
+    provenance: GraphProvenance
     meta: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -88,7 +96,7 @@ def build_canonical_graph(
             "kind": "project",
             "label": project.get("name") or structural.get("repo_name"),
             "repo_name": structural.get("repo_name"),
-            "provenance": "tree_sitter",
+            "provenance": provenance("tree_sitter", source_artifact=manifest.source_artifacts.get("structural"), source_id=str(project["node_id"])),
             "meta": {},
         }
 
@@ -102,7 +110,7 @@ def build_canonical_graph(
             "file_path": file_node.get("file_path"),
             "repo_name": file_node.get("repo_name"),
             "language": file_node.get("language"),
-            "provenance": "tree_sitter",
+            "provenance": provenance("tree_sitter", source_artifact=manifest.source_artifacts.get("structural"), source_id=node_id),
             "meta": {"language": file_node.get("language")},
         }
 
@@ -117,7 +125,11 @@ def build_canonical_graph(
             "range": code_node.get("range"),
             "repo_name": code_node.get("repo_name"),
             "symbol_source": code_node.get("symbol_source"),
-            "provenance": code_node.get("symbol_source") if code_node.get("symbol_source") == "scip" else "tree_sitter",
+            "provenance": provenance(
+                code_node.get("symbol_source") if code_node.get("symbol_source") == "scip" else "tree_sitter",
+                source_artifact=manifest.source_artifacts.get("structural"),
+                source_id=node_id,
+            ),
             "meta": {
                 "symbol_source": code_node.get("symbol_source"),
                 "scip_kind": code_node.get("scip_kind"),
@@ -136,7 +148,12 @@ def build_canonical_graph(
             "label": assignment.get("primary_block"),
             "confidence": assignment.get("confidence"),
             "secondary_blocks": assignment.get("secondary_blocks", []),
-            "provenance": "semantic_classifier",
+            "provenance": provenance(
+                "semantic_classifier",
+                source_artifact=manifest.source_artifacts.get("semantic"),
+                source_id=source,
+                confidence=assignment.get("confidence"),
+            ),
             "meta": {
                 "confidence": assignment.get("confidence"),
                 "secondary_blocks": assignment.get("secondary_blocks", []),
@@ -149,7 +166,7 @@ def build_canonical_graph(
                 source,
                 "DESCRIBES",
                 structural.get("repo_name"),
-                provenance="semantic_classifier",
+                provenance=provenance("semantic_classifier", source_artifact=manifest.source_artifacts.get("semantic"), source_id=source, confidence=assignment.get("confidence")),
             )
         )
         for secondary in assignment.get("secondary_blocks", []) or []:
@@ -163,10 +180,28 @@ def build_canonical_graph(
                 "kind": "secondary_block_assignment",
                 "label": block,
                 "confidence": secondary.get("confidence"),
-                "provenance": "semantic_classifier",
+                "provenance": provenance(
+                    "semantic_classifier",
+                    source_artifact=manifest.source_artifacts.get("semantic"),
+                    source_id=source,
+                    confidence=secondary.get("confidence"),
+                ),
                 "meta": secondary,
             }
-            edges.append(canonical_edge(secondary_id, source, "SECONDARY_DESCRIBES", structural.get("repo_name"), provenance="semantic_classifier"))
+            edges.append(
+                canonical_edge(
+                    secondary_id,
+                    source,
+                    "SECONDARY_DESCRIBES",
+                    structural.get("repo_name"),
+                    provenance=provenance(
+                        "semantic_classifier",
+                        source_artifact=manifest.source_artifacts.get("semantic"),
+                        source_id=source,
+                        confidence=secondary.get("confidence"),
+                    ),
+                )
+            )
 
     for entity in semantic.get("entities", []) or []:
         entity_id = str(entity.get("entity_id", ""))
@@ -178,14 +213,23 @@ def build_canonical_graph(
             "kind": "entity",
             "label": entity.get("name"),
             "repo_name": structural.get("repo_name"),
-            "provenance": "semantic_enrichment",
+            "provenance": provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=entity_id),
             "meta": entity,
         }
     for action in semantic.get("actions", []) or []:
         source = str(action.get("source_code_node_id", ""))
         target = str(action.get("entity_id", ""))
         if source and target:
-            edges.append(canonical_edge(source, target, f"PERFORMS_{action.get('action', 'ACTION')}", structural.get("repo_name"), provenance="semantic_enrichment", meta=action))
+            edges.append(
+                canonical_edge(
+                    source,
+                    target,
+                    f"PERFORMS_{action.get('action', 'ACTION')}",
+                    structural.get("repo_name"),
+                    provenance=provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=source, confidence=action.get("confidence")),
+                    meta=action,
+                )
+            )
 
     for edge in structural.get("edges", []):
         edges.append(
@@ -194,7 +238,11 @@ def build_canonical_graph(
                 str(edge.get("target_id")),
                 str(edge.get("edge_type")),
                 edge.get("repo_name") or structural.get("repo_name"),
-                provenance=edge.get("provenance") or infer_edge_provenance(str(edge.get("edge_type"))),
+                provenance=provenance(
+                    edge.get("provenance") or infer_edge_provenance(str(edge.get("edge_type"))),
+                    source_artifact=manifest.source_artifacts.get("structural"),
+                    source_id=f"{edge.get('source_id')}->{edge.get('target_id')}",
+                ),
                 target_repo=edge.get("target_repo"),
             )
         )
@@ -211,12 +259,12 @@ def build_canonical_graph(
             "label": rel,
             "file_path": rel,
             "repo_name": structural.get("repo_name"),
-            "provenance": "scip",
+            "provenance": provenance("scip", source_artifact=manifest.source_artifacts.get("scip"), source_id=doc_id),
             "meta": item,
         }
         file_id = f"repo://{structural.get('repo_name')}/{rel}"
         if file_id in nodes:
-            edges.append(canonical_edge(doc_id, file_id, "DESCRIBES_FILE", structural.get("repo_name"), provenance="scip"))
+            edges.append(canonical_edge(doc_id, file_id, "DESCRIBES_FILE", structural.get("repo_name"), provenance=provenance("scip", source_artifact=manifest.source_artifacts.get("scip"), source_id=doc_id)))
     for item in scip.get("addressable_orphaned_symbols", []) or []:
         symbol = str(item.get("symbol", ""))
         if symbol and symbol in nodes:
@@ -225,7 +273,7 @@ def build_canonical_graph(
         source = str(item.get("source_symbol", ""))
         target = str(item.get("target_symbol", ""))
         if source and target:
-            edges.append(canonical_edge(source, target, "IMPLEMENTS", structural.get("repo_name"), provenance="scip", meta=item))
+            edges.append(canonical_edge(source, target, "IMPLEMENTS", structural.get("repo_name"), provenance=provenance("scip", source_artifact=manifest.source_artifacts.get("scip"), source_id=source), meta=item))
 
     for node in multimodal.get("nodes", []) or []:
         node_id = str(node.get("node_id", ""))
@@ -238,7 +286,7 @@ def build_canonical_graph(
             "label": node.get("name") or node.get("path"),
             "file_path": node.get("path"),
             "meta": node.get("meta", {}),
-            "provenance": f"{node.get('kind')}_parser",
+            "provenance": provenance(f"{node.get('kind')}_parser", source_artifact=manifest.source_artifacts.get("multimodal"), source_id=node_id),
         }
     for edge in multimodal.get("edges", []) or []:
         edges.append(
@@ -247,7 +295,7 @@ def build_canonical_graph(
                 str(edge.get("target_id")),
                 str(edge.get("edge_kind")),
                 structural.get("repo_name"),
-                provenance="multimodal_correlation",
+                provenance=provenance("multimodal_correlation", source_artifact=manifest.source_artifacts.get("multimodal"), source_id=f"{edge.get('source_id')}->{edge.get('target_id')}"),
             )
         )
     for item in temporal.get("replayed_snapshots", []) or []:
@@ -261,7 +309,7 @@ def build_canonical_graph(
             "kind": "graph_snapshot",
             "label": item.get("subject") or commit[:12],
             "repo_name": structural.get("repo_name"),
-            "provenance": "temporal_replay",
+            "provenance": provenance("temporal_replay", source_artifact=manifest.source_artifacts.get("temporal"), source_id=commit),
             "meta": item,
         }
     for item in regret.get("surfaces", []) or []:
@@ -276,12 +324,12 @@ def build_canonical_graph(
             "kind": "regret_surface",
             "label": regret_item.get("title"),
             "repo_name": structural.get("repo_name"),
-            "provenance": "regret_detector",
+            "provenance": provenance("regret_detector", source_artifact=manifest.source_artifacts.get("regret"), source_id=regret_id),
             "meta": item,
         }
         for evidence in item.get("evidence_bundle", []) or []:
             for source_node in evidence.get("node_ids", []) or []:
-                edges.append(canonical_edge(node_id, str(source_node), "EVIDENCED_BY", structural.get("repo_name"), provenance="regret_detector", meta=evidence))
+                edges.append(canonical_edge(node_id, str(source_node), "EVIDENCED_BY", structural.get("repo_name"), provenance=provenance("regret_detector", source_artifact=manifest.source_artifacts.get("regret"), source_id=regret_id), meta=evidence))
 
     summary = {
         "node_count": len(nodes),
@@ -333,7 +381,7 @@ def canonical_edge(
     edge_type: str,
     repo_name: str | None,
     *,
-    provenance: str,
+    provenance: GraphProvenance,
     target_repo: str | None = None,
     meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -343,9 +391,26 @@ def canonical_edge(
         "edge_type": edge_type,
         "repo_name": repo_name,
         "target_repo": target_repo,
-        "provenance": provenance,
+        "provenance": provenance.model_dump(mode="json"),
         "meta": meta or {},
     }
+
+
+def provenance(
+    producer: str,
+    *,
+    source_artifact: str | None = None,
+    source_id: str | None = None,
+    confidence: float | None = None,
+    notes: list[str] | None = None,
+) -> GraphProvenance:
+    return GraphProvenance(
+        producer=producer,
+        source_artifact=source_artifact,
+        source_id=source_id,
+        confidence=confidence,
+        notes=notes or [],
+    )
 
 
 def infer_edge_provenance(edge_type: str) -> str:

@@ -23,7 +23,7 @@ def test_canonical_graph_unifies_structural_and_semantic_layers(tmp_path: Path) 
     assert graph["summary"]["dangling_edge_count"] == 0
     layers = set(graph["summary"]["layers"])
     assert {"project", "file", "code", "semantic"} <= layers
-    assert any(edge["provenance"] == "semantic_classifier" for edge in graph["edges"])
+    assert any(edge["provenance"]["producer"] == "semantic_classifier" for edge in graph["edges"])
     assert any(node["node_id"] == artifact.code_nodes[0].scip_id for node in graph["nodes"])
     assert graph["manifest"]["source_artifacts"]["structural"].endswith("structural-artifact.json")
 
@@ -85,6 +85,8 @@ def test_canonical_graph_can_project_temporal_multimodal_and_regret_reports(tmp_
     assert {"temporal", "test", "regret"} <= layers
     assert graph["manifest"]["source_artifacts"]["temporal"] == str(temporal.resolve())
     assert any(edge["edge_type"] == "EVIDENCED_BY" for edge in graph["edges"])
+    assert all(edge["provenance"]["producer"] for edge in graph["edges"])
+    assert all(node["provenance"]["producer"] for node in graph["nodes"])
 
 
 def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:

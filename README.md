@@ -89,7 +89,10 @@ Current projections into the canonical graph include:
 
 The integrity gate checks this contract through `graph-integrity`: no dangling
 canonical targets, every canonical edge has provenance, and the graph manifest
-records the source artifacts used to build the projection.
+records the source artifacts used to build the projection. Derived nodes
+(`semantic`, `scip`, `test`, `openapi`, `infra`, `temporal`, `regret`) must link
+back to source evidence through canonical edges, and the graph must round-trip
+through the typed `CanonicalGraph` schema without loss.
 
 ## LogicLens Paper Feature Map
 
