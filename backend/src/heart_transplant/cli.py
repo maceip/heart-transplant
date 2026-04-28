@@ -6,7 +6,7 @@ from pathlib import Path
 import typer
 
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
-from heart_transplant.canonical_graph import build_canonical_graph
+from heart_transplant.canonical_graph import build_canonical_graph, write_canonical_graph_for_artifact
 from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
 from heart_transplant.graph_smoke import run_graph_smoke
 from heart_transplant.ingest.corpus_ingest import ingest_vendors
@@ -79,6 +79,7 @@ def ingest_local(
         write_json(target_dir / "scip-consumed.json", scip_consumed)
     else:
         scip_consumed = None
+    canonical_graph_path = write_canonical_graph_for_artifact(target_dir)
 
     typer.echo(
         json.dumps(
@@ -91,6 +92,7 @@ def ingest_local(
                 "parser_backends": artifact.parser_backends,
                 "scip": scip_metadata.model_dump(mode="json") if scip_metadata else None,
                 "scip_consumed": scip_consumed,
+                "canonical_graph": str(canonical_graph_path),
             },
             indent=2,
         )
@@ -298,7 +300,9 @@ def classify_artifact(
     """Run neighborhood-aware block classification; writes ``semantic-artifact.json``."""
 
     sem = run_classification_on_artifact(artifact_dir, use_openai=use_openai)
+    canonical_graph_path = write_canonical_graph_for_artifact(artifact_dir)
     typer.echo(sem.model_dump_json(indent=2))
+    typer.echo(json.dumps({"canonical_graph": str(canonical_graph_path)}, indent=2))
 
 
 @app.command("persist-semantic-surreal")
@@ -542,6 +546,7 @@ def temporal_scan_command(
     since: str | None = typer.Option(None, "--since", help="Optional git --since value, e.g. 2026-01-01."),
     replay_snapshots: bool = typer.Option(False, "--replay-snapshots", help="Replay Tree-sitter ingest on selected historical commits."),
     replay_limit: int = typer.Option(5, "--replay-limit", help="Maximum commits to replay when --replay-snapshots is set."),
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Optional canonical graph artifact to attach this temporal report to."),
     out: Path | None = typer.Option(None, "--out", help="Output JSON path. Defaults to .heart-transplant/reports/<timestamp>__phase-9-temporal-scan.json."),
 ) -> None:
     """Phase 9 deterministic git-history scan with block-churn metrics."""
@@ -554,7 +559,12 @@ def temporal_scan_command(
         replay_limit=replay_limit,
     )
     dest = write_temporal_scan(report, out.resolve() if out else None)
-    typer.echo(json.dumps({"wrote": str(dest), "commit_count": report.commit_count, "block_churn": report.block_churn}, indent=2))
+    canonical_graph_path = (
+        str(write_canonical_graph_for_artifact(artifact_dir.resolve(), temporal_report=dest))
+        if artifact_dir
+        else None
+    )
+    typer.echo(json.dumps({"wrote": str(dest), "commit_count": report.commit_count, "block_churn": report.block_churn, "canonical_graph": canonical_graph_path}, indent=2))
 
 
 @app.command("temporal-snapshot")
@@ -735,6 +745,7 @@ def regret_sdk_scan_command(
     report = run_regret_sdk_scan(chosen, min_confidence=min_confidence)
     if output:
         write_json(output.resolve(), report.model_dump(mode="json"))
+        write_canonical_graph_for_artifact(chosen, regret_report=output.resolve())
     typer.echo(report.model_dump_json(indent=2))
 
 
@@ -779,6 +790,7 @@ def multimodal_ingest_command(
     directory: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
     include_tests: bool = typer.Option(True, "--include-tests/--no-include-tests"),
     include_infra: bool = typer.Option(True, "--include-infra/--no-include-infra"),
+    artifact_dir: Path | None = typer.Option(None, "--artifact-dir", exists=True, file_okay=False, dir_okay=True, help="Optional canonical graph artifact to attach this multimodal report to."),
     out: Path | None = typer.Option(
         None,
         "--out",
@@ -793,6 +805,8 @@ def multimodal_ingest_command(
         include_infra=include_infra,
         write_artifact=out.resolve() if out else None,
     )
+    if out and artifact_dir:
+        write_canonical_graph_for_artifact(artifact_dir.resolve(), multimodal_report=out.resolve())
     typer.echo(report.model_dump_json(indent=2))
 
 

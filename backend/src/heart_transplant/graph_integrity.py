@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Any
 
 from heart_transplant.artifact_store import read_json
+from heart_transplant.canonical_graph import build_canonical_graph
 
 
 def run_graph_integrity(artifact_dir: Path) -> dict[str, Any]:
     artifact_dir = artifact_dir.resolve()
     structural = read_json(artifact_dir / "structural-artifact.json")
+    canonical = build_canonical_graph(artifact_dir)
     project_node = structural.get("project_node") or {}
     node_ids = {str(project_node.get("node_id", ""))}
     node_ids.update(str(node["node_id"]) for node in structural.get("file_nodes", []))
@@ -47,6 +49,21 @@ def run_graph_integrity(artifact_dir: Path) -> dict[str, Any]:
         _check("no_dangling_edges", not dangling_edges, f"{len(dangling_edges)} dangling edges"),
         _check("no_provisional_edge_leakage", not provisional_targets, f"{len(provisional_targets)} provisional edge endpoints"),
         _check("code_files_materialized", not missing_file_nodes, f"{len(missing_file_nodes)} code paths without FileNode"),
+        _check(
+            "canonical_graph_no_dangling_targets",
+            int(canonical.get("summary", {}).get("dangling_edge_count", 0) or 0) == 0,
+            f"{canonical.get('summary', {}).get('dangling_edge_count', 0)} canonical dangling edges",
+        ),
+        _check(
+            "canonical_graph_all_edges_have_provenance",
+            all(edge.get("provenance") for edge in canonical.get("edges", [])),
+            "canonical graph edges include provenance",
+        ),
+        _check(
+            "canonical_graph_manifest_present",
+            bool(canonical.get("manifest", {}).get("source_artifacts", {}).get("structural")),
+            "canonical graph manifest records structural source artifact",
+        ),
     ]
     failed = [check for check in checks if check["status"] != "pass"]
     return {
@@ -63,6 +80,9 @@ def run_graph_integrity(artifact_dir: Path) -> dict[str, Any]:
             "dangling_edge_count": len(dangling_edges),
             "provisional_edge_endpoint_count": len(provisional_targets),
             "missing_file_node_count": len(missing_file_nodes),
+            "canonical_node_count": canonical.get("summary", {}).get("node_count", 0),
+            "canonical_edge_count": canonical.get("summary", {}).get("edge_count", 0),
+            "canonical_dangling_edge_count": canonical.get("summary", {}).get("dangling_edge_count", 0),
         },
         "checks": checks,
         "dangling_edges": dangling_edges[:50],

@@ -72,6 +72,25 @@ Real now:
 - preserved 50-repo EC2 synthesis with landed fixes for the three first-run ingest crashes and six zero-node successes
 - LogicLens paper checklist and evidence-contract CLIs (`paper-checklist`, `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`)
 
+## Canonical Graph Contract
+
+The canonical graph is the central backend contract. Producers may still write
+their native artifacts for auditability, but every product surface should either
+write into `canonical-graph.json` or be a derived view from it.
+
+Current projections into the canonical graph include:
+
+- structural ingest: project, file, code, and SCIP-backed structural edges
+- semantic classification: block assignments, secondary block assignments, entities, and actions
+- SCIP consume reports: document nodes and implementation/reference provenance
+- multimodal reports: test, OpenAPI, infra, and correlated codefile nodes
+- temporal reports: replayed graph snapshot nodes
+- regret SDK reports: regret surface nodes linked back to evidence nodes
+
+The integrity gate checks this contract through `graph-integrity`: no dangling
+canonical targets, every canonical edge has provenance, and the graph manifest
+records the source artifacts used to build the projection.
+
 ## LogicLens Paper Feature Map
 
 This table maps the paper-shaped capabilities we are rebuilding to the current
