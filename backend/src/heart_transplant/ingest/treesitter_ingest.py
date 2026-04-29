@@ -132,7 +132,14 @@ LANGUAGE_RULES: dict[str, list[NodeRule]] = {
 }
 
 
-def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
+def ingest_repository(
+    repo_path: Path,
+    repo_name: str,
+    *,
+    max_source_files: int | None = None,
+    max_file_bytes: int | None = None,
+    extra_ignored_dirs: set[str] | None = None,
+) -> StructuralArtifact:
     repo_path = repo_path.resolve()
     code_nodes: list[CodeNode] = []
     edges: list[StructuralEdge] = []
@@ -146,9 +153,11 @@ def ingest_repository(repo_path: Path, repo_name: str) -> StructuralArtifact:
     )
 
     files_by_rel_path: dict[str, Path] = {}
-    for path in walk_source_files(repo_path):
+    for path in walk_source_files(repo_path, max_file_bytes=max_file_bytes, extra_ignored_dirs=extra_ignored_dirs):
         rel = path.relative_to(repo_path).as_posix()
         files_by_rel_path[rel] = path
+        if max_source_files is not None and len(files_by_rel_path) > max_source_files:
+            raise RuntimeError(f"Source file limit exceeded: more than {max_source_files} supported source files")
 
     existing_rel_paths = set(files_by_rel_path.keys())
 
@@ -262,7 +271,12 @@ def build_file_surface_node(
     )
 
 
-def walk_source_files(root: Path) -> Iterable[Path]:
+def walk_source_files(
+    root: Path,
+    *,
+    max_file_bytes: int | None = None,
+    extra_ignored_dirs: set[str] | None = None,
+) -> Iterable[Path]:
     ignored_dirs = {
         ".git",
         ".hg",
@@ -286,12 +300,15 @@ def walk_source_files(root: Path) -> Iterable[Path]:
         ".tox",
         ".nox",
     }
+    ignored_dirs.update(extra_ignored_dirs or set())
     for path in root.rglob("*"):
         if not path.is_file():
             continue
         if any(part in ignored_dirs for part in path.parts):
             continue
         if path.suffix.lower() in SUPPORTED_SOURCE_SUFFIXES:
+            if max_file_bytes is not None and path.stat().st_size > max_file_bytes:
+                continue
             yield path
 
 

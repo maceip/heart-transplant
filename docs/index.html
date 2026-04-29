@@ -3,61 +3,43 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Heart Transplant - Repo Surgery Console</title>
-    <link rel="stylesheet" href="./assets/pages.css?v=20260427-no-row-stripes" />
+    <title>Heart Transplant - Repo Analysis Console</title>
+    <link rel="stylesheet" href="./assets/pages.css?v=20260429-smui-001" />
   </head>
   <body>
     <main class="app-shell">
       <section class="hero-band" aria-labelledby="page-title">
         <div class="hero-copy">
-          <p class="eyebrow">heart-transplant beta console</p>
-          <h1 id="page-title">Repository surgery, block by block.</h1>
+          <p class="eyebrow">TXP-001</p>
+          <h1 id="page-title">Repository Analysis with a Pulse.</h1>
           <p class="lede">
-            Run a browser-safe GitHub repo intake, classify file surfaces into architecture blocks,
-            and compare the pulse against the preserved 50-repo EC2 smell test.
+            Turn a GitHub repo into an evidence-backed operating map: where the system is stateful,
+            which files carry risk, what a change might touch, and what a reviewer should inspect first.
           </p>
         </div>
         <div class="monitor-panel" aria-label="Benchmark vitals">
-          <div class="ecg-line" aria-hidden="true"></div>
-          <div class="vital-grid">
-            <div>
-              <span id="vital-total">50</span>
-              <label>repos tested</label>
-            </div>
-            <div>
-              <span id="vital-ok">47</span>
-              <label>successful</label>
-            </div>
-            <div>
-              <span id="vital-nodes">378K</span>
-              <label>code nodes</label>
-            </div>
-            <div>
-              <span id="vital-edges">571K</span>
-              <label>edges</label>
-            </div>
-          </div>
+          <canvas id="vitals-scope" width="720" height="180" aria-label="Analysis activity oscilloscope"></canvas>
         </div>
       </section>
 
       <section class="case-band" aria-labelledby="case-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">case board</p>
-            <h2 id="case-title">Recognizable Patients From The 50-Repo Run</h2>
+            <p class="eyebrow">recent runs</p>
+            <h2 id="case-title">GitHub Trending Repos To Analyze</h2>
           </div>
-          <p class="section-note">Pick one name, then the console turns its files into block leaves.</p>
+          <p class="section-note">Pick a repo or enter your own. Results update below after analysis.</p>
         </div>
         <div class="case-grid" id="case-grid"></div>
       </section>
 
       <section class="tool-band" aria-labelledby="ingest-title">
         <div class="section-heading">
-          <p class="eyebrow">intake</p>
-          <h2 id="ingest-title">Ingest a GitHub Repo</h2>
+          <p class="eyebrow">analysis</p>
+          <h2 id="ingest-title">Enter GitHub Repo</h2>
         </div>
         <form id="repo-form" class="repo-form">
-          <label for="repo-input">GitHub repository URL or owner/name</label>
+          <label for="repo-input">Public GitHub repository URL or owner/name</label>
           <div class="input-row">
             <input
               id="repo-input"
@@ -67,24 +49,98 @@
               autocomplete="off"
               spellcheck="false"
             />
-            <button type="submit">Start intake</button>
+            <button type="submit">Start analysis</button>
           </div>
-          <p id="repo-status" class="status-text" role="status">Ready for a public GitHub repository.</p>
+          <p id="repo-status" class="status-text" role="status">Checking hosted analyzer.</p>
         </form>
 
-        <div class="handoff-panel">
-          <h3>Full backend surgery path</h3>
-          <pre id="backend-command"><code>git clone https://github.com/immich-app/immich.git vendor/github-repos/immich
-cd backend
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli ingest-local ..\vendor\github-repos\immich --repo-name immich-app/immich
-.\.venv-win\Scripts\python.exe -m heart_transplant.cli classify .heart-transplant\artifacts\&lt;artifact-dir&gt; --no-use-openai</code></pre>
+        <div class="runtime-panel" id="runtime-panel">
+          <div>
+            <strong>Runtime</strong>
+            <span id="runtime-mode">checking</span>
+          </div>
+          <div>
+            <strong>Latest receipt</strong>
+            <span id="runtime-receipt">No hosted run yet.</span>
+          </div>
+          <div>
+            <strong>Limits</strong>
+            <span>Public GitHub repos only; no package installs, OpenAI calls, or local paths.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="fixture-band" aria-labelledby="fixture-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">fixture review</p>
+            <h2 id="fixture-title">Candidate Review Queue</h2>
+          </div>
+          <p class="section-note">Load a fixture-candidates packet, review with buttons, then export JSON for backend ingest.</p>
+        </div>
+
+        <div class="fixture-shell">
+          <div class="fixture-toolbar">
+            <div>
+              <strong id="fixture-repo">No packet loaded</strong>
+              <span id="fixture-artifact">Load fixture-candidates.json or the whole packet directory.</span>
+            </div>
+            <div class="fixture-actions">
+              <label class="reviewer-field" for="fixture-reviewer">
+                <span>Reviewer</span>
+                <input id="fixture-reviewer" type="text" autocomplete="off" placeholder="optional" />
+              </label>
+              <label class="button-like" for="fixture-files">Load packet</label>
+              <input id="fixture-files" type="file" multiple webkitdirectory />
+              <label class="button-like secondary" for="fixture-json">Load JSON files</label>
+              <input id="fixture-json" type="file" multiple accept=".json,application/json" />
+              <button id="fixture-export" type="button" disabled>Export reviewed JSON</button>
+            </div>
+          </div>
+
+          <div class="fixture-stats" id="fixture-stats"></div>
+          <div class="fixture-graph" id="fixture-graph"></div>
+
+          <div class="fixture-controls">
+            <div class="fixture-tabs" role="tablist" aria-label="Fixture candidate tabs">
+              <button type="button" data-fixture-tab="nodes" class="active">Nodes</button>
+              <button type="button" data-fixture-tab="edges">Edges</button>
+              <button type="button" data-fixture-tab="questions">Evidence Questions</button>
+              <button type="button" data-fixture-tab="blast">Blast Radius</button>
+              <button type="button" data-fixture-tab="summary">Summary / Export</button>
+            </div>
+            <div class="fixture-filter">
+              <label for="fixture-filter">Show</label>
+              <select id="fixture-filter">
+                <option value="all">all</option>
+                <option value="unreviewed">unreviewed only</option>
+                <option value="correct">correct</option>
+                <option value="wrong">wrong</option>
+                <option value="missing_important_context">missing context</option>
+                <option value="not_sure">not sure</option>
+              </select>
+              <button id="fixture-mark-correct" type="button" disabled>Mark visible correct</button>
+              <button id="fixture-reset-visible" type="button" disabled>Reset visible</button>
+            </div>
+          </div>
+
+          <div class="fixture-list" id="fixture-list"></div>
         </div>
       </section>
 
       <section class="results-band" aria-labelledby="blocks-title">
         <div class="section-heading">
+          <p class="eyebrow">repository insights</p>
+          <h2 id="answers-title">Basic Blocks</h2>
+        </div>
+        <div class="answer-grid" id="answer-grid"></div>
+
+        <div class="section-heading">
           <p class="eyebrow">block output</p>
-          <h2 id="blocks-title">Architecture Block Vitals</h2>
+          <div>
+            <h2 id="blocks-title">Block Distribution</h2>
+            <p class="section-note">A block is a file's likely role in the repo, such as auth, persistence, rendering, background work, or network edge.</p>
+          </div>
         </div>
         <div class="results-layout">
           <div class="chart-card">
@@ -93,7 +149,7 @@ cd backend
           <div class="block-list" id="block-list"></div>
         </div>
         <div class="tree-panel">
-          <h3>Repo → directory → block leaves</h3>
+          <h3>Repo → directory → detected blocks</h3>
           <div id="block-tree" class="block-tree"></div>
         </div>
         <div class="surface-table-wrap">
@@ -113,27 +169,27 @@ cd backend
 
       <section class="benchmark-band" aria-labelledby="bench-title">
         <div class="section-heading">
-          <p class="eyebrow">50 repo test</p>
-          <h2 id="bench-title">Surgery Graphs From The EC2 Run</h2>
+          <p class="eyebrow">benchmark set</p>
+          <h2 id="bench-title">Repository Analysis Benchmark</h2>
         </div>
         <div class="benchmark-grid">
           <div class="chart-card">
-            <h3>Language triage</h3>
+            <h3>Success rate by language</h3>
             <canvas id="language-chart" width="620" height="340" aria-label="OK and failed repositories by language"></canvas>
           </div>
           <div class="chart-card">
-            <h3>Node pressure</h3>
+            <h3>Code nodes by language</h3>
             <canvas id="node-chart" width="620" height="340" aria-label="Code nodes by language"></canvas>
           </div>
           <div class="chart-card wide">
-            <h3>Largest successful grafts</h3>
-            <canvas id="largest-chart" width="1280" height="360" aria-label="Largest successful repository artifacts"></canvas>
+            <h3>Largest analyzed repositories</h3>
+            <canvas id="largest-chart" width="1280" height="360" aria-label="Code nodes found per repository"></canvas>
           </div>
         </div>
         <div class="findings-strip" id="bench-findings"></div>
         <div class="complication-panel" id="complication-panel"></div>
       </section>
     </main>
-    <script src="./assets/pages.js?v=20260427-no-row-stripes"></script>
+    <script src="./assets/pages.js?v=20260429-smui-001"></script>
   </body>
 </html>

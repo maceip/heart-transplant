@@ -53,6 +53,19 @@ def list_blocks() -> None:
         typer.echo(block)
 
 
+@app.command("beta-serve")
+def beta_serve(
+    host: str = typer.Option("127.0.0.1", "--host", help="Host/interface to bind."),
+    port: int = typer.Option(8089, "--port", help="Port to bind."),
+    docs_dir: Path | None = typer.Option(None, "--docs-dir", exists=True, file_okay=False, dir_okay=True),
+) -> None:
+    """Serve the beta console and unauthenticated hosted analysis API."""
+
+    from heart_transplant.beta_api import serve_beta
+
+    serve_beta(host=host, port=port, docs_dir=docs_dir.resolve() if docs_dir else None)
+
+
 @app.command("ingest-local")
 def ingest_local(
     repo_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
