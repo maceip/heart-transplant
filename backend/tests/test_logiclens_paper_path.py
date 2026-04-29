@@ -102,7 +102,7 @@ def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:
     assert explained.source_nodes[0].node_id == code_node.scip_id
     assert explained.file_ranges
     assert file_explained.source_nodes
-    assert block.query_type == "find_architectural_block"
+    assert block.query_type == "answer_with_evidence"
     assert block.source_nodes
     assert unsupported.query_type == "unsupported"
     assert not unsupported.source_nodes

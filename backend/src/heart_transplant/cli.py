@@ -217,7 +217,18 @@ def find_architectural_block_command(
 ) -> None:
     """Find block-assigned nodes with evidence rather than prose-only answers."""
 
-    typer.echo(find_block_evidence(artifact_dir.resolve(), block_label, min_confidence=min_confidence).model_dump_json(indent=2))
+    resolved_artifact_dir = artifact_dir.resolve()
+    bundle = find_architectural_block(resolved_artifact_dir, block_label)
+    if min_confidence > 0:
+        semantic_path = resolved_artifact_dir / "semantic-artifact.json"
+        semantic_rows = json.loads(semantic_path.read_text(encoding="utf-8")).get("block_assignments", [])
+        allowed_node_ids = {
+            row.get("node_id")
+            for row in semantic_rows
+            if float(row.get("confidence") or 0.0) >= min_confidence
+        }
+        bundle.source_nodes = [node for node in bundle.source_nodes if node.node_id in allowed_node_ids]
+    typer.echo(bundle.model_dump_json(indent=2))
 
 
 @app.command("answer-with-evidence")

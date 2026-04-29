@@ -9,6 +9,7 @@ from heart_transplant.artifact_store import write_json
 from heart_transplant.classify.pipeline import run_classification_on_artifact
 from heart_transplant.cli import app
 from heart_transplant.evals.evidence_benchmark import load_evidence_questions, run_evidence_benchmark
+from heart_transplant.evidence import answer_with_evidence
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
 
 
@@ -89,10 +90,51 @@ def test_evidence_benchmark_cli_runs_question_file(tmp_path: Path) -> None:
     assert load_evidence_questions(questions)[0]["id"] == "fixture-auth"
 
 
+def test_answer_with_evidence_handles_multi_block_paper_question(tmp_path: Path) -> None:
+    artifact_dir = _artifact_with_semantics(tmp_path)
+
+    bundle = answer_with_evidence(
+        artifact_dir,
+        "Trace how a user session is established from HTTP entry to persistence.",
+    )
+
+    files = {node.file_path for node in bundle.source_nodes}
+    assert bundle.query_type == "answer_with_evidence"
+    assert bundle.confidence > 0.5
+    assert "auth.ts" in files
+    assert "db.ts" in files
+    assert "route.ts" in files
+
+
+def test_evidence_benchmark_scores_unsupported_questions_as_abstentions(tmp_path: Path) -> None:
+    artifact_dir = _artifact_with_semantics(tmp_path)
+    questions = [
+        {
+            "id": "fixture-unsupported",
+            "repo_name": "test/evidence",
+            "question": "Where is the quantum scheduler configured?",
+            "expected_blocks": [],
+            "expected_files": [],
+            "expected_file_globs": [],
+            "unsupported": True,
+            "source": "test",
+            "notes": "",
+            "status": "active",
+        }
+    ]
+
+    report = run_evidence_benchmark(artifact_dir, questions)
+
+    assert report["summary"]["accuracy"] == 1.0
+    assert report["rows"][0]["unsupported_match"] is True
+
+
 def _artifact_with_semantics(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "auth.ts").write_text("export function sessionGuard() { return true; }\n", encoding="utf-8")
+    (repo / "route.ts").write_text("export function apiRoute(request: Request) { return sessionGuard(); }\n", encoding="utf-8")
+    (repo / "db.ts").write_text("export const db = { query(sql: string) { return sql; } };\n", encoding="utf-8")
     artifact = ingest_repository(repo, "test/evidence")
     artifact_dir = tmp_path / "artifact"
     artifact_dir.mkdir()

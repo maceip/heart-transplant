@@ -6,6 +6,7 @@
     "expected_blocks": ["Background Processing"],
     "expected_files": [],
     "expected_file_globs": ["src/bull/**"],
+    "unsupported": false,
     "source": "Rail 2 seed question set",
     "notes": "Current clean-elysia artifact does not retrieve this yet; keep as evidence-QA pressure before promoting.",
     "status": "needs_review"
@@ -17,6 +18,7 @@
     "expected_blocks": ["Data Persistence", "Persistence Strategy"],
     "expected_files": [],
     "expected_file_globs": ["src/libs/**", "drizzle.config.ts"],
+    "unsupported": false,
     "source": "Rail 2 seed question set",
     "notes": "Accepts persistence strategy because cache/database surfaces can be multi-label.",
     "status": "active"
@@ -28,6 +30,7 @@
     "expected_blocks": ["Data Persistence"],
     "expected_files": [],
     "expected_file_globs": ["src/lib/**", "src/libs/**", "drizzle.config.ts"],
+    "unsupported": false,
     "source": "Rail 2 seed question set",
     "notes": "Uses the current misspelled repo name preserved in the vendored gold files.",
     "status": "active"
@@ -39,6 +42,7 @@
     "expected_blocks": ["Access Control"],
     "expected_files": ["auth.ts"],
     "expected_file_globs": [],
+    "unsupported": false,
     "source": "Unit-test fixture",
     "notes": "Keeps the evidence benchmark covered by a tiny deterministic fixture.",
     "status": "active"
@@ -53,6 +57,18 @@
     "unsupported": true,
     "source": "Unit-test fixture",
     "notes": "Correct answer is insufficient evidence.",
+    "status": "active"
+  },
+  {
+    "id": "fixture-unsupported-abstention",
+    "repo_name": "test/logiclens",
+    "question": "Where is the quantum scheduler configured?",
+    "expected_blocks": [],
+    "expected_files": [],
+    "expected_file_globs": [],
+    "unsupported": true,
+    "source": "Unit-test fixture",
+    "notes": "Scores the LogicLens requirement to abstain instead of inventing evidence.",
     "status": "active"
   }
 ]
