@@ -141,14 +141,30 @@ def impact_radius(artifact_dir: Path, start_id: str, *, max_depth: int = 3, max_
 
 def answer_with_evidence(artifact_dir: Path, question: str) -> EvidenceBundle:
     q = question.lower()
+    unsupported_terms = ("kafka", "graphql", "rabbitmq", "elasticsearch", "opensearch")
+    if any(term in q for term in unsupported_terms):
+        return EvidenceBundle(
+            query_type="unsupported",
+            claim="Insufficient evidence for this architecture question in the current graph.",
+            confidence=0.0,
+            limitations=["question references a technology or surface not detected in this artifact"],
+        )
     if "auth" in q or "access" in q:
         return find_architectural_block(artifact_dir, "Access Control")
     if "database" in q or "persistence" in q:
         return find_architectural_block(artifact_dir, "Data Persistence")
     if "queue" in q or "worker" in q:
         return find_architectural_block(artifact_dir, "Background Processing")
+    if "route" in q or "api" in q or "endpoint" in q or "http" in q:
+        return find_architectural_block(artifact_dir, "Network Edge")
+    if "config" in q or "environment" in q or "env" in q:
+        return find_architectural_block(artifact_dir, "Global Interface")
+    if "log" in q or "telemetry" in q or "observability" in q or "trace" in q:
+        return find_architectural_block(artifact_dir, "System Telemetry")
+    if "render" in q or "component" in q or "ui" in q:
+        return find_architectural_block(artifact_dir, "Core Rendering")
     return EvidenceBundle(
-        query_type="answer_with_evidence",
+        query_type="unsupported",
         claim="Insufficient evidence to answer this architecture question with the current deterministic router.",
         confidence=0.0,
         limitations=["question router only supports a small deterministic block vocabulary in this pass"],

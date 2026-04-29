@@ -96,6 +96,7 @@ def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:
     explained = explain_node(artifact_dir, code_node.scip_id)
     file_explained = explain_file(artifact_dir, "auth.ts")
     block = answer_with_evidence(artifact_dir, "Where is auth handled?")
+    unsupported = answer_with_evidence(artifact_dir, "Where is Kafka configured?")
     missing_path = trace_dependency(artifact_dir, code_node.scip_id, "missing", max_depth=2)
 
     assert explained.source_nodes[0].node_id == code_node.scip_id
@@ -103,6 +104,8 @@ def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:
     assert file_explained.source_nodes
     assert block.query_type == "find_architectural_block"
     assert block.source_nodes
+    assert unsupported.query_type == "unsupported"
+    assert not unsupported.source_nodes
     assert missing_path.confidence < 0.5
     assert missing_path.limitations
 

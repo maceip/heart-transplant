@@ -24,11 +24,23 @@ def run_evidence_benchmark(artifact_dir: Path, questions: list[dict[str, Any]], 
 
     rows = []
     correct = 0
+    unsupported_questions = 0
+    unsupported_correct = 0
+    hallucinations = 0
+    missing_evidence = 0
     for question in scoped_questions:
         bundle = answer_with_evidence(artifact_dir, question["question"])
         result = score_evidence_answer(question, bundle, semantic_blocks)
         if result["match"]:
             correct += 1
+        if result["unsupported_expected"]:
+            unsupported_questions += 1
+            if result["unsupported_correct"]:
+                unsupported_correct += 1
+            if result["hallucinated"]:
+                hallucinations += 1
+        if not result["has_evidence"] and not result["unsupported_expected"]:
+            missing_evidence += 1
         rows.append({**question, **result, "answer": bundle.model_dump(mode="json")})
 
     return {
@@ -42,6 +54,12 @@ def run_evidence_benchmark(artifact_dir: Path, questions: list[dict[str, Any]], 
             "correct": correct,
             "accuracy": correct / max(len(scoped_questions), 1),
             "skipped_repo_scope": len(active_questions) - len(scoped_questions),
+            "unsupported_questions": unsupported_questions,
+            "unsupported_correct": unsupported_correct,
+            "unsupported_correct_rate": unsupported_correct / max(unsupported_questions, 1),
+            "hallucination_count": hallucinations,
+            "hallucination_rate": hallucinations / max(unsupported_questions, 1),
+            "missing_evidence_count": missing_evidence,
         },
         "rows": rows,
     }
@@ -55,6 +73,7 @@ def normalize_question(row: dict[str, Any]) -> dict[str, Any]:
         "expected_blocks": [str(item) for item in row.get("expected_blocks", []) if str(item or "").strip()],
         "expected_files": [str(item) for item in row.get("expected_files", []) if str(item or "").strip()],
         "expected_file_globs": [str(item) for item in row.get("expected_file_globs", []) if str(item or "").strip()],
+        "unsupported": bool(row.get("unsupported", False)),
         "source": str(row.get("source") or ""),
         "notes": str(row.get("notes") or ""),
         "status": str(row.get("status") or "active"),
@@ -73,6 +92,22 @@ def score_evidence_answer(question: dict[str, Any], bundle: EvidenceBundle, sema
     source_files = sorted({node.file_path for node in bundle.source_nodes if node.file_path})
     source_node_ids = [node.node_id for node in bundle.source_nodes]
     observed_blocks = sorted({block for node_id in source_node_ids for block in semantic_blocks.get(node_id, set())})
+    unsupported_expected = bool(question.get("unsupported"))
+    unsupported_returned = bundle.confidence == 0.0 and not bundle.source_nodes
+    hallucinated = unsupported_expected and bool(bundle.source_nodes)
+    if unsupported_expected:
+        return {
+            "match": unsupported_returned,
+            "has_evidence": bool(bundle.source_nodes),
+            "block_match": not bundle.source_nodes,
+            "file_match": not bundle.source_nodes,
+            "unsupported_expected": True,
+            "unsupported_returned": unsupported_returned,
+            "unsupported_correct": unsupported_returned,
+            "hallucinated": hallucinated,
+            "observed_blocks": observed_blocks,
+            "source_files": source_files,
+        }
     expected_blocks = set(question["expected_blocks"])
     expected_files = set(question["expected_files"])
     expected_globs = question["expected_file_globs"]
@@ -88,6 +123,10 @@ def score_evidence_answer(question: dict[str, Any], bundle: EvidenceBundle, sema
         "has_evidence": has_evidence,
         "block_match": block_match,
         "file_match": file_match,
+        "unsupported_expected": False,
+        "unsupported_returned": False,
+        "unsupported_correct": False,
+        "hallucinated": False,
         "observed_blocks": observed_blocks,
         "source_files": source_files,
     }
