@@ -36,6 +36,7 @@ from heart_transplant.temporal.metrics import temporal_metrics, write_temporal_m
 from heart_transplant.temporal.persist import persist_temporal_metrics
 from heart_transplant.temporal.scan import temporal_scan, write_temporal_scan
 from heart_transplant.temporal.snapshot import architecture_snapshot
+from heart_transplant.training import build_training_packet
 from heart_transplant.causal.simulation import run_change_simulation
 from heart_transplant.regret.scan import run_regret_scan, run_regret_sdk_scan
 from heart_transplant.execution.orchestrator import run_transplant
@@ -214,6 +215,28 @@ def answer_with_evidence_command(
     """Answer a narrow architecture question from artifact evidence, or say evidence is insufficient."""
 
     typer.echo(answer_with_evidence(artifact_dir.resolve(), question).model_dump_json(indent=2))
+
+
+@app.command("fixture-candidates")
+def fixture_candidates(
+    target: Path = typer.Argument(..., exists=True, help="Repo directory or existing artifact directory."),
+    repo_name: str | None = typer.Option(None, "--repo-name", help="Repo name for fresh ingest targets."),
+    out_dir: Path | None = typer.Option(None, "--out-dir", help="Directory for review packet files."),
+    with_scip: bool = typer.Option(False, "--with-scip", help="Run SCIP when target is a source repo."),
+    install_deps: bool = typer.Option(False, "--install-deps", help="Install deps before SCIP when needed."),
+    use_openai: bool = typer.Option(False, "--use-openai", help="Use OpenAI during classification if OPENAI_API_KEY is set."),
+) -> None:
+    """One-command reviewer packet: ingest/classify if needed, then emit candidates to approve/correct."""
+
+    result = build_training_packet(
+        target.resolve(),
+        repo_name=repo_name,
+        out_dir=out_dir.resolve() if out_dir else None,
+        with_scip=with_scip,
+        install_deps=install_deps,
+        use_openai=use_openai,
+    )
+    typer.echo(json.dumps(result, indent=2))
 
 
 @app.command("paper-checklist")
