@@ -34,6 +34,31 @@ def test_evidence_benchmark_scores_expected_blocks_and_files(tmp_path: Path) -> 
     assert report["summary"]["accuracy"] == 1.0
     assert report["rows"][0]["block_match"] is True
     assert report["rows"][0]["file_match"] is True
+    assert report["summary"]["hallucination_rate"] == 0.0
+
+
+def test_evidence_benchmark_scores_unsupported_questions(tmp_path: Path) -> None:
+    artifact_dir = _artifact_with_semantics(tmp_path)
+    questions = [
+        {
+            "id": "fixture-kafka",
+            "repo_name": "test/evidence",
+            "question": "Where is Kafka configured?",
+            "expected_blocks": [],
+            "expected_files": [],
+            "expected_file_globs": [],
+            "unsupported": True,
+            "source": "test",
+            "notes": "",
+            "status": "active",
+        }
+    ]
+
+    report = run_evidence_benchmark(artifact_dir, questions)
+
+    assert report["summary"]["unsupported_correct_rate"] == 1.0
+    assert report["summary"]["hallucination_rate"] == 0.0
+    assert report["rows"][0]["unsupported_correct"] is True
 
 
 def test_evidence_benchmark_cli_runs_question_file(tmp_path: Path) -> None:

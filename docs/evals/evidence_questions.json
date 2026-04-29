@@ -42,5 +42,17 @@
     "source": "Unit-test fixture",
     "notes": "Keeps the evidence benchmark covered by a tiny deterministic fixture.",
     "status": "active"
+  },
+  {
+    "id": "fixture-unsupported-kafka",
+    "repo_name": "test/logiclens",
+    "question": "Where is Kafka configured?",
+    "expected_blocks": [],
+    "expected_files": [],
+    "expected_file_globs": [],
+    "unsupported": true,
+    "source": "Unit-test fixture",
+    "notes": "Correct answer is insufficient evidence.",
+    "status": "active"
   }
 ]
