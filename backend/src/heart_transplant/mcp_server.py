@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 import os
+from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
 from heart_transplant.blast_radius import compute_impact_subgraph
 from heart_transplant.db import graph_queries as gq
+from heart_transplant.evidence import query_entities, query_projects, trace_entity_workflow
 
 mcp = FastMCP(
     "heart-transplant",
@@ -90,6 +92,39 @@ def get_impact_radius(
         prune_high_degree=prune_high_degree,
     )
     return _json(r)
+
+
+@mcp.tool(name="query_entities_artifact")
+def query_entities_artifact_tool(
+    artifact_dir: str,
+    query: str,
+    limit: int = 20,
+) -> str:
+    """Entity-centered retrieval from on-disk artifacts, matching the LogicLens Entities Tool shape."""
+
+    return query_entities(Path(artifact_dir).expanduser().resolve(), query, limit=limit).model_dump_json(indent=2)
+
+
+@mcp.tool(name="query_projects_artifact")
+def query_projects_artifact_tool(
+    artifact_dir: str,
+    query: str,
+    limit: int = 20,
+) -> str:
+    """Project-centered retrieval from on-disk artifacts, matching the LogicLens Projects Tool shape."""
+
+    return query_projects(Path(artifact_dir).expanduser().resolve(), query, limit=limit).model_dump_json(indent=2)
+
+
+@mcp.tool(name="trace_entity_workflow_artifact")
+def trace_entity_workflow_artifact_tool(
+    artifact_dir: str,
+    query: str,
+    limit: int = 30,
+) -> str:
+    """Trace semantic code-to-entity action edges from on-disk artifacts."""
+
+    return trace_entity_workflow(Path(artifact_dir).expanduser().resolve(), query, limit=limit).model_dump_json(indent=2)
 
 
 def main() -> None:

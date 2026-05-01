@@ -9,7 +9,15 @@ from heart_transplant.artifact_store import write_json
 from heart_transplant.canonical_graph import build_canonical_graph, write_canonical_graph_for_artifact
 from heart_transplant.classify.pipeline import run_classification_on_artifact
 from heart_transplant.cli import app
-from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, trace_dependency
+from heart_transplant.evidence import (
+    answer_with_evidence,
+    explain_file,
+    explain_node,
+    query_entities,
+    query_projects,
+    trace_dependency,
+    trace_entity_workflow,
+)
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
 from heart_transplant.paper_checklist import build_paper_reproduction_checklist
 
@@ -22,8 +30,12 @@ def test_canonical_graph_unifies_structural_and_semantic_layers(tmp_path: Path) 
     assert graph["schema"] == "heart-transplant.canonical-graph.v1"
     assert graph["summary"]["dangling_edge_count"] == 0
     layers = set(graph["summary"]["layers"])
-    assert {"project", "file", "code", "semantic"} <= layers
+    assert {"system", "project", "file", "code", "semantic"} <= layers
     assert any(edge["provenance"]["producer"] == "semantic_classifier" for edge in graph["edges"])
+    assert any(edge["edge_type"] == "RELATES_TO" for edge in graph["edges"])
+    assert any(edge["source_id"] == "system:local" and edge["edge_type"] == "CONTAINS" for edge in graph["edges"])
+    assert any(node["kind"] == "project_summary" for node in graph["nodes"])
+    assert any(node["kind"] == "system_summary" for node in graph["nodes"])
     assert any(node["node_id"] == artifact.code_nodes[0].scip_id for node in graph["nodes"])
     assert graph["manifest"]["source_artifacts"]["structural"].endswith("structural-artifact.json")
 
@@ -110,6 +122,22 @@ def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:
     assert missing_path.limitations
 
 
+def test_entity_and_project_tools_return_paper_shaped_subgraphs(tmp_path: Path) -> None:
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+
+    entities = query_entities(artifact_dir, "auth session")
+    workflow = trace_entity_workflow(artifact_dir, "auth session flow")
+    projects = query_projects(artifact_dir, "auth project")
+
+    assert entities.query_type == "query_entities"
+    assert entities.source_nodes
+    assert entities.paths
+    assert workflow.query_type == "trace_entity_workflow"
+    assert workflow.paths
+    assert projects.query_type == "query_projects"
+    assert projects.paths[0].edge_types == ["CONTAINS"]
+
+
 def test_paper_reproduction_checklist_maps_features_to_gates_and_benchmarks() -> None:
     checklist = build_paper_reproduction_checklist(Path(__file__).resolve().parents[2])
 
@@ -127,12 +155,15 @@ def test_cli_exposes_logiclens_paper_path_commands(tmp_path: Path) -> None:
 
     canonical = runner.invoke(app, ["canonical-graph", str(artifact_dir)])
     explain = runner.invoke(app, ["explain-node", code_node.scip_id, "--artifact-dir", str(artifact_dir)])
+    entities = runner.invoke(app, ["query-entities", "auth session", "--artifact-dir", str(artifact_dir)])
     paper = runner.invoke(app, ["paper-checklist"])
 
     assert canonical.exit_code == 0
     assert json.loads(canonical.output)["schema"] == "heart-transplant.canonical-graph.v1"
     assert explain.exit_code == 0
     assert json.loads(explain.output)["query_type"] == "explain_node"
+    assert entities.exit_code == 0
+    assert json.loads(entities.output)["query_type"] == "query_entities"
     assert paper.exit_code == 0
     assert json.loads(paper.output)["report_type"] == "logiclens_paper_reproduction_checklist"
 

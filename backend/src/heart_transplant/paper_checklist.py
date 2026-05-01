@@ -59,6 +59,16 @@ def build_paper_reproduction_checklist(repo_root: Path | None = None) -> PaperRe
             notes=["Holdout baseline is below target; multi-label and file-surface scoring are now present."],
         ),
         PaperFeatureStatus(
+            feature_id="semantic_entities",
+            paper_feature="Semantic graph enhancement with domain entities and action edges",
+            backend_mapping="SemanticEntity/SemanticAction generation, canonical Entity nodes, Code→Entity action edges, Entity→Project RELATES_TO edges",
+            status="partial",
+            gate_or_test="backend/tests/test_logiclens_paper_path.py::test_entity_and_project_tools_return_paper_shaped_subgraphs",
+            artifact="semantic-artifact.json; canonical-graph.json",
+            benchmark_mapping="Covered indirectly by evidence-benchmark today; a dedicated entity/workflow fixture set is still needed.",
+            notes=["Entity/action extraction is deterministic and artifact-backed; LLM-grade domain abstraction remains future work."],
+        ),
+        PaperFeatureStatus(
             feature_id="evidence_retrieval",
             paper_feature="Evidence-grounded architecture question answering",
             backend_mapping="EvidenceBundle schema and artifact-backed explain/trace/find/answer helpers",
@@ -66,6 +76,16 @@ def build_paper_reproduction_checklist(repo_root: Path | None = None) -> PaperRe
             gate_or_test="evidence-benchmark; backend/tests/test_evidence_benchmark.py; backend/tests/test_logiclens_paper_path.py",
             artifact="docs/evals/evidence_questions.json; canonical-graph.json; structural-artifact.json; semantic-artifact.json",
             benchmark_mapping="evidence-benchmark scores expected blocks/files for active architecture questions; unsupported-answer scoring still needs expansion.",
+        ),
+        PaperFeatureStatus(
+            feature_id="reactive_graph_tools",
+            paper_feature="Agent retrieval tools for Projects, Entities, Codes, Graph Query, and Source",
+            backend_mapping="Artifact-backed project/entity/workflow retrieval, evidence/source helpers, Surreal graph queries, MCP tools",
+            status="partial",
+            gate_or_test="backend/tests/test_logiclens_paper_path.py; backend/tests/test_graph_queries.py",
+            artifact="canonical-graph.json; semantic-artifact.json; SurrealDB ht_code/ht_edge/ht_block_assign rows",
+            benchmark_mapping="Evidence benchmark covers answer quality; tool-selection quality is not yet evaluated with a ReAct harness.",
+            notes=["Projects and Entities tool shapes are now explicit; Codes/Source/Graph Query surfaces existed already through explain/trace/Surreal/MCP helpers."],
         ),
         PaperFeatureStatus(
             feature_id="graph_persistence",

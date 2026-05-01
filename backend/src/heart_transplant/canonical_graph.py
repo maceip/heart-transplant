@@ -89,6 +89,16 @@ def build_canonical_graph(
     )
 
     project = structural.get("project_node") or {}
+    system_id = "system:local"
+    nodes[system_id] = {
+        "node_id": system_id,
+        "layer": "system",
+        "kind": "system",
+        "label": structural.get("repo_name") or "local system",
+        "repo_name": structural.get("repo_name"),
+        "provenance": provenance("canonical_graph", source_artifact=manifest.source_artifacts.get("structural"), source_id=system_id),
+        "meta": {"project_count": 1 if project.get("node_id") else 0},
+    }
     if project.get("node_id"):
         nodes[str(project["node_id"])] = {
             "node_id": str(project["node_id"]),
@@ -99,6 +109,15 @@ def build_canonical_graph(
             "provenance": provenance("tree_sitter", source_artifact=manifest.source_artifacts.get("structural"), source_id=str(project["node_id"])),
             "meta": {},
         }
+        edges.append(
+            canonical_edge(
+                system_id,
+                str(project["node_id"]),
+                "CONTAINS",
+                structural.get("repo_name"),
+                provenance=provenance("canonical_graph", source_artifact=manifest.source_artifacts.get("structural"), source_id=f"{system_id}->{project['node_id']}"),
+            )
+        )
 
     for file_node in structural.get("file_nodes", []):
         node_id = str(file_node.get("node_id"))
@@ -135,6 +154,36 @@ def build_canonical_graph(
                 "scip_kind": code_node.get("scip_kind"),
             },
         }
+
+    for summary in semantic.get("semantic_summaries", []) or []:
+        target = str(summary.get("node_id", ""))
+        summary_type = str(summary.get("summary_type") or "summary")
+        if not target:
+            continue
+        summary_id = f"summary:{summary_type}:{target}"
+        nodes[summary_id] = {
+            "node_id": summary_id,
+            "layer": "semantic",
+            "kind": f"{summary_type}_summary",
+            "label": summary_type,
+            "repo_name": structural.get("repo_name"),
+            "provenance": provenance(
+                summary.get("provenance") or "semantic_enrichment",
+                source_artifact=manifest.source_artifacts.get("semantic"),
+                source_id=target,
+            ),
+            "meta": {"text": summary.get("text")},
+        }
+        if target in nodes:
+            edges.append(
+                canonical_edge(
+                    summary_id,
+                    target,
+                    "SUMMARIZES",
+                    structural.get("repo_name"),
+                    provenance=provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=summary_id),
+                )
+            )
 
     for assignment in semantic.get("block_assignments", []) or []:
         source = str(assignment.get("node_id", ""))
@@ -201,6 +250,16 @@ def build_canonical_graph(
             "provenance": provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=entity_id),
             "meta": entity,
         }
+        if project.get("node_id"):
+            edges.append(
+                canonical_edge(
+                    entity_id,
+                    str(project["node_id"]),
+                    "RELATES_TO",
+                    structural.get("repo_name"),
+                    provenance=provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=entity_id),
+                )
+            )
     for action in semantic.get("actions", []) or []:
         source = str(action.get("source_code_node_id", ""))
         target = str(action.get("entity_id", ""))
@@ -209,7 +268,7 @@ def build_canonical_graph(
                 canonical_edge(
                     source,
                     target,
-                    f"PERFORMS_{action.get('action', 'ACTION')}",
+                    str(action.get("action") or "ACTION"),
                     structural.get("repo_name"),
                     provenance=provenance("semantic_enrichment", source_artifact=manifest.source_artifacts.get("semantic"), source_id=source),
                     meta=action,

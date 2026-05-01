@@ -144,6 +144,117 @@ def find_architectural_block(artifact_dir: Path, block_label: str, *, limit: int
     )
 
 
+def query_entities(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceBundle:
+    """Artifact-backed approximation of the paper's Entities Tool."""
+
+    sem = _load_semantic(artifact_dir)
+    structural = read_json(Path(artifact_dir) / "structural-artifact.json")
+    graph = _load_graph(artifact_dir)
+    actions_by_entity: dict[str, list[dict[str, Any]]] = {}
+    for action in sem.get("actions", []) or []:
+        actions_by_entity.setdefault(str(action.get("entity_id")), []).append(action)
+
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for entity in sem.get("entities", []) or []:
+        score = _text_score(query, " ".join(str(entity.get(key) or "") for key in ("name", "category", "description")))
+        if score > 0:
+            scored.append((score + min(len(actions_by_entity.get(str(entity.get("entity_id")), [])), 5) * 0.2, entity))
+    scored.sort(key=lambda item: (-item[0], str(item[1].get("name") or "")))
+    selected = [entity for _score, entity in scored[:limit]]
+
+    code_nodes: list[dict[str, Any]] = []
+    for entity in selected:
+        for action in actions_by_entity.get(str(entity.get("entity_id")), []):
+            node = graph["nodes_by_id"].get(str(action.get("source_code_node_id")))
+            if node:
+                code_nodes.append(node)
+
+    if not selected:
+        return EvidenceBundle(
+            query_type="query_entities",
+            claim=f"No semantic entities matched query: {query}",
+            confidence=0.2 if sem else 0.0,
+            limitations=["semantic-artifact.json missing or no entity text matched the query"] if not sem else ["no entity matched the query"],
+        )
+
+    project = structural.get("project_node") or {}
+    return EvidenceBundle(
+        query_type="query_entities",
+        claim=(
+            f"Matched {len(selected)} semantic entit(y/ies) for '{query}' in project "
+            f"{project.get('name') or structural.get('repo_name')}."
+        ),
+        confidence=min(0.55 + len(code_nodes[:5]) * 0.05, 0.85),
+        source_nodes=[_evidence_node(node) for node in _dedupe_nodes(code_nodes)[:limit]],
+        file_ranges=_file_ranges(_dedupe_nodes(code_nodes)[:limit]),
+        paths=[
+            EvidencePath(
+                node_ids=[str(action.get("source_code_node_id")), str(action.get("entity_id"))],
+                edge_types=[str(action.get("action") or "ACTION")],
+            )
+            for entity in selected
+            for action in actions_by_entity.get(str(entity.get("entity_id")), [])[:3]
+        ][:limit],
+        limitations=[],
+    )
+
+
+def query_projects(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceBundle:
+    """Artifact-backed approximation of the paper's Projects Tool."""
+
+    structural = read_json(Path(artifact_dir) / "structural-artifact.json")
+    sem = _load_semantic(artifact_dir)
+    project = structural.get("project_node") or {}
+    summaries = [
+        row
+        for row in sem.get("semantic_summaries", []) or []
+        if row.get("summary_type") in {"project", "system"}
+    ]
+    score = _text_score(
+        query,
+        " ".join(
+            [
+                str(project.get("name") or ""),
+                str(structural.get("repo_name") or ""),
+                *(str(row.get("text") or "") for row in summaries),
+            ]
+        ),
+    )
+    nodes = _rank_nodes_by_text(_load_graph(artifact_dir), query, limit=limit)
+    if score <= 0 and not nodes:
+        return EvidenceBundle(
+            query_type="query_projects",
+            claim=f"No project evidence matched query: {query}",
+            confidence=0.2,
+            limitations=["project summary and code surfaces did not match the query"],
+        )
+    return EvidenceBundle(
+        query_type="query_projects",
+        claim=f"Project {project.get('name') or structural.get('repo_name')} matched '{query}' with {len(nodes)} supporting node(s).",
+        confidence=min(0.55 + score * 0.05 + len(nodes[:5]) * 0.03, 0.85),
+        source_nodes=[_evidence_node(node) for node in nodes],
+        file_ranges=_file_ranges(nodes),
+        paths=[EvidencePath(node_ids=["system:local", str(project.get("node_id"))], edge_types=["CONTAINS"])] if project.get("node_id") else [],
+        limitations=[] if summaries else ["semantic project/system summaries are missing"],
+    )
+
+
+def trace_entity_workflow(artifact_dir: Path, entity_query: str, *, limit: int = 30) -> EvidenceBundle:
+    """Trace code nodes that act on matching entities, ordered by semantic action."""
+
+    bundle = query_entities(artifact_dir, entity_query, limit=limit)
+    if not bundle.paths:
+        bundle.query_type = "trace_entity_workflow"
+        return bundle
+    ordered = sorted(bundle.paths, key=lambda path: (_workflow_action_rank(path.edge_types[0] if path.edge_types else ""), path.node_ids))
+    bundle.query_type = "trace_entity_workflow"
+    bundle.claim = f"Workflow evidence for '{entity_query}' spans {len(ordered)} semantic action edge(s)."
+    bundle.paths = ordered[:limit]
+    if len(bundle.source_nodes) > 1 and not bundle.limitations:
+        bundle.limitations.append("Ordering is inferred from action labels; runtime sequence is not proven without traces.")
+    return bundle
+
+
 def impact_radius(artifact_dir: Path, start_id: str, *, max_depth: int = 3, max_nodes: int = 100) -> EvidenceBundle:
     try:
         impact = compute_impact_subgraph(start_id, max_depth=max_depth, max_nodes=max_nodes)
@@ -167,6 +278,10 @@ def answer_with_evidence(artifact_dir: Path, question: str) -> EvidenceBundle:
     intent = _plan_question(question)
     if intent.blocks:
         return _answer_from_ranked_evidence(artifact_dir, question, intent)
+    if re.search(r"\b(entity|entities|workflow|flow|creation|activation|delete|deletion|produce|configure)\b", question, re.I):
+        return trace_entity_workflow(artifact_dir, question)
+    if re.search(r"\b(project|repo|repository|service|services|component|components)\b", question, re.I):
+        return query_projects(artifact_dir, question)
     return EvidenceBundle(
         query_type="unsupported",
         claim="Insufficient evidence to answer this architecture question with the current deterministic router.",
@@ -490,3 +605,78 @@ def _snippet(node: dict[str, Any]) -> str | None:
 
 def _is_test_path(path: str) -> bool:
     return bool(re.search(r"(^|/)(tests?|__tests__)/|(_test|\.test|\.spec)\.", path, re.I))
+
+
+def _text_score(query: str, text: str) -> float:
+    query_terms = _terms(query)
+    if not query_terms:
+        return 0.0
+    haystack = text.lower()
+    score = sum(1.0 for term in query_terms if term in haystack)
+    phrase = query.strip().lower()
+    if phrase and phrase in haystack:
+        score += 3.0
+    return score
+
+
+def _terms(text: str) -> list[str]:
+    stop = {
+        "a",
+        "an",
+        "and",
+        "are",
+        "by",
+        "for",
+        "from",
+        "how",
+        "in",
+        "is",
+        "of",
+        "on",
+        "or",
+        "the",
+        "to",
+        "what",
+        "where",
+        "which",
+        "with",
+    }
+    return [term for term in re.findall(r"[a-zA-Z][a-zA-Z0-9_]{2,}", text.lower()) if term not in stop]
+
+
+def _rank_nodes_by_text(graph: dict[str, Any], query: str, *, limit: int) -> list[dict[str, Any]]:
+    ranked: list[tuple[float, dict[str, Any]]] = []
+    for node in graph["nodes_by_id"].values():
+        score = _text_score(query, " ".join(str(node.get(key) or "") for key in ("file_path", "name", "kind", "content")))
+        if score > 0:
+            ranked.append((score, node))
+    ranked.sort(key=lambda item: (-item[0], _is_test_path(str(item[1].get("file_path") or "")), str(item[1].get("file_path") or "")))
+    return _dedupe_nodes([node for _score, node in ranked])[:limit]
+
+
+def _dedupe_nodes(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for node in nodes:
+        node_id = str(node.get("node_id") or node.get("scip_id"))
+        if not node_id or node_id in seen:
+            continue
+        seen.add(node_id)
+        out.append(node)
+    return out
+
+
+def _workflow_action_rank(action: str) -> int:
+    order = {
+        "CONFIGURE": 0,
+        "AUTHORIZE": 1,
+        "CONNECT": 2,
+        "CREATE": 3,
+        "PRODUCE": 4,
+        "PROCESS": 5,
+        "PERSIST": 6,
+        "OBSERVE": 7,
+        "RENDER": 8,
+        "REPRESENT": 9,
+    }
+    return order.get(action.upper(), 50)

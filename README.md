@@ -70,7 +70,7 @@ Real now:
 - **MCP stdio server** (`heart-transplant mcp-serve` or `python -m heart_transplant.mcp_server`) exposing graph tools when Surreal is running and loaded
 - dated trending-repo input manifests for beta corpus refreshes (`docs/evals/trending-repos-2026-04-27.json`)
 - preserved 50-repo EC2 synthesis with landed fixes for the three first-run ingest crashes and six zero-node successes
-- LogicLens paper checklist and evidence-contract CLIs (`paper-checklist`, `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence`)
+- LogicLens paper checklist and evidence-contract CLIs (`paper-checklist`, `canonical-graph`, `explain-node`, `explain-file`, `trace-dependency`, `query-entities`, `query-projects`, `trace-entity-workflow`, `find-architectural-block`, `answer-with-evidence`)
 
 ## Canonical Graph Contract
 
@@ -104,7 +104,9 @@ the path exists, but the paper-grade gate or benchmark is not fully green yet.
 | Stable symbol identity and reference graph | Partial | `backend/src/heart_transplant/scip_typescript.py`, `backend/src/heart_transplant/scip_consume.py`, `backend/src/heart_transplant/scip/` | `ingest-local --with-scip`, `index.scip`, `scip-consumed.json`, `scip_actually_resolves_nodes` |
 | Canonical multi-layer architecture graph | Partial | `backend/src/heart_transplant/canonical_graph.py`, `backend/src/heart_transplant/multimodal/` | `heart-transplant canonical-graph`, `canonical-graph.json`, `graph-integrity` |
 | Semantic component/block labeling | Partial | `backend/src/heart_transplant/ontology.py`, `backend/src/heart_transplant/classify/`, `backend/src/heart_transplant/semantic/` | `classify`, `semantic-artifact.json`, `block-benchmark`, `docs/evals/gold_block_benchmark*.json` |
+| Domain entities and semantic action edges | Partial | `backend/src/heart_transplant/semantic/enrichment.py`, `backend/src/heart_transplant/canonical_graph.py`, `backend/src/heart_transplant/evidence.py` | `semantic-artifact.json`, `canonical-graph.json`, `query-entities`, `trace-entity-workflow` |
 | Evidence-grounded architecture Q&A | Partial | `backend/src/heart_transplant/evidence.py`, `backend/src/heart_transplant/db/graph_queries.py`, `backend/src/heart_transplant/mcp_server.py` | `explain-node`, `explain-file`, `trace-dependency`, `find-architectural-block`, `answer-with-evidence` |
+| Reactive graph retrieval tools | Partial | `backend/src/heart_transplant/evidence.py`, `backend/src/heart_transplant/db/graph_queries.py`, `backend/src/heart_transplant/mcp_server.py` | `query-projects`, `query-entities`, `trace-entity-workflow`, `mcp-serve`, SurrealDB graph tools |
 | Queryable graph backend | Partial | `backend/src/heart_transplant/db/`, `backend/src/heart_transplant/mcp_server.py` | `load-surreal`, `verify-surreal`, `mcp-serve`, SurrealDB `ht_code` / `ht_edge` rows |
 | Architecture evolution over time | Partial | `backend/src/heart_transplant/temporal/` | `temporal-scan`, `temporal-scan --replay-snapshots`, `temporal-diff`, `temporal-gates` |
 | Cross-layer code/test/API/infra reasoning | Partial | `backend/src/heart_transplant/multimodal/`, `backend/src/heart_transplant/canonical_graph.py` | `multimodal-ingest`, `canonical-graph`, future correlation accuracy benchmark |

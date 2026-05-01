@@ -4,7 +4,7 @@ import hashlib
 import re
 from collections import Counter
 
-from heart_transplant.models import CodeNode, NeighborhoodRecord
+from heart_transplant.models import CodeNode, NeighborhoodRecord, ProjectNode
 from heart_transplant.semantic.models import BlockAssignment, SemanticAction, SemanticEntity, SemanticSummary
 
 
@@ -51,6 +51,39 @@ def build_semantic_summaries(
             )
         )
     return summaries
+
+
+def build_project_summary(project: ProjectNode, summaries: list[SemanticSummary]) -> SemanticSummary:
+    block_counts: Counter[str] = Counter()
+    for summary in summaries:
+        match = re.search(r" maps to ([^ ](?:.*?)) with \d+ import", summary.text)
+        if match:
+            block_counts[match.group(1)] += 1
+    top_blocks = ", ".join(block for block, _count in block_counts.most_common(5)) or "unclassified code"
+    return SemanticSummary(
+        node_id=project.node_id,
+        summary_type="project",
+        text=(
+            f"Project {project.name} represents repository {project.repo_name}. "
+            f"Its strongest observed responsibilities are {top_blocks}. "
+            f"The summary is derived from {len(summaries)} code-node semantic summaries."
+        ),
+        provenance="heuristic_semantic_enrichment",
+    )
+
+
+def build_system_summary(system_name: str, project_summaries: list[SemanticSummary]) -> SemanticSummary:
+    project_text = " ".join(summary.text for summary in project_summaries)
+    return SemanticSummary(
+        node_id="system:local",
+        summary_type="system",
+        text=(
+            f"System {system_name} currently contains {len(project_summaries)} project graph(s). "
+            f"It exposes cross-cutting architecture evidence through structural code nodes, "
+            f"semantic entities, project summaries, and action edges. {project_text[:500]}"
+        ),
+        provenance="heuristic_semantic_enrichment",
+    )
 
 
 def build_semantic_entities(

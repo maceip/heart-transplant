@@ -8,7 +8,16 @@ import typer
 from heart_transplant.artifact_manifest import build_artifact_manifest, run_artifact_manifest, summarize_artifact_manifest, write_artifact_manifest
 from heart_transplant.artifact_store import artifact_root, persist_structural_artifact, write_json
 from heart_transplant.canonical_graph import build_canonical_graph
-from heart_transplant.evidence import answer_with_evidence, explain_file, explain_node, find_architectural_block, trace_dependency
+from heart_transplant.evidence import (
+    answer_with_evidence,
+    explain_file,
+    explain_node,
+    find_architectural_block,
+    query_entities,
+    query_projects,
+    trace_dependency,
+    trace_entity_workflow,
+)
 from heart_transplant.graph_smoke import run_graph_smoke
 from heart_transplant.ingest.corpus_ingest import ingest_vendors
 from heart_transplant.ingest.treesitter_ingest import ingest_repository
@@ -229,6 +238,39 @@ def find_architectural_block_command(
         }
         bundle.source_nodes = [node for node in bundle.source_nodes if node.node_id in allowed_node_ids]
     typer.echo(bundle.model_dump_json(indent=2))
+
+
+@app.command("query-entities")
+def query_entities_command(
+    query: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    limit: int = typer.Option(20, "--limit"),
+) -> None:
+    """Return an entity-centered subgraph evidence bundle from semantic artifacts."""
+
+    typer.echo(query_entities(artifact_dir.resolve(), query, limit=limit).model_dump_json(indent=2))
+
+
+@app.command("query-projects")
+def query_projects_command(
+    query: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    limit: int = typer.Option(20, "--limit"),
+) -> None:
+    """Return a project-centered evidence bundle from summaries and adjacent code nodes."""
+
+    typer.echo(query_projects(artifact_dir.resolve(), query, limit=limit).model_dump_json(indent=2))
+
+
+@app.command("trace-entity-workflow")
+def trace_entity_workflow_command(
+    query: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    limit: int = typer.Option(30, "--limit"),
+) -> None:
+    """Trace code-to-entity action edges for workflow-style questions."""
+
+    typer.echo(trace_entity_workflow(artifact_dir.resolve(), query, limit=limit).model_dump_json(indent=2))
 
 
 @app.command("answer-with-evidence")

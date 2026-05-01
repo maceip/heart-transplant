@@ -13,6 +13,8 @@ from heart_transplant.semantic.enrichment import (
     build_semantic_actions,
     build_semantic_entities,
     build_semantic_summaries,
+    build_system_summary,
+    build_project_summary,
 )
 from heart_transplant.semantic.models import BlockAssignment, SemanticArtifact
 
@@ -36,9 +38,12 @@ def run_classification_on_artifact(
         assignments = [classify_node_heuristic(c, nb) for c, nb in items]
     enriched_items = [(node, neighbor, assignment) for (node, neighbor), assignment in zip(items, assignments, strict=True)]
     entities = build_semantic_entities(enriched_items)
+    summaries = build_semantic_summaries(enriched_items)
+    summaries.append(build_project_summary(a.project_node, summaries))
+    summaries.append(build_system_summary(a.repo_name, [summaries[-1]]))
     sem = SemanticArtifact(
         artifact_id=str(structural.get("artifact_id", "unknown")),
-        semantic_summaries=build_semantic_summaries(enriched_items),
+        semantic_summaries=summaries,
         entities=entities,
         actions=build_semantic_actions(enriched_items, entities),
         block_assignments=assignments,
