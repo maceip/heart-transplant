@@ -49,6 +49,7 @@ The next build target is not “more pages.” It is making the LogicLens-style 
 - `docs/evals/trending-repos-2026-04-27.json` and `docs/evals/trending-repos-top50-2026-04-27.json` — Dated daily-trending input manifests for private beta corpus refreshes
 - `docs/evals/trending-top50-ec2-first-synthesis-2026-04-27.md` — First 50-repo EC2 synthesis with landed fix notes for the nine first-run complications
 - `docs/roadmaps/alignment-and-trajectory-2026-04-27.md` — Current alignment doc for LogicLens-backend and Regret SDK trajectory
+- `docs/roadmaps/logiclens-next-tranche-2026-04-27.md` — Outcome-gated next tranche to reach a respectable LogicLens backend and Regret SDK baseline
 
 ### Useful Commands
 
