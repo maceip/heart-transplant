@@ -289,9 +289,11 @@ def walk_source_files(
         ".turbo",
         ".cache",
         ".pytest_cache",
+        ".pytest_tmp",
         ".mypy_cache",
         ".ruff_cache",
         "__pycache__",
+        ".heart-transplant",
         ".venv",
         ".venv-win",
         "venv",
@@ -304,7 +306,7 @@ def walk_source_files(
     for path in root.rglob("*"):
         if not path.is_file():
             continue
-        if any(part in ignored_dirs for part in path.parts):
+        if any(part in ignored_dirs for part in path.relative_to(root).parts):
             continue
         if path.suffix.lower() in SUPPORTED_SOURCE_SUFFIXES:
             if max_file_bytes is not None and path.stat().st_size > max_file_bytes:
