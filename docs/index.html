@@ -3,193 +3,104 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Heart Transplant - Repo Analysis Console</title>
-    <link rel="stylesheet" href="./assets/pages.css?v=20260429-smui-001" />
+    <title>LogicLens — Repository Architecture Demo</title>
+    <link rel="stylesheet" href="./assets/pages.css?v=20260505-logiclens" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero-band" aria-labelledby="page-title">
-        <div class="hero-copy">
-          <p class="eyebrow">TXP-001</p>
-          <h1 id="page-title">Repository Analysis with a Pulse.</h1>
-          <p class="lede">
-            Turn a GitHub repo into an evidence-backed operating map: where the system is stateful,
-            which files carry risk, what a change might touch, and what a reviewer should inspect first.
-          </p>
-        </div>
-        <div class="monitor-panel" aria-label="Benchmark vitals">
-          <canvas id="vitals-scope" width="720" height="180" aria-label="Analysis activity oscilloscope"></canvas>
-        </div>
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">heart-transplant · LogicLens</p>
+        <h1 id="page-title">Read any repo as architecture, not files.</h1>
+        <p class="lede">
+          Point LogicLens at a public GitHub repository. It classifies every source file into one
+          of 24 architecture blocks, answers the seven core architecture questions with file-level
+          evidence, and surfaces regret patterns the codebase carries.
+        </p>
       </section>
 
-      <section class="case-band" aria-labelledby="case-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">recent runs</p>
-            <h2 id="case-title">GitHub Trending Repos To Analyze</h2>
-          </div>
-          <p class="section-note">Pick a repo or enter your own. Results update below after analysis.</p>
-        </div>
-        <div class="case-grid" id="case-grid"></div>
-      </section>
-
-      <section class="tool-band" aria-labelledby="ingest-title">
-        <div class="section-heading">
-          <p class="eyebrow">analysis</p>
-          <h2 id="ingest-title">Enter GitHub Repo</h2>
-        </div>
+      <section class="repo-band" aria-labelledby="repo-title">
+        <h2 id="repo-title" class="visually-hidden">Pick a repository</h2>
+        <div class="repo-chips" id="repo-chips" role="list" aria-label="Featured repositories"></div>
         <form id="repo-form" class="repo-form">
-          <label for="repo-input">Public GitHub repository URL or owner/name</label>
+          <label for="repo-input">GitHub repository</label>
           <div class="input-row">
             <input
               id="repo-input"
               name="repo"
               type="text"
               value="immich-app/immich"
+              placeholder="owner/name or https://github.com/owner/name"
               autocomplete="off"
               spellcheck="false"
             />
-            <button type="submit">Start analysis</button>
+            <button type="submit">Analyze</button>
           </div>
-          <p id="repo-status" class="status-text" role="status">Checking hosted analyzer.</p>
+          <p id="repo-status" class="status-text" role="status">Pick a featured repo or enter your own to start.</p>
         </form>
-
-        <div class="runtime-panel" id="runtime-panel">
-          <div>
-            <strong>Runtime</strong>
-            <span id="runtime-mode">checking</span>
-          </div>
-          <div>
-            <strong>Latest receipt</strong>
-            <span id="runtime-receipt">No hosted run yet.</span>
-          </div>
-          <div>
-            <strong>Limits</strong>
-            <span>Public GitHub repos only; no package installs, OpenAI calls, or local paths.</span>
-          </div>
-        </div>
       </section>
 
-      <section class="fixture-band" aria-labelledby="fixture-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">fixture review</p>
-            <h2 id="fixture-title">Candidate Review Queue</h2>
-          </div>
-          <p class="section-note">Load a fixture-candidates packet, review with buttons, then export JSON for backend ingest.</p>
-        </div>
-
-        <div class="fixture-shell">
-          <div class="fixture-toolbar">
-            <div>
-              <strong id="fixture-repo">No packet loaded</strong>
-              <span id="fixture-artifact">Load fixture-candidates.json or the whole packet directory.</span>
-            </div>
-            <div class="fixture-actions">
-              <label class="reviewer-field" for="fixture-reviewer">
-                <span>Reviewer</span>
-                <input id="fixture-reviewer" type="text" autocomplete="off" placeholder="optional" />
-              </label>
-              <label class="button-like" for="fixture-files">Load packet</label>
-              <input id="fixture-files" type="file" multiple webkitdirectory />
-              <label class="button-like secondary" for="fixture-json">Load JSON files</label>
-              <input id="fixture-json" type="file" multiple accept=".json,application/json" />
-              <button id="fixture-export" type="button" disabled>Export reviewed JSON</button>
-            </div>
-          </div>
-
-          <div class="fixture-stats" id="fixture-stats"></div>
-          <div class="fixture-graph" id="fixture-graph"></div>
-
-          <div class="fixture-controls">
-            <div class="fixture-tabs" role="tablist" aria-label="Fixture candidate tabs">
-              <button type="button" data-fixture-tab="nodes" class="active">Nodes</button>
-              <button type="button" data-fixture-tab="edges">Edges</button>
-              <button type="button" data-fixture-tab="questions">Evidence Questions</button>
-              <button type="button" data-fixture-tab="blast">Blast Radius</button>
-              <button type="button" data-fixture-tab="summary">Summary / Export</button>
-            </div>
-            <div class="fixture-filter">
-              <label for="fixture-filter">Show</label>
-              <select id="fixture-filter">
-                <option value="all">all</option>
-                <option value="unreviewed">unreviewed only</option>
-                <option value="correct">correct</option>
-                <option value="wrong">wrong</option>
-                <option value="missing_important_context">missing context</option>
-                <option value="not_sure">not sure</option>
-              </select>
-              <button id="fixture-mark-correct" type="button" disabled>Mark visible correct</button>
-              <button id="fixture-reset-visible" type="button" disabled>Reset visible</button>
-            </div>
-          </div>
-
-          <div class="fixture-list" id="fixture-list"></div>
-        </div>
+      <section class="summary-band" aria-labelledby="summary-title" hidden>
+        <h2 id="summary-title" class="visually-hidden">Summary</h2>
+        <div class="summary-grid" id="summary-grid"></div>
       </section>
 
-      <section class="results-band" aria-labelledby="blocks-title">
-        <div class="section-heading">
-          <p class="eyebrow">repository insights</p>
-          <h2 id="answers-title">Basic Blocks</h2>
-        </div>
-        <div class="answer-grid" id="answer-grid"></div>
+      <section class="evidence-band" aria-labelledby="evidence-title" hidden>
+        <header class="section-heading">
+          <p class="eyebrow">evidence-grounded Q&amp;A</p>
+          <h2 id="evidence-title">Seven architecture questions</h2>
+          <p class="section-note">
+            Each card answers one question with the files that carry the evidence. No file ⇒ honest empty result.
+          </p>
+        </header>
+        <div class="evidence-grid" id="evidence-grid"></div>
+      </section>
 
-        <div class="section-heading">
-          <p class="eyebrow">block output</p>
-          <div>
-            <h2 id="blocks-title">Block Distribution</h2>
-            <p class="section-note">A block is a file's likely role in the repo, such as auth, persistence, rendering, background work, or network edge.</p>
-          </div>
-        </div>
-        <div class="results-layout">
+      <section class="regret-band" aria-labelledby="regret-title" hidden>
+        <header class="section-heading">
+          <p class="eyebrow">regret patterns</p>
+          <h2 id="regret-title">What this codebase will likely regret</h2>
+          <p class="section-note">
+            Heuristic patterns over the classified surfaces: scattered auth, database sprawl, fat routes,
+            inconsistent telemetry. Each surface is a starting point, not a verdict.
+          </p>
+        </header>
+        <div class="regret-grid" id="regret-grid"></div>
+      </section>
+
+      <section class="blocks-band" aria-labelledby="blocks-title" hidden>
+        <header class="section-heading">
+          <p class="eyebrow">block distribution</p>
+          <h2 id="blocks-title">Where the code spends its time</h2>
+        </header>
+        <div class="blocks-layout">
           <div class="chart-card">
-            <canvas id="repo-block-chart" width="760" height="360" aria-label="Classified block counts"></canvas>
+            <canvas id="block-chart" width="760" height="360" aria-label="Detected blocks by file count"></canvas>
           </div>
-          <div class="block-list" id="block-list"></div>
-        </div>
-        <div class="tree-panel">
-          <h3>Repo → directory → detected blocks</h3>
-          <div id="block-tree" class="block-tree"></div>
-        </div>
-        <div class="surface-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>File surface</th>
-                <th>Primary block</th>
-                <th>Confidence</th>
-                <th>Signal</th>
-              </tr>
-            </thead>
-            <tbody id="surface-table"></tbody>
-          </table>
+          <div class="surface-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>File</th>
+                  <th>Block</th>
+                  <th>Confidence</th>
+                  <th>Signal</th>
+                </tr>
+              </thead>
+              <tbody id="surface-table"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <section class="benchmark-band" aria-labelledby="bench-title">
-        <div class="section-heading">
-          <p class="eyebrow">benchmark set</p>
-          <h2 id="bench-title">Repository Analysis Benchmark</h2>
-        </div>
-        <div class="benchmark-grid">
-          <div class="chart-card">
-            <h3>Success rate by language</h3>
-            <canvas id="language-chart" width="620" height="340" aria-label="OK and failed repositories by language"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>Code nodes by language</h3>
-            <canvas id="node-chart" width="620" height="340" aria-label="Code nodes by language"></canvas>
-          </div>
-          <div class="chart-card wide">
-            <h3>Largest analyzed repositories</h3>
-            <canvas id="largest-chart" width="1280" height="360" aria-label="Code nodes found per repository"></canvas>
-          </div>
-        </div>
-        <div class="findings-strip" id="bench-findings"></div>
-        <div class="complication-panel" id="complication-panel"></div>
-      </section>
+      <footer class="page-footer">
+        <p>
+          The hosted demo runs in your browser: it pulls the GitHub tree, samples up to 55 files for
+          content, and applies the same heuristics LogicLens uses to seed its 24-block ontology.
+          Run <code>heart-transplant logiclens-demo &lt;repo&gt;</code> locally for the full
+          canonical-graph and blast-radius simulations.
+        </p>
+      </footer>
     </main>
-    <script src="./assets/pages.js?v=20260429-smui-001"></script>
+    <script src="./assets/pages.js?v=20260505-logiclens"></script>
   </body>
 </html>
