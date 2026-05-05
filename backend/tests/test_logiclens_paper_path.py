@@ -124,30 +124,62 @@ def test_evidence_bundle_queries_return_receipts(tmp_path: Path) -> None:
 
 
 def test_entity_and_project_tools_return_paper_shaped_subgraphs(tmp_path: Path) -> None:
-    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    artifact_dir, artifact = _artifact_with_semantics(tmp_path)
 
     entities = query_entities(artifact_dir, "auth session")
     workflow = trace_entity_workflow(artifact_dir, "auth session flow")
     projects = query_projects(artifact_dir, "auth project")
-    codes = query_codes(artifact_dir, "sessionGuard")
+    codes = query_codes(artifact_dir, "sessionGuard", min_score=0.1)
+
+    fn_node_id = next(node.scip_id for node in artifact.code_nodes if node.kind.value == "function")
 
     assert entities.query_type == "query_entities"
     assert entities.source_nodes
     assert entities.paths
+    assert entities.paths[0].edge_provenance == [None]
     assert workflow.query_type == "trace_entity_workflow"
     assert workflow.paths
     assert projects.query_type == "query_projects"
     assert projects.paths[0].edge_types == ["CONTAINS"]
     assert codes.query_type == "query_codes"
     assert codes.source_nodes
-    assert any(n.node_id for n in codes.source_nodes)
+    top_ids = [n.node_id for n in codes.source_nodes]
+    assert fn_node_id in top_ids
+    assert codes.paths
+    assert codes.paths[0].edge_provenance is not None
+    assert len(codes.paths[0].node_ids) >= 2
+
+
+def test_query_codes_abstains_on_gibberish(tmp_path: Path) -> None:
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    empty = query_codes(artifact_dir, "zzzNonexistentSymbolXyzzy999")
+    assert empty.query_type == "query_codes"
+    assert empty.confidence == 0.0
+    assert not empty.source_nodes
+
+
+def test_answer_with_evidence_entity_vs_code_precedence(tmp_path: Path) -> None:
+    """Entity-pattern questions route to trace_entity_workflow before query_codes."""
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    routed = answer_with_evidence(artifact_dir, "Which function creates the user entity?")
+    assert routed.query_type == "trace_entity_workflow"
 
 
 def test_answer_with_evidence_routes_code_questions_to_codes_tool(tmp_path: Path) -> None:
-    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    artifact_dir, artifact = _artifact_with_semantics(tmp_path)
+    fn_node_id = next(node.scip_id for node in artifact.code_nodes if node.kind.value == "function")
     routed = answer_with_evidence(artifact_dir, "Which function implements sessionGuard?")
     assert routed.query_type == "query_codes"
     assert routed.source_nodes
+    assert {n.node_id for n in routed.source_nodes} == {fn_node_id}
+
+
+def test_answer_with_evidence_codes_abstention_benchmark_case(tmp_path: Path) -> None:
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    abstain = answer_with_evidence(artifact_dir, "Where is the function zzzNonexistentSymbolXyzzy999 implemented?")
+    assert abstain.query_type == "query_codes"
+    assert abstain.confidence == 0.0
+    assert not abstain.source_nodes
 
 
 def test_paper_reproduction_checklist_maps_features_to_gates_and_benchmarks() -> None:

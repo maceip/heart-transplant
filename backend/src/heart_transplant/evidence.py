@@ -25,6 +25,8 @@ class EvidenceNode(BaseModel):
 class EvidencePath(BaseModel):
     node_ids: list[str] = Field(default_factory=list)
     edge_types: list[str] = Field(default_factory=list)
+    edge_provenance: list[str | None] = Field(default_factory=list)
+    """Parallel to the last hop in ``edge_types`` (``None`` when unknown)."""
 
 
 class EvidenceBundle(BaseModel):
@@ -119,7 +121,7 @@ def trace_dependency(artifact_dir: Path, start_id: str, end_id: str, *, max_dept
         confidence=0.85,
         source_nodes=[_evidence_node(node) for node in nodes if node],
         file_ranges=_file_ranges([node for node in nodes if node]),
-        paths=[EvidencePath(node_ids=path["node_ids"], edge_types=path["edge_types"])],
+        paths=[EvidencePath(node_ids=path["node_ids"], edge_types=path["edge_types"], edge_provenance=path.get("edge_provenance", []))],
     )
 
 
@@ -191,6 +193,7 @@ def query_entities(artifact_dir: Path, query: str, *, limit: int = 20) -> Eviden
             EvidencePath(
                 node_ids=[str(action.get("source_code_node_id")), str(action.get("entity_id"))],
                 edge_types=[str(action.get("action") or "ACTION")],
+                edge_provenance=[None],
             )
             for entity in selected
             for action in actions_by_entity.get(str(entity.get("entity_id")), [])[:3]
@@ -199,8 +202,16 @@ def query_entities(artifact_dir: Path, query: str, *, limit: int = 20) -> Eviden
     )
 
 
-def query_codes(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceBundle:
-    """Artifact-backed approximation of the paper's Codes Tool (code-centric subgraph retrieval)."""
+def query_codes(
+    artifact_dir: Path,
+    query: str,
+    *,
+    limit: int = 20,
+    subgraph_depth: int = 3,
+    subgraph_max_edges: int = 120,
+    min_score: float = 0.18,
+) -> EvidenceBundle:
+    """Paper Codes Tool: rank symbol/code nodes, expand a bounded connected subgraph, attach provenance."""
 
     graph = _load_graph(artifact_dir)
     sem = _load_semantic(artifact_dir)
@@ -211,17 +222,20 @@ def query_codes(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceB
     }
     semantic_rows = _semantic_rows_by_node(artifact_dir)
 
-    def is_code_surface(node: dict[str, Any]) -> bool:
+    def is_rankable_code_surface(node: dict[str, Any]) -> bool:
         kind = str(node.get("kind") or "").lower()
-        if kind in {"project", "system"}:
+        if kind in {"project", "system", "file"}:
             return False
-        if kind == "file":
+        if kind == "file_surface":
+            return False
+        sym_src = str(node.get("symbol_source") or "")
+        if sym_src == "file_surface":
             return False
         return bool(node.get("file_path") or node.get("name"))
 
     ranked: list[tuple[float, dict[str, Any]]] = []
     for node in graph["nodes_by_id"].values():
-        if not is_code_surface(node):
+        if not is_rankable_code_surface(node):
             continue
         node_id = str(node.get("node_id") or node.get("scip_id") or "")
         row = semantic_rows.get(node_id)
@@ -242,7 +256,7 @@ def query_codes(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceB
                 extra,
             ]
         )
-        score = _text_score(query, haystack)
+        score = _normalized_lexical_score(query, haystack)
         if score > 0:
             ranked.append((score, node))
     ranked.sort(
@@ -253,32 +267,51 @@ def query_codes(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceB
         )
     )
     chosen = _dedupe_nodes([node for _score, node in ranked])[:limit]
+
     if not chosen:
         return EvidenceBundle(
             query_type="query_codes",
-            claim=f"No code nodes matched query: {query}",
-            confidence=0.25,
-            limitations=["no code/file-path node scored above zero for this query; broaden terms or check ingest coverage"],
+            claim=f"No code symbol nodes matched query: {query}",
+            confidence=0.0,
+            limitations=[
+                "no code symbol matched the query above the abstention threshold; "
+                "try broader keywords or verify ingest/classifier coverage",
+            ],
         )
 
-    paths: list[EvidencePath] = []
-    for node in chosen[: min(len(chosen), 12)]:
-        nid = str(node.get("node_id") or node.get("scip_id") or "")
-        for edge in _incident_edges(graph, nid)[:4]:
-            other = edge["target_id"] if edge.get("source_id") == nid else edge.get("source_id")
-            et = str(edge.get("edge_type") or "EDGE")
-            paths.append(EvidencePath(node_ids=[nid, str(other)], edge_types=[et]))
-        if len(paths) >= limit:
-            break
+    top_score = ranked[0][0] if ranked else 0.0
+    if top_score < min_score:
+        return EvidenceBundle(
+            query_type="query_codes",
+            claim=f"Insufficient lexical relevance for query: {query} (best score {top_score:.3f} < {min_score}).",
+            confidence=0.0,
+            limitations=[
+                f"best_rank_score={top_score:.3f}; abstaining from ranking garbage matches",
+            ],
+        )
+
+    seeds = {str(n.get("node_id") or n.get("scip_id")) for n in chosen[: min(8, len(chosen))]}
+    path_bundle = _codes_tool_subgraph_paths(
+        graph,
+        seeds,
+        max_depth=subgraph_depth,
+        max_edges=subgraph_max_edges,
+    )
+
+    conf = round(min(0.35 + 0.55 * top_score, 0.92), 3)
+    limitations = [
+        f"codes subgraph: seeds={len(seeds)}, depth={subgraph_depth}, structural_edges={len(path_bundle)}",
+        "expanded along structural artifact edges only (SCIP/reference topology)",
+    ]
 
     return EvidenceBundle(
         query_type="query_codes",
-        claim=f"Matched {len(chosen)} code surface node(s) for '{query}'.",
-        confidence=min(0.5 + 0.03 * min(len(chosen), 10), 0.88),
+        claim=f"Codes retrieval for '{query}': top match strength {top_score:.3f}; {len(chosen)} ranked symbol(s); subgraph edges below.",
+        confidence=conf,
         source_nodes=[_evidence_node(node) for node in chosen],
         file_ranges=_file_ranges(chosen),
-        paths=paths[:limit],
-        limitations=[],
+        paths=path_bundle,
+        limitations=limitations,
     )
 
 
@@ -358,12 +391,14 @@ def impact_radius(artifact_dir: Path, start_id: str, *, max_depth: int = 3, max_
 
 
 def answer_with_evidence(artifact_dir: Path, question: str) -> EvidenceBundle:
+    # Domain entity / workflow questions before block-intent routing so words like "user"
+    # do not send the prompt only to Access Control block evidence.
+    if re.search(r"\b(entity|entities|workflow|flow|creation|activation|delete|deletion|produce|configure)\b", question, re.I):
+        return trace_entity_workflow(artifact_dir, question)
     intent = _plan_question(question)
     if intent.blocks:
         return _answer_from_ranked_evidence(artifact_dir, question, intent)
     q = question.lower()
-    if re.search(r"\b(entity|entities|workflow|flow|creation|activation|delete|deletion|produce|configure)\b", question, re.I):
-        return trace_entity_workflow(artifact_dir, question)
     if re.search(
         r"\b(code|function|functions|class|classes|method|methods|symbol|symbols|implementation|snippet|source)\b",
         question,
@@ -437,22 +472,28 @@ def _incident_edges(graph: dict[str, Any], node_id: str) -> list[dict[str, Any]]
 
 def _bfs_path(graph: dict[str, Any], start_id: str, end_id: str, *, max_depth: int) -> dict[str, list[str]] | None:
     edges = graph["structural"].get("edges", [])
-    adjacency: dict[str, list[tuple[str, str]]] = {}
+    adjacency: dict[str, list[tuple[str, str, str | None]]] = {}
     for edge in edges:
-        adjacency.setdefault(str(edge.get("source_id")), []).append((str(edge.get("target_id")), str(edge.get("edge_type"))))
-    queue = deque([(start_id, [start_id], [])])
+        s = str(edge.get("source_id"))
+        t = str(edge.get("target_id"))
+        et = str(edge.get("edge_type"))
+        prov_raw = edge.get("provenance")
+        prov = str(prov_raw) if prov_raw is not None else None
+        adjacency.setdefault(s, []).append((t, et, prov))
+        adjacency.setdefault(t, []).append((s, et, prov))
+    queue = deque([(start_id, [start_id], [], [])])
     seen = {start_id}
     while queue:
-        node_id, path, edge_types = queue.popleft()
+        node_id, path, edge_types, provs = queue.popleft()
         if node_id == end_id:
-            return {"node_ids": path, "edge_types": edge_types}
+            return {"node_ids": path, "edge_types": edge_types, "edge_provenance": provs}
         if len(edge_types) >= max_depth:
             continue
-        for nxt, edge_type in adjacency.get(node_id, []):
+        for nxt, edge_type, p in adjacency.get(node_id, []):
             if nxt in seen:
                 continue
             seen.add(nxt)
-            queue.append((nxt, [*path, nxt], [*edge_types, edge_type]))
+            queue.append((nxt, [*path, nxt], [*edge_types, edge_type], [*provs, p]))
     return None
 
 
@@ -664,7 +705,13 @@ def _paths_between_chosen_nodes(graph: dict[str, Any], nodes: list[dict[str, Any
     for start, end in zip(ids, ids[1:], strict=False):
         path = _bfs_path(graph, start, end, max_depth=4)
         if path:
-            out.append(EvidencePath(node_ids=path["node_ids"], edge_types=path["edge_types"]))
+            out.append(
+                EvidencePath(
+                    node_ids=path["node_ids"],
+                    edge_types=path["edge_types"],
+                    edge_provenance=path.get("edge_provenance", []),
+                )
+            )
         if len(out) >= 4:
             break
     return out
@@ -695,6 +742,61 @@ def _snippet(node: dict[str, Any]) -> str | None:
 
 def _is_test_path(path: str) -> bool:
     return bool(re.search(r"(^|/)(tests?|__tests__)/|(_test|\.test|\.spec)\.", path, re.I))
+
+
+def _codes_tool_subgraph_paths(
+    graph: dict[str, Any],
+    seed_ids: set[str],
+    *,
+    max_depth: int,
+    max_edges: int,
+) -> list[EvidencePath]:
+    """Union of bounded BFS walks from each seed — connected multi-hop subgraph receipts."""
+    edges_out: list[EvidencePath] = []
+    seen_walks: set[tuple[str, ...]] = set()
+    for seed in seed_ids:
+        if len(edges_out) >= max_edges:
+            break
+        q = deque([(seed, [seed], [], [], 0)])
+        while q and len(edges_out) < max_edges:
+            nid, path_nodes, etypes, provs, depth = q.popleft()
+            if depth >= max_depth:
+                continue
+            for edge in _incident_edges(graph, nid):
+                other = str(edge.get("target_id") if edge.get("source_id") == nid else edge.get("source_id"))
+                if not other or other in path_nodes:
+                    continue
+                et = str(edge.get("edge_type") or "EDGE")
+                prov = edge.get("provenance")
+                prov_s = str(prov) if prov is not None else None
+                new_path = [*path_nodes, other]
+                walk_key = tuple(new_path)
+                if walk_key in seen_walks:
+                    continue
+                seen_walks.add(walk_key)
+                edge_types = [*etypes, et]
+                edge_provenance = [*provs, prov_s]
+                edges_out.append(
+                    EvidencePath(
+                        node_ids=new_path,
+                        edge_types=edge_types,
+                        edge_provenance=edge_provenance,
+                    )
+                )
+                if len(edges_out) >= max_edges:
+                    break
+                q.append((other, new_path, edge_types, edge_provenance, depth + 1))
+    return edges_out
+
+
+def _normalized_lexical_score(query: str, haystack: str) -> float:
+    """Scale _text_score to ~[0,1] for confidence and abstention."""
+    raw = _text_score(query, haystack)
+    if raw <= 0:
+        return 0.0
+    terms = _terms(query)
+    denom = max(len(terms), 1) + 3.0
+    return min(raw / denom, 1.0)
 
 
 def _text_score(query: str, text: str) -> float:

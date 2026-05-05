@@ -60,6 +60,19 @@
     "status": "active"
   },
   {
+    "id": "fixture-unsupported-codes-garbage",
+    "repo_name": "test/logiclens",
+    "question": "Where is the function zzzNonexistentSymbolXyzzy999 implemented?",
+    "expected_blocks": [],
+    "expected_files": [],
+    "expected_file_globs": [],
+    "expected_query_types": ["query_codes"],
+    "unsupported": true,
+    "source": "Unit-test fixture",
+    "notes": "query_codes should abstain (no nodes, confidence 0) for nonsense token.",
+    "status": "active"
+  },
+  {
     "id": "fixture-unsupported-abstention",
     "repo_name": "test/logiclens",
     "question": "Where is the quantum scheduler configured?",

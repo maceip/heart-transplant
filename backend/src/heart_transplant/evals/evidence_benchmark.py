@@ -73,6 +73,7 @@ def normalize_question(row: dict[str, Any]) -> dict[str, Any]:
         "expected_blocks": [str(item) for item in row.get("expected_blocks", []) if str(item or "").strip()],
         "expected_files": [str(item) for item in row.get("expected_files", []) if str(item or "").strip()],
         "expected_file_globs": [str(item) for item in row.get("expected_file_globs", []) if str(item or "").strip()],
+        "expected_query_types": [str(item) for item in row.get("expected_query_types", []) if str(item or "").strip()],
         "unsupported": bool(row.get("unsupported", False)),
         "source": str(row.get("source") or ""),
         "notes": str(row.get("notes") or ""),
@@ -112,15 +113,17 @@ def score_evidence_answer(question: dict[str, Any], bundle: EvidenceBundle, sema
     expected_blocks = set(question["expected_blocks"])
     expected_files = set(question["expected_files"])
     expected_globs = question["expected_file_globs"]
+    expected_qt = question.get("expected_query_types") or []
     block_match = not expected_blocks or bool(expected_blocks.intersection(observed_blocks))
     file_match = not expected_files and not expected_globs
     if expected_files:
         file_match = bool(expected_files.intersection(source_files))
     if expected_globs:
         file_match = file_match or any(fnmatch(path, pattern) for path in source_files for pattern in expected_globs)
+    query_type_match = not expected_qt or bundle.query_type in set(expected_qt)
     has_evidence = bool(bundle.source_nodes)
     return {
-        "match": bool(has_evidence and block_match and file_match),
+        "match": bool(has_evidence and block_match and file_match and query_type_match),
         "has_evidence": has_evidence,
         "block_match": block_match,
         "file_match": file_match,
@@ -131,6 +134,7 @@ def score_evidence_answer(question: dict[str, Any], bundle: EvidenceBundle, sema
         "hallucinated": False,
         "observed_blocks": observed_blocks,
         "source_files": source_files,
+        "query_type_match": query_type_match,
     }
 
 
