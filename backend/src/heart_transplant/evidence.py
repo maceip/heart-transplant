@@ -199,6 +199,89 @@ def query_entities(artifact_dir: Path, query: str, *, limit: int = 20) -> Eviden
     )
 
 
+def query_codes(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceBundle:
+    """Artifact-backed approximation of the paper's Codes Tool (code-centric subgraph retrieval)."""
+
+    graph = _load_graph(artifact_dir)
+    sem = _load_semantic(artifact_dir)
+    summary_by_node = {
+        str(row.get("node_id")): str(row.get("text") or "")
+        for row in sem.get("semantic_summaries", []) or []
+        if row.get("summary_type") == "code_node" and row.get("node_id")
+    }
+    semantic_rows = _semantic_rows_by_node(artifact_dir)
+
+    def is_code_surface(node: dict[str, Any]) -> bool:
+        kind = str(node.get("kind") or "").lower()
+        if kind in {"project", "system"}:
+            return False
+        if kind == "file":
+            return False
+        return bool(node.get("file_path") or node.get("name"))
+
+    ranked: list[tuple[float, dict[str, Any]]] = []
+    for node in graph["nodes_by_id"].values():
+        if not is_code_surface(node):
+            continue
+        node_id = str(node.get("node_id") or node.get("scip_id") or "")
+        row = semantic_rows.get(node_id)
+        extra = " ".join(
+            [
+                summary_by_node.get(node_id, ""),
+                str(row.get("reasoning") or "") if row else "",
+                str(row.get("primary_block") or "") if row else "",
+            ]
+        )
+        haystack = " ".join(
+            str(part or "")
+            for part in [
+                node.get("file_path"),
+                node.get("name"),
+                node.get("kind"),
+                node.get("content"),
+                extra,
+            ]
+        )
+        score = _text_score(query, haystack)
+        if score > 0:
+            ranked.append((score, node))
+    ranked.sort(
+        key=lambda item: (
+            -item[0],
+            _is_test_path(str(item[1].get("file_path") or "")),
+            str(item[1].get("file_path") or ""),
+        )
+    )
+    chosen = _dedupe_nodes([node for _score, node in ranked])[:limit]
+    if not chosen:
+        return EvidenceBundle(
+            query_type="query_codes",
+            claim=f"No code nodes matched query: {query}",
+            confidence=0.25,
+            limitations=["no code/file-path node scored above zero for this query; broaden terms or check ingest coverage"],
+        )
+
+    paths: list[EvidencePath] = []
+    for node in chosen[: min(len(chosen), 12)]:
+        nid = str(node.get("node_id") or node.get("scip_id") or "")
+        for edge in _incident_edges(graph, nid)[:4]:
+            other = edge["target_id"] if edge.get("source_id") == nid else edge.get("source_id")
+            et = str(edge.get("edge_type") or "EDGE")
+            paths.append(EvidencePath(node_ids=[nid, str(other)], edge_types=[et]))
+        if len(paths) >= limit:
+            break
+
+    return EvidenceBundle(
+        query_type="query_codes",
+        claim=f"Matched {len(chosen)} code surface node(s) for '{query}'.",
+        confidence=min(0.5 + 0.03 * min(len(chosen), 10), 0.88),
+        source_nodes=[_evidence_node(node) for node in chosen],
+        file_ranges=_file_ranges(chosen),
+        paths=paths[:limit],
+        limitations=[],
+    )
+
+
 def query_projects(artifact_dir: Path, query: str, *, limit: int = 20) -> EvidenceBundle:
     """Artifact-backed approximation of the paper's Projects Tool."""
 
@@ -278,8 +361,15 @@ def answer_with_evidence(artifact_dir: Path, question: str) -> EvidenceBundle:
     intent = _plan_question(question)
     if intent.blocks:
         return _answer_from_ranked_evidence(artifact_dir, question, intent)
+    q = question.lower()
     if re.search(r"\b(entity|entities|workflow|flow|creation|activation|delete|deletion|produce|configure)\b", question, re.I):
         return trace_entity_workflow(artifact_dir, question)
+    if re.search(
+        r"\b(code|function|functions|class|classes|method|methods|symbol|symbols|implementation|snippet|source)\b",
+        question,
+        re.I,
+    ) and not re.search(r"\b(project|repo|repository|service|services|component|components)\b", q):
+        return query_codes(artifact_dir, question)
     if re.search(r"\b(project|repo|repository|service|services|component|components)\b", question, re.I):
         return query_projects(artifact_dir, question)
     return EvidenceBundle(

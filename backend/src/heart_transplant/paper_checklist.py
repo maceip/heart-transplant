@@ -80,12 +80,15 @@ def build_paper_reproduction_checklist(repo_root: Path | None = None) -> PaperRe
         PaperFeatureStatus(
             feature_id="reactive_graph_tools",
             paper_feature="Agent retrieval tools for Projects, Entities, Codes, Graph Query, and Source",
-            backend_mapping="Artifact-backed project/entity/workflow retrieval, evidence/source helpers, Surreal graph queries, MCP tools",
+            backend_mapping="Artifact-backed project/entity/code/workflow retrieval, explain-node/source as Source tool, Surreal graph queries, MCP tools",
             status="partial",
             gate_or_test="backend/tests/test_logiclens_paper_path.py; backend/tests/test_graph_queries.py",
             artifact="canonical-graph.json; semantic-artifact.json; SurrealDB ht_code/ht_edge/ht_block_assign rows",
             benchmark_mapping="Evidence benchmark covers answer quality; tool-selection quality is not yet evaluated with a ReAct harness.",
-            notes=["Projects and Entities tool shapes are now explicit; Codes/Source/Graph Query surfaces existed already through explain/trace/Surreal/MCP helpers."],
+            notes=[
+                "CLI/MCP expose query-projects, query-entities, query-codes, trace-entity-workflow; explain-node traces Source tool behavior.",
+                "Graph Query remains Surreal-backed (gq.*); full arbitrary graph DB queries from artifacts are not paper-identical.",
+            ],
         ),
         PaperFeatureStatus(
             feature_id="graph_persistence",

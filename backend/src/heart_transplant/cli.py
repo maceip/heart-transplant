@@ -13,6 +13,7 @@ from heart_transplant.evidence import (
     explain_file,
     explain_node,
     find_architectural_block,
+    query_codes,
     query_entities,
     query_projects,
     trace_dependency,
@@ -261,6 +262,17 @@ def query_projects_command(
     """Return a project-centered evidence bundle from summaries and adjacent code nodes."""
 
     typer.echo(query_projects(artifact_dir.resolve(), query, limit=limit).model_dump_json(indent=2))
+
+
+@app.command("query-codes")
+def query_codes_command(
+    query: str,
+    artifact_dir: Path = typer.Option(..., "--artifact-dir", exists=True, file_okay=False, dir_okay=True),
+    limit: int = typer.Option(20, "--limit"),
+) -> None:
+    """Return a code-centered evidence bundle (LogicLens paper Codes Tool shape)."""
+
+    typer.echo(query_codes(artifact_dir.resolve(), query, limit=limit).model_dump_json(indent=2))
 
 
 @app.command("trace-entity-workflow")

@@ -13,6 +13,7 @@ from heart_transplant.evidence import (
     answer_with_evidence,
     explain_file,
     explain_node,
+    query_codes,
     query_entities,
     query_projects,
     trace_dependency,
@@ -128,6 +129,7 @@ def test_entity_and_project_tools_return_paper_shaped_subgraphs(tmp_path: Path) 
     entities = query_entities(artifact_dir, "auth session")
     workflow = trace_entity_workflow(artifact_dir, "auth session flow")
     projects = query_projects(artifact_dir, "auth project")
+    codes = query_codes(artifact_dir, "sessionGuard")
 
     assert entities.query_type == "query_entities"
     assert entities.source_nodes
@@ -136,6 +138,16 @@ def test_entity_and_project_tools_return_paper_shaped_subgraphs(tmp_path: Path) 
     assert workflow.paths
     assert projects.query_type == "query_projects"
     assert projects.paths[0].edge_types == ["CONTAINS"]
+    assert codes.query_type == "query_codes"
+    assert codes.source_nodes
+    assert any(n.node_id for n in codes.source_nodes)
+
+
+def test_answer_with_evidence_routes_code_questions_to_codes_tool(tmp_path: Path) -> None:
+    artifact_dir, _artifact = _artifact_with_semantics(tmp_path)
+    routed = answer_with_evidence(artifact_dir, "Which function implements sessionGuard?")
+    assert routed.query_type == "query_codes"
+    assert routed.source_nodes
 
 
 def test_paper_reproduction_checklist_maps_features_to_gates_and_benchmarks() -> None:
@@ -156,6 +168,7 @@ def test_cli_exposes_logiclens_paper_path_commands(tmp_path: Path) -> None:
     canonical = runner.invoke(app, ["canonical-graph", str(artifact_dir)])
     explain = runner.invoke(app, ["explain-node", code_node.scip_id, "--artifact-dir", str(artifact_dir)])
     entities = runner.invoke(app, ["query-entities", "auth session", "--artifact-dir", str(artifact_dir)])
+    codes = runner.invoke(app, ["query-codes", "sessionGuard", "--artifact-dir", str(artifact_dir)])
     paper = runner.invoke(app, ["paper-checklist"])
 
     assert canonical.exit_code == 0
@@ -164,6 +177,8 @@ def test_cli_exposes_logiclens_paper_path_commands(tmp_path: Path) -> None:
     assert json.loads(explain.output)["query_type"] == "explain_node"
     assert entities.exit_code == 0
     assert json.loads(entities.output)["query_type"] == "query_entities"
+    assert codes.exit_code == 0
+    assert json.loads(codes.output)["query_type"] == "query_codes"
     assert paper.exit_code == 0
     assert json.loads(paper.output)["report_type"] == "logiclens_paper_reproduction_checklist"
 
