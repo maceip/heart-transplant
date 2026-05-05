@@ -47,6 +47,7 @@ from heart_transplant.temporal.scan import temporal_scan, write_temporal_scan
 from heart_transplant.temporal.snapshot import architecture_snapshot
 from heart_transplant.training import build_training_packet
 from heart_transplant.causal.simulation import run_change_simulation
+from heart_transplant.demo import run_logiclens_demo
 from heart_transplant.regret.scan import run_regret_scan, run_regret_sdk_scan
 from heart_transplant.execution.orchestrator import run_transplant
 from heart_transplant.multimodal.ingest import run_multimodal_ingest
@@ -964,6 +965,32 @@ def program_surface_command() -> None:
     """Phase 14: JSON index of phase module readiness (imports + symbols)."""
 
     typer.echo(json.dumps(program_surface_status(), indent=2))
+
+
+@app.command("logiclens-demo")
+def logiclens_demo_command(
+    target: Path = typer.Argument(..., exists=True, help="Repo directory or existing artifact directory."),
+    repo_name: str | None = typer.Option(None, "--repo-name", help="Override repo name when ingesting."),
+    out_dir: Path | None = typer.Option(None, "--out-dir", help="Demo packet directory (default: <artifact>/demo)."),
+    with_scip: bool = typer.Option(False, "--with-scip", help="Run scip-typescript when target is a TS/JS repo."),
+    install_deps: bool = typer.Option(False, "--install-deps", help="Install Node deps before SCIP when needed."),
+    use_openai: bool = typer.Option(False, "--use-openai", help="Use OpenAI during classification if OPENAI_API_KEY is set."),
+    mc_runs: int = typer.Option(32, "--mc-runs", help="Monte Carlo runs for blast-radius simulations."),
+    min_regret_confidence: float = typer.Option(0.35, "--min-regret-confidence"),
+) -> None:
+    """Run the launchable end-to-end LogicLens demonstration on a repo or artifact."""
+
+    result = run_logiclens_demo(
+        target.resolve(),
+        repo_name=repo_name,
+        out_dir=out_dir.resolve() if out_dir else None,
+        with_scip=with_scip,
+        install_deps=install_deps,
+        use_openai=use_openai,
+        mc_runs=mc_runs,
+        min_regret_confidence=min_regret_confidence,
+    )
+    typer.echo(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

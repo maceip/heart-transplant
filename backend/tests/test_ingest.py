@@ -40,6 +40,22 @@ def test_walk_source_files_skips_windows_virtualenv(tmp_path: Path) -> None:
     assert discovered == {"app.py"}
 
 
+def test_walk_source_files_skips_pytest_tmp_and_artifact_caches(tmp_path: Path) -> None:
+    repo_dir = tmp_path / "sample-repo"
+    repo_dir.mkdir()
+    (repo_dir / "keep.py").write_text("def keep_me():\n    return True\n", encoding="utf-8")
+    pytest_tmp = repo_dir / ".pytest_tmp" / "fixture"
+    pytest_tmp.mkdir(parents=True)
+    (pytest_tmp / "fixture.py").write_text("def fixture():\n    return None\n", encoding="utf-8")
+    artifacts = repo_dir / ".heart-transplant" / "artifacts" / "stamp"
+    artifacts.mkdir(parents=True)
+    (artifacts / "leftover.ts").write_text("export const x = 1;\n", encoding="utf-8")
+
+    discovered = {path.relative_to(repo_dir).as_posix() for path in walk_source_files(repo_dir)}
+
+    assert discovered == {"keep.py"}
+
+
 def test_ingest_repository_handles_deep_parse_trees_without_recursion(tmp_path: Path) -> None:
     repo_dir = tmp_path / "deep-repo"
     repo_dir.mkdir()
